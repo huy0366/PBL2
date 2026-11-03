@@ -1,0 +1,5 @@
+PB01	Phòng Nhân sự	1/1/2019
+PB02	Phòng Kế toán	2/1/2019
+PB03	Phòng Kỹ thuật	3/1/2019
+PB04	Phòng Kinh doanh	4/1/2019
+PB05	Phòng Marketing	5/1/2019

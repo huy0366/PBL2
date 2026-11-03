@@ -1,0 +1,58 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "type": "shell",
+            "label": "C/C++: g++.exe build active file",
+            "command": "C:/msys64/mingw64/bin/g++.exe",
+            "args": [
+                "-g",
+                "-I\"C:/raylib/raylib/src\"",
+                "-L\"C:/raylib/raylib/src\"",
+                "${workspaceFolder}/main.cpp",
+                "-lraylib",
+                "-lopengl32",
+                "-lgdi32",
+                "-lwinmm",
+                "-o",
+                "${workspaceFolder}/app.exe"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "detail": "Biên dịch dự án PBL2 với raylib"
+        },
+        {
+            "type": "shell",
+            "label": "Build app.exe",
+            "command": "C:/msys64/mingw64/bin/g++.exe",
+            "args": [
+                "-g",
+                "-I\"C:/raylib/raylib/src\"",
+                "-L\"C:/raylib/raylib/src\"",
+                "${workspaceFolder}/main.cpp",
+                "-lraylib",
+                "-lopengl32",
+                "-lgdi32",
+                "-lwinmm",
+                "-o",
+                "${workspaceFolder}/app.exe"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": "build",
+            "detail": "Biên dịch main.cpp ra app.exe"
+        }
+    ]
+}

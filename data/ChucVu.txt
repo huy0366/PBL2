@@ -1,0 +1,5 @@
+CV01	Giám đốc	5000000
+CV02	Trường Phòng	3000000
+CV03	Phó Phòng	2000000
+CV04	Tổ Trưởng	1000000
+CV05	Nhân Viên	0
