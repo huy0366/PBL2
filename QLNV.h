@@ -88,6 +88,7 @@ public:
     List<Employee> *TimTheoPhongBan(const string &);
     List<Employee> *TimTheoChucVu(const string &);
 
+    int get_age();
     // double TinhLuong(const string &);
     // double TongQuyLuong();
     // double TongQuyLuongPhongBan(const string &);
@@ -146,100 +147,75 @@ double QLNV::lcb(Employee *e) const
 
 bool QLNV::CheckEmployee(Employee *e)
 {
-    try
-    {
-        if (e == nullptr)
-            throw "Chưa có thông tin nhân viên";
-        if (e->get_mnv() == "")
-            throw "Chưa nhập mã nhân viên";
+    if (e == nullptr)
+        throw string("Chưa có thông tin nhân viên!");
+    if (e->get_mnv().empty())
+        throw string("Chưa nhập mã nhân viên!");
+    if (e->get_name().empty())
+        throw string("Chưa nhập họ và tên nhân viên!");
+    if (e->get_sex().empty())
+        throw string("Chưa chọn giới tính!");
+    if (e->get_PhongBan() == nullptr)
+        throw string("Chưa chọn phòng ban!");
+    if (e->get_ChucVu() == nullptr)
+        throw string("Chưa chọn chức vụ!");
+    if (e->get_ViTri() == nullptr)
+        throw string("Chưa chọn vị trí việc làm!");
 
-        if (e->get_PhongBan() == nullptr)
-            throw "Chưa chọn phòng ban";
-        if (e->get_ChucVu() == nullptr)
-            throw "Chưa chọn chức vụ";
-        if (e->get_ViTri() == nullptr)
-            throw "Chưa chọn vị trí việc làm";
-        int tuoi = ngayHienTai.get_year() - e->get_NgaySinh().get_year();
-        if (tuoi < this->tuoiToiThieu)
-            throw "Chưa đủ 18 tuổi";
-        if (tuoi > this->tuoiToiDa)
-            throw "Vượt quá tuổi tối đa (60 tuổi)";
-    }
-    catch (const char *e)
-    {
-        throw;
-    }
-    catch (...)
-    {
-        throw;
-    }
-    return 1;
+    int tuoi = ngayHienTai.get_year() - e->get_NgaySinh().get_year();
+    if (tuoi < this->tuoiToiThieu)
+        throw string("Nhân viên chưa đủ 18 tuổi!");
+    if (tuoi > this->tuoiToiDa)
+        throw string("Nhân viên vượt quá tuổi tối đa (60 tuổi)!");
+
+    if (e->get_NgayLamViec() > ngayHienTai)
+        throw string("Ngày vào làm không được lớn hơn ngày hiện tại!");
+
+    int tuoiKhiVaoLam = e->get_NgayLamViec().get_year() - e->get_NgaySinh().get_year();
+    if (tuoiKhiVaoLam < this->tuoiToiThieu)
+        throw string("Tuổi tính đến ngày vào làm chưa đủ 18 tuổi!");
+
+    return true;
 }
 bool QLNV::CheckPhongBan(PhongBan *pb)
 {
-    try
-    {
-        if (pb == nullptr)
-            throw "Chưa có thông tin";
-        if (pb->get_MaPhongBan() == "")
-            throw "chưa nhập mã phòng ban";
-        if (pb->get_TenPhongBan() == "")
-            throw "chưa nhập tên phòng ban";
-    }
-    catch (...)
-    {
-        throw;
-    }
-    return 1;
+    if (pb == nullptr)
+        throw string("Chưa có thông tin phòng ban!");
+    if (pb->get_MaPhongBan().empty())
+        throw string("Chưa nhập mã phòng ban!");
+    if (pb->get_TenPhongBan().empty())
+        throw string("Chưa nhập tên phòng ban!");
+    return true;
 }
 bool QLNV::CheckChucVu(ChucVu *cv)
 {
-    try
-    {
-        if (cv == nullptr)
-            throw "Chưa có thông tin";
-        if (cv->get_MaChucVu() == "")
-            throw "chưa nhập mã Chức Vụ";
-        if (cv->get_TenChucVu() == "")
-            throw "Chưa nhập tên chức vụ";
-    }
-    catch (...)
-    {
-        throw;
-    }
-    return 1;
+    if (cv == nullptr)
+        throw string("Chưa có thông tin chức vụ!");
+    if (cv->get_MaChucVu().empty())
+        throw string("Chưa nhập mã chức vụ!");
+    if (cv->get_TenChucVu().empty())
+        throw string("Chưa nhập tên chức vụ!");
+    return true;
 }
 bool QLNV::CheckVTVL(ViTriViecLam *vt)
 {
-    try
-    {
-        if (vt == nullptr)
-            throw "Chưa có thông tin";
-        if (vt->get_MaVTVL() == "")
-            throw "chưa nhập mã Vị Trí Việc Làm";
-        if (vt->get_TenVTVL() == "")
-            throw "chưa nhập tên vị trí việc làm";
-    }
-    catch (...)
-    {
-        throw;
-    }
-    return 1;
+    if (vt == nullptr)
+        throw string("Chưa có thông tin vị trí việc làm!");
+    if (vt->get_MaVTVL().empty())
+        throw string("Chưa nhập mã vị trí việc làm!");
+    if (vt->get_TenVTVL().empty())
+        throw string("Chưa nhập tên vị trí việc làm!");
+    return true;
 }
 bool QLNV::CheckMucLuong(MucLuong *ml)
 {
-    try
-    {
-        if (ml->get_Bac_VTVL() < 1)
-            throw "Bậc nhỏ hơn 1";
-        if (ml->get_Luong() < 0)
-            throw "Lương âm";
-    }
-    catch (...)
-    {
-        throw;
-    }
-    return 1;
+    if (ml == nullptr)
+        throw string("Chưa có thông tin mức lương!");
+    if (ml->get_Bac_VTVL() < 1)
+        throw string("Bậc lương không được nhỏ hơn 1!");
+    if (ml->get_Luong() < 0)
+        throw string("Mức lương không được là số âm!");
+    return true;
 }
 
 int QLNV::DemNVThamChieuPB(PhongBan *pb)
@@ -291,255 +267,136 @@ int QLNV::DemNVThamChieuML(const string &ma, int bac, const string &loai)
 
 bool QLNV::ThemEmployee(Employee *e, Node<Employee> *p)
 {
-    try
-    {
-        CheckEmployee(e);
-        if (DB->FindEmployee(e->get_mnv()) != nullptr)
-            throw "Trùng mã nhân viên đã tồn tại";
-        this->DB->Insert(e, p);
-    }
-    catch (...)
-    {
-        throw;
-    }
 
+    CheckEmployee(e);
+    if (DB->FindEmployee(e->get_mnv()) != nullptr)
+        throw "Trùng mã nhân viên đã tồn tại";
+    this->DB->Insert(e, p);
     return 1;
 }
 bool QLNV::ThemPhongBan(PhongBan *pb)
 {
-    try
-    {
-        CheckPhongBan(pb);
-        if (DB->FindPB(pb->get_MaPhongBan()) != nullptr)
-            throw "trùng mã phòng ban";
-        this->DB->Insert(pb);
-    }
-    catch (const char *e)
-    {
-        throw;
-    }
-    catch (...)
-    {
-        throw;
-    }
+    CheckPhongBan(pb);
+    if (DB->FindPB(pb->get_MaPhongBan()) != nullptr)
+        throw "trùng mã phòng ban";
+    this->DB->Insert(pb);
     return 1;
 }
 bool QLNV::ThemChucVu(ChucVu *cv)
 {
-    try
-    {
-        CheckChucVu(cv);
-        if (DB->FindCV(cv->get_MaChucVu()) != nullptr)
-            throw "trùng mã Chức Vụ";
-        this->DB->Insert(cv);
-    }
-    catch (const char *e)
-    {
-        throw;
-    }
-    catch (...)
-    {
-        throw;
-    }
+
+    CheckChucVu(cv);
+    if (DB->FindCV(cv->get_MaChucVu()) != nullptr)
+        throw "trùng mã Chức Vụ";
+    this->DB->Insert(cv);
     return 1;
 }
 bool QLNV::ThemViTri(ViTriViecLam *vt)
 {
-    try
-    {
-        CheckVTVL(vt);
-        if (DB->FindVTVL(vt->get_MaVTVL()) != nullptr)
-            throw "trùng mã Vị Trí Việc Làm";
-        this->DB->Insert(vt);
-    }
-    catch (const char *e)
-    {
-        throw;
-    }
-    catch (...)
-    {
-        throw;
-    }
+
+    CheckVTVL(vt);
+    if (DB->FindVTVL(vt->get_MaVTVL()) != nullptr)
+        throw "trùng mã Vị Trí Việc Làm";
+    this->DB->Insert(vt);
     return 1;
 }
 bool QLNV::ThemMucLuong(MucLuong *ml)
 {
-    try
-    {
-        CheckMucLuong(ml);
-        if (DB->FindML(ml->get_Ma_VTVL(), ml->get_Bac_VTVL(), ml->get_Loai_NV()) != nullptr)
-            throw "Trùng mức lương (vị trí/bậc/loại)";
-        DB->Insert(ml);
-    }
-    catch (const char *e)
-    {
-        throw;
-    }
-    catch (...)
-    {
-        throw;
-    }
+
+    CheckMucLuong(ml);
+    if (DB->FindML(ml->get_Ma_VTVL(), ml->get_Bac_VTVL(), ml->get_Loai_NV()) != nullptr)
+        throw "Trùng mức lương (vị trí/bậc/loại)";
+    DB->Insert(ml);
     return 1;
 }
 
 bool QLNV::XoaEmployee(Employee *e)
 {
-    try
-    {
-        if (e == nullptr)
-            throw "NULL";    //????
-        this->DB->Remove(e); // gỡ khỏi Hash + List
-        delete e;            // QuanLyNhanVien/DataBase là chủ sở hữu
-        return true;
-    }
-    catch (const char *e)
-    {
-        throw;
-    }
-    catch (...)
-    {
-        throw;
-    }
+
+    if (e == nullptr)
+        throw "NULL";    //????
+    this->DB->Remove(e); // gỡ khỏi Hash + List
+    delete e;            // QuanLyNhanVien/DataBase là chủ sở hữu
+    return true;
 }
 bool QLNV::XoaPhongBan(PhongBan *pb)
 {
-    try
-    {
-        if (pb == nullptr)
-            throw "Không tìm thấy phòng ban mã " + pb->get_MaPhongBan();
-        int n = DemNVThamChieuPB(pb);
-        if (n > 0)
-            throw "Không thể xóa phòng ban mã " + pb->get_MaPhongBan() + ": còn " + to_string(n) + " nhân viên";
-        DB->Remove(pb);
-        delete pb;
-        return true;
-    }
-    catch (const char *e)
-    {
-        throw;
-    }
-    catch (...)
-    {
-        throw;
-    }
+
+    if (pb == nullptr)
+        throw "Không tìm thấy phòng ban mã " + pb->get_MaPhongBan();
+    int n = DemNVThamChieuPB(pb);
+    if (n > 0)
+        throw "Không thể xóa phòng ban mã " + pb->get_MaPhongBan() + ": còn " + to_string(n) + " nhân viên";
+    DB->Remove(pb);
+    delete pb;
+    return true;
 }
 bool QLNV::XoaChucVu(ChucVu *cv)
 {
-    try
-    {
-        if (cv == nullptr)
-            throw "Không tìm thấy chức vụ mã " + cv->get_MaChucVu();
-        int n = DemNVThamChieuCV(cv);
-        if (n > 0)
-            throw "Không thể xóa chức vụ mã " + cv->get_MaChucVu() + ": còn " + to_string(n) + " nhân viên";
-        DB->Remove(cv);
-        delete cv;
-        return true;
-    }
-    catch (const char *e)
-    {
-        throw;
-    }
-    catch (...)
-    {
-        throw;
-    }
+
+    if (cv == nullptr)
+        throw "Không tìm thấy chức vụ mã " + cv->get_MaChucVu();
+    int n = DemNVThamChieuCV(cv);
+    if (n > 0)
+        throw "Không thể xóa chức vụ mã " + cv->get_MaChucVu() + ": còn " + to_string(n) + " nhân viên";
+    DB->Remove(cv);
+    delete cv;
+    return true;
 }
 bool QLNV::XoaViTri(ViTriViecLam *vt)
 {
-    try
-    {
-        if (!vt)
-            throw "Không tìm thấy vị trí mã " + vt->get_MaVTVL();
-        int n = DemNVThamChieuVT(vt);
-        if (n > 0)
-            throw "Không thể xóa vị trí " + vt->get_MaVTVL() + ": còn " + to_string(n) + " nhân viên";
 
-        DB->Remove(vt);
-        Node<MucLuong> *p = DB->get_ListML()->get_header()->Next;
-        while (p != nullptr)
-        {
-            Node<MucLuong> *next = p->Next;
-            if (p->Data && p->Data->get_Ma_VTVL() == vt->get_MaVTVL())
-                DB->Remove(p->Data);
-            p = next;
-        }
-        delete vt;
-        return true;
-    }
-    catch (const char *e)
+    if (!vt)
+        throw "Không tìm thấy vị trí mã " + vt->get_MaVTVL();
+    int n = DemNVThamChieuVT(vt);
+    if (n > 0)
+        throw "Không thể xóa vị trí " + vt->get_MaVTVL() + ": còn " + to_string(n) + " nhân viên";
+
+    DB->Remove(vt);
+    Node<MucLuong> *p = DB->get_ListML()->get_header()->Next;
+    while (p != nullptr)
     {
-        throw;
+        Node<MucLuong> *next = p->Next;
+        if (p->Data && p->Data->get_Ma_VTVL() == vt->get_MaVTVL())
+            DB->Remove(p->Data);
+        p = next;
     }
-    catch (...)
-    {
-        throw;
-    }
+    delete vt;
+    return true;
 }
 
 bool QLNV::SuaEmployee(Employee *e)
 {
-    try
-    {
-        CheckEmployee(e);
-        DB->Repair(e);
-    }
-    catch (...)
-    {
-        throw;
-    }
+
+    CheckEmployee(e);
+    DB->Repair(e);
     return 1;
 }
 bool QLNV::SuaChucVu(ChucVu *cv)
 {
-    try
-    {
-        CheckChucVu(cv);
-        DB->Repair(cv);
-    }
-    catch (...)
-    {
-        throw;
-    }
+
+    CheckChucVu(cv);
+    DB->Repair(cv);
     return 1;
 }
 bool QLNV::SuaPhongBan(PhongBan *pb)
 {
-    try
-    {
-        CheckPhongBan(pb);
-        DB->Repair(pb);
-    }
-    catch (...)
-    {
-        throw;
-    }
+
+    CheckPhongBan(pb);
+    DB->Repair(pb);
     return 1;
 }
 bool QLNV::SuaVTVL(ViTriViecLam *vt)
 {
-    try
-    {
-        CheckVTVL(vt);
-        DB->Repair(vt);
-    }
-    catch (...)
-    {
-        throw;
-    }
+
+    CheckVTVL(vt);
+    DB->Repair(vt);
     return 1;
 }
 bool QLNV::SuaMucLuong(MucLuong *ml)
 {
-    try
-    {
-        CheckMucLuong(ml);
-        DB->Repair(ml);
-    }
-    catch (...)
-    {
-        throw;
-    }
+    CheckMucLuong(ml);
+    DB->Repair(ml);
     return 1;
 }
 

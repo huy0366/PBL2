@@ -190,7 +190,7 @@ Node<T> *List<T>::operator[](int index)
     p = p->Next;
     if (index > size)
         return nullptr;
-    while (index-- != 0)
+    while (index-- != 0 && p != nullptr)
         p = p->Next;
     return p;
 }

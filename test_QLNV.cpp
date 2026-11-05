@@ -130,4 +130,20 @@ int main()
              << " " << (*e)[i]->Data->get_NgayLamViec() << " " << (*e)[i]->Data->get_ThuongPhat() << " " << (*e)[i]->Data->get_BacViTri() << " " << endl;
     cout << size;
     cout << (ql->get_ListEmployee()->get_size());
+    cout << "sua nhan vien==========================" << endl;
+    Date d1 = Date("5/8/1991");
+    Date d2 = Date("18/8/2010");
+    int thuong = 100000, vtri = 3, ngaycong = 10, heso = 1.9;
+    ChucVu *cv = ql->get_DB()->FindCV("CV04");
+    ViTriViecLam *vt = ql->get_DB()->FindVTVL("VTVL03");
+    pb = ql->get_DB()->FindPB("PB03");
+    Employee *esua = new FullTime("NV015", "Đinh Quang Phúc", d1, "Nam", cv, vt, pb, d2, vtri, thuong, ngaycong, heso);
+    ql->SuaEmployee(esua);
+    size = e->get_size();
+    for (int i = 0; i < e->get_size(); i++)
+        cout << " " << (*e)[i]->Data->get_mnv() << " " << (*e)[i]->Data->get_name() << " " << (*e)[i]->Data->get_NgaySinh() << " " << (*e)[i]->Data->get_sex()
+             << " " << (*e)[i]->Data->get_ChucVu()->get_TenChucVu() << " " << (*e)[i]->Data->get_ViTri()->get_TenVTVL() << " " << (*e)[i]->Data->get_PhongBan()->get_TenPhongBan()
+             << " " << (*e)[i]->Data->get_NgayLamViec() << " " << (*e)[i]->Data->get_ThuongPhat() << " " << (*e)[i]->Data->get_BacViTri() << " " << endl;
+    cout << size;
+    cout << (ql->get_ListEmployee()->get_size());
 }

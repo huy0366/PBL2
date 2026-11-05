@@ -26,6 +26,7 @@ public:
     List<Employee> *get_ListNV();
     bool ThemNV(Employee *);
     bool XoaNV(Employee *);
+    // bool SuaNV(Employee *);
     int get_sizeNV();
     // Hàm so sánh kiểm tra Tên Chi Nhánh
     static bool checkPhongBanName(Entity *entity, const string &name);
@@ -99,6 +100,20 @@ bool PhongBan::XoaNV(Employee *e)
     }
     return 0;
 }
+// bool PhongBan::SuaNV(Employee *e)
+// {
+//     Node<Employee> *p = this->L->get_header()->Next;
+//     while (p != nullptr)
+//     {
+//         if (p->Data->get_mnv() == e->get_mnv())
+//         {
+//             p->Data = e;
+//             return 1;
+//         }
+//         p = p->Next;
+//     }
+//     return 0;
+// }
 int PhongBan::get_sizeNV()
 {
     return this->L->get_size();

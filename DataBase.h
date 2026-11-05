@@ -328,6 +328,8 @@ void DataBase::Repair(Employee *e)
     if (e_old == nullptr)
         return;
     *e_old = *e;
+    // if (e->get_PhongBan() != nullptr)
+    //     e->get_PhongBan()->SuaNV(e);
 }
 
 List<PhongBan> *DataBase::get_ListPB()
