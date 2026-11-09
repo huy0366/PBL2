@@ -149,6 +149,10 @@ void DataBase::Insert(Employee *e, Node<Employee> *p)
         this->HashEmployee->insert(e->get_mnv(), e);
         if (e->get_PhongBan() != nullptr)
             e->get_PhongBan()->ThemNV(e);
+        if (e->get_ChucVu() != nullptr)
+            e->get_ChucVu()->ThemNV(e);
+        if (e->get_ViTri() != nullptr)
+            e->get_ViTri()->ThemNV(e);
     }
 }
 
@@ -221,6 +225,10 @@ void DataBase::Remove(Employee *e)
     }
     PhongBan *pb = e->get_PhongBan();
     pb->XoaNV(e);
+    ViTriViecLam *vt = e->get_ViTri();
+    vt->XoaNV(e);
+    ChucVu *cv = e->get_ChucVu();
+    cv->XoaNV(e);
 }
 
 PhongBan *DataBase::FindPB(const string &ma)
@@ -535,7 +543,7 @@ void DataBase::ReadFileEmployee(const string &filePath1, const string &filePath2
         PhongBan *pb = FindPB(maPhongBan);
         ViTriViecLam *vt = FindVTVL(maViTri);
         ChucVu *cv = FindCV(maChucVu);
-        PartTime *e = new PartTime(mnv, hoTen, ngaySinh, gioiTinh, cv, vt, pb, ngayVaoLam, thuong, bac, tglam);
+        PartTime *e = new PartTime(mnv, hoTen, ngaySinh, gioiTinh, cv, vt, pb, ngayVaoLam, bac, thuong, tglam);
         this->Insert(e);
     }
     file2.close();

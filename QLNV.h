@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <iostream>
 #include "DataBase.h"
 #include <ctime>
@@ -74,7 +74,7 @@ public:
     bool XoaPhongBan(PhongBan *);
     bool XoaChucVu(ChucVu *);
     bool XoaViTri(ViTriViecLam *);
-    // bool XoaMucLuong(const string &, int, const string &);
+    bool XoaMucLuong(MucLuong *);
     // sửa
     bool SuaEmployee(Employee *);
     bool SuaChucVu(ChucVu *);
@@ -98,6 +98,9 @@ public:
     // void ThongKeTheoPhongBan();
     // void DanhSachTheoThamNien();
 
+    MucLuong *get_MucLuong(Employee *e) const;
+    double get_LuongCoBan(Employee *e) const;
+    double TinhLuong(Employee *e) const;
     // ================= Sắp xếp & hiển thị =================
     List<PhongBan> *get_ListPB() const;
     List<ChucVu> *get_ListCV() const;
@@ -134,11 +137,9 @@ double QLNV::lcb(Employee *e) const
 {
     if (!e || !e->get_ViTri()) // thêm check này
         return -1;             // trả về -1 báo hiệu không hợp lệ
-
     string mvt = e->get_MaViTri();
     int bac = e->get_BacViTri();
     string loainv = e->get_LoaiNV();
-
     MucLuong *ml = DB->FindML(mvt, bac, loainv);
     if (!ml)
         return -1; // thêm check này
@@ -161,20 +162,20 @@ bool QLNV::CheckEmployee(Employee *e)
         throw string("Chưa chọn chức vụ!");
     if (e->get_ViTri() == nullptr)
         throw string("Chưa chọn vị trí việc làm!");
-
     int tuoi = ngayHienTai.get_year() - e->get_NgaySinh().get_year();
     if (tuoi < this->tuoiToiThieu)
         throw string("Nhân viên chưa đủ 18 tuổi!");
     if (tuoi > this->tuoiToiDa)
         throw string("Nhân viên vượt quá tuổi tối đa (60 tuổi)!");
-
     if (e->get_NgayLamViec() > ngayHienTai)
         throw string("Ngày vào làm không được lớn hơn ngày hiện tại!");
-
+    if (e->get_BacViTri() < 1)
+        throw string("Chưa chọn bậc lương!");
+    if (e->get_BacViTri() > bacToiDa)
+        throw string("Bậc lương vượt quá bậc tối đa!");
     int tuoiKhiVaoLam = e->get_NgayLamViec().get_year() - e->get_NgaySinh().get_year();
     if (tuoiKhiVaoLam < this->tuoiToiThieu)
         throw string("Tuổi tính đến ngày vào làm chưa đủ 18 tuổi!");
-
     return true;
 }
 bool QLNV::CheckPhongBan(PhongBan *pb)
@@ -185,6 +186,8 @@ bool QLNV::CheckPhongBan(PhongBan *pb)
         throw string("Chưa nhập mã phòng ban!");
     if (pb->get_TenPhongBan().empty())
         throw string("Chưa nhập tên phòng ban!");
+    if (pb->get_NgayThanhLap() > Date::DateHienTai())
+        throw string("Ngày thành lập lớn hơn ngày hiện tại!");
     return true;
 }
 bool QLNV::CheckChucVu(ChucVu *cv)
@@ -270,7 +273,7 @@ bool QLNV::ThemEmployee(Employee *e, Node<Employee> *p)
 
     CheckEmployee(e);
     if (DB->FindEmployee(e->get_mnv()) != nullptr)
-        throw "Trùng mã nhân viên đã tồn tại";
+        throw string("Trùng mã nhân viên đã tồn tại");
     this->DB->Insert(e, p);
     return 1;
 }
@@ -278,7 +281,7 @@ bool QLNV::ThemPhongBan(PhongBan *pb)
 {
     CheckPhongBan(pb);
     if (DB->FindPB(pb->get_MaPhongBan()) != nullptr)
-        throw "trùng mã phòng ban";
+        throw string("trùng mã phòng ban");
     this->DB->Insert(pb);
     return 1;
 }
@@ -287,7 +290,7 @@ bool QLNV::ThemChucVu(ChucVu *cv)
 
     CheckChucVu(cv);
     if (DB->FindCV(cv->get_MaChucVu()) != nullptr)
-        throw "trùng mã Chức Vụ";
+        throw string("trùng mã Chức Vụ");
     this->DB->Insert(cv);
     return 1;
 }
@@ -296,7 +299,7 @@ bool QLNV::ThemViTri(ViTriViecLam *vt)
 
     CheckVTVL(vt);
     if (DB->FindVTVL(vt->get_MaVTVL()) != nullptr)
-        throw "trùng mã Vị Trí Việc Làm";
+        throw string("trùng mã Vị Trí Việc Làm");
     this->DB->Insert(vt);
     return 1;
 }
@@ -305,7 +308,7 @@ bool QLNV::ThemMucLuong(MucLuong *ml)
 
     CheckMucLuong(ml);
     if (DB->FindML(ml->get_Ma_VTVL(), ml->get_Bac_VTVL(), ml->get_Loai_NV()) != nullptr)
-        throw "Trùng mức lương (vị trí/bậc/loại)";
+        throw string("Trùng mức lương (vị trí/bậc/loại)");
     DB->Insert(ml);
     return 1;
 }
@@ -314,19 +317,19 @@ bool QLNV::XoaEmployee(Employee *e)
 {
 
     if (e == nullptr)
-        throw "NULL";    //????
-    this->DB->Remove(e); // gỡ khỏi Hash + List
-    delete e;            // QuanLyNhanVien/DataBase là chủ sở hữu
+        throw string("NULL"); //????
+    this->DB->Remove(e);      // gỡ khỏi Hash + List
+    delete e;                 // QuanLyNhanVien/DataBase là chủ sở hữu
     return true;
 }
 bool QLNV::XoaPhongBan(PhongBan *pb)
 {
 
     if (pb == nullptr)
-        throw "Không tìm thấy phòng ban mã " + pb->get_MaPhongBan();
+        throw string("Không tìm thấy phòng ban mã " + pb->get_MaPhongBan());
     int n = DemNVThamChieuPB(pb);
     if (n > 0)
-        throw "Không thể xóa phòng ban mã " + pb->get_MaPhongBan() + ": còn " + to_string(n) + " nhân viên";
+        throw string("Không thể xóa phòng ban mã " + pb->get_MaPhongBan() + ": còn " + to_string(n) + " nhân viên");
     DB->Remove(pb);
     delete pb;
     return true;
@@ -335,10 +338,10 @@ bool QLNV::XoaChucVu(ChucVu *cv)
 {
 
     if (cv == nullptr)
-        throw "Không tìm thấy chức vụ mã " + cv->get_MaChucVu();
+        throw string("Không tìm thấy chức vụ mã " + cv->get_MaChucVu());
     int n = DemNVThamChieuCV(cv);
     if (n > 0)
-        throw "Không thể xóa chức vụ mã " + cv->get_MaChucVu() + ": còn " + to_string(n) + " nhân viên";
+        throw string("Không thể xóa chức vụ mã " + cv->get_MaChucVu() + ": còn " + to_string(n) + " nhân viên");
     DB->Remove(cv);
     delete cv;
     return true;
@@ -347,10 +350,10 @@ bool QLNV::XoaViTri(ViTriViecLam *vt)
 {
 
     if (!vt)
-        throw "Không tìm thấy vị trí mã " + vt->get_MaVTVL();
+        throw string("Không tìm thấy vị trí mã " + vt->get_MaVTVL());
     int n = DemNVThamChieuVT(vt);
     if (n > 0)
-        throw "Không thể xóa vị trí " + vt->get_MaVTVL() + ": còn " + to_string(n) + " nhân viên";
+        throw string("Không thể xóa vị trí " + vt->get_MaVTVL() + ": còn " + to_string(n) + " nhân viên");
 
     DB->Remove(vt);
     Node<MucLuong> *p = DB->get_ListML()->get_header()->Next;
@@ -362,6 +365,18 @@ bool QLNV::XoaViTri(ViTriViecLam *vt)
         p = next;
     }
     delete vt;
+    return true;
+}
+
+bool QLNV::XoaMucLuong(MucLuong *ml)
+{
+    if (ml == nullptr)
+        throw string("Không tìm thấy mức lương!");
+    int n = DemNVThamChieuML(ml->get_Ma_VTVL(), ml->get_Bac_VTVL(), ml->get_Loai_NV());
+    if (n > 0)
+        throw string("Không thể xóa mức lương vị trí " + ml->get_Ma_VTVL() + " bậc " + to_string(ml->get_Bac_VTVL()) + ": còn " + to_string(n) + " nhân viên đang áp dụng!");
+    DB->Remove(ml);
+    delete ml;
     return true;
 }
 
@@ -631,6 +646,28 @@ void QLNV::DanhSachTheoThamNien()
     }
 }
 */
+MucLuong *QLNV::get_MucLuong(Employee *e) const
+{
+    if (e == nullptr || e->get_ViTri() == nullptr)
+        return nullptr;
+
+    return this->DB->FindML(
+        e->get_MaViTri(),
+        e->get_BacViTri(),
+        e->get_LoaiNV());
+}
+double QLNV::get_LuongCoBan(Employee *e) const
+{
+    return this->lcb(e);
+}
+double QLNV::TinhLuong(Employee *e) const
+{
+    double luongCB = this->lcb(e);
+    if (luongCB < 0)
+        return -1; // Không tìm thấy mức lương hợp lệ
+    return e->get_ThucLinh(luongCB);
+}
+
 List<PhongBan> *QLNV::get_ListPB() const
 {
     return DB ? DB->get_ListPB() : nullptr;

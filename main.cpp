@@ -4,15 +4,26 @@
 #include <bits/stdc++.h>
 using namespace std;
 Font myFont, tieude;
+string FormatSoTien(long long so);
+void HienThongBao(const string &noiDung, bool laLoi = true);
+void VeThongBao();
 void DrawSidebar(int &currentScreen);
 void DrawMainContent(int &currentScreen, Texture2D &BackGround, QLNV *QL);
 void Draw_Screen_Home(Texture2D &BackGround);
+void Draw_Screen_NhanVien(Vector2 mousePos, bool Clicked, QLNV *QL);
+void Draw_Screen_VTVL(Vector2 mousePos, bool Clicked, QLNV *QL);
 void Draw_Screen_Employee(QLNV *QL);
-// void Draw_Screen_Deparment(QLNV *QL);
+void Draw_Screen_PhongBan(Vector2 mousePos, bool Clicked, QLNV *QL);
+void Draw_Screen_ChucVu(Vector2 mousePos, bool Clicked, QLNV *QL);
+void Draw_Screen_Deparment(QLNV *QL);
 bool DrawCalendar(Vector2 pos, int &selDay, int &month, int &year, Rectangle &Calendar, bool &isOpenCalendar);
-// void Draw_Screen_Salary(QLNV *QL); // 2 cái duyệt cho nhau
+void Draw_Screen_BangLuong(Vector2 mousePos, bool Clicked, QLNV *QL);
+void Draw_Screen_MucLuong(Vector2 mousePos, bool Clicked, QLNV *QL);
+void Draw_Screen_FullTime(Vector2 mousePos, bool Clicked, QLNV *QL);
+void Draw_Screen_PartTime(Vector2 mousePos, bool Clicked, QLNV *QL);
+void Draw_Screen_Salary(QLNV *QL); // 2 cái duyệt cho nhau
 // void Draw_Screen_Search(QLNV *QL);
-void HieuUngGo(bool &active, Rectangle &btn, char input[]);
+void HieuUngGo(bool &active, Rectangle &btn, char input[], int fSize = 28);
 int GetDaysInMonth(const int &m, const int &y);
 int GetStartDay(const int &m, const int &y);
 
@@ -28,8 +39,69 @@ bool tbDangHien = false; // Trạng thái đang bật hay tắt
 float tbThoiGian = 0.0f; // Đếm thời gian hiển thị
 float tbX = 2000.0f;     // Tọa độ X hiện tại của hộp thông báo
 
+enum Screen
+{
+    SCREEN_HOME,       // Trang Chủ
+    SCREEN_EMPLOYEE,   // Nhân viên
+    SCREEN_DEPARTMENT, // Bộ phận
+    SCREEN_SALARY,     // Bảng lương
+    SCREEN_Search,     // Hệ thống
+    Exit,              // Thoát hệ thống
+};
+
+int main()
+{
+    // SetConfigFlags(FLAG_WINDOW_RESIZABLE);
+    InitWindow(1792, 1008, "PBL2");
+    SetTargetFPS(60);
+    // lấy ảnh
+    Texture2D BackGround = LoadTexture("BackGround.png");
+
+    int codepoints[8000];
+    for (int i = 0; i < 8000; i++)
+        codepoints[i] = 32 + i;
+    myFont = LoadFontEx("font/times.ttf", 32, codepoints, 8000);
+    tieude = LoadFontEx("font/timesbd.ttf", 32, codepoints, 8000);
+    SetTextureFilter(myFont.texture, TEXTURE_FILTER_BILINEAR);
+    QLNV *QL = new QLNV;
+
+    int currentScreen = SCREEN_HOME;
+
+    while (!WindowShouldClose())
+    {
+        if (currentScreen == Exit)
+        {
+            break;
+        }
+        BeginDrawing();
+
+        ClearBackground(RAYWHITE);
+        DrawSidebar(currentScreen);
+        DrawMainContent(currentScreen, BackGround, QL);
+        VeThongBao();
+        EndDrawing();
+    }
+    UnloadTexture(BackGround);
+    CloseWindow();
+}
+string FormatSoTien(long long so)
+{
+    if (so < 0)
+        return "-" + FormatSoTien(-so);
+    string s = to_string(so);
+    string kq = "";
+    int dem = 0;
+    for (int i = s.size() - 1; i >= 0; i--)
+    {
+        kq = s[i] + kq;
+        dem++;
+        if (dem % 3 == 0 && i > 0)
+            kq = "." + kq;
+    }
+    return kq;
+}
 // 1. Gọi hàm này mỗi khi muốn bật thông báo
-void HienThongBao(const string &noiDung, bool laLoi = true)
+void HienThongBao(const string &noiDung, bool laLoi)
 {
     tbNoiDung = noiDung;
     tbLaLoi = laLoi;
@@ -87,52 +159,6 @@ void VeThongBao()
     DrawTextEx(tieude, tieuDeTB, {box.x + 26, box.y + 10}, 22, 1, mauChuDao);
     DrawTextEx(myFont, tbNoiDung.c_str(), {box.x + 26, box.y + 38}, 22, 1, Color{40, 45, 55, 255});
 }
-enum Screen
-{
-    SCREEN_HOME,       // Trang Chủ
-    SCREEN_EMPLOYEE,   // Nhân viên
-    SCREEN_DEPARTMENT, // Bộ phận
-    SCREEN_SALARY,     // Bảng lương
-    SCREEN_Search,     // Hệ thống
-    Exit,              // Thoát hệ thống
-};
-
-int main()
-{
-    SetConfigFlags(FLAG_WINDOW_RESIZABLE);
-    InitWindow(1792, 1008, "PBL2");
-    SetTargetFPS(60);
-    // lấy ảnh
-    Texture2D BackGround = LoadTexture("BackGround.png");
-
-    int codepoints[8000];
-    for (int i = 0; i < 8000; i++)
-        codepoints[i] = 32 + i;
-    myFont = LoadFontEx("font/times.ttf", 32, codepoints, 8000);
-    tieude = LoadFontEx("font/timesbd.ttf", 32, codepoints, 8000);
-    SetTextureFilter(myFont.texture, TEXTURE_FILTER_BILINEAR);
-    QLNV *QL = new QLNV;
-
-    int currentScreen = SCREEN_HOME;
-
-    while (!WindowShouldClose())
-    {
-        if (currentScreen == Exit)
-        {
-            break;
-        }
-        BeginDrawing();
-
-        ClearBackground(RAYWHITE);
-        DrawSidebar(currentScreen);
-        DrawMainContent(currentScreen, BackGround, QL);
-        VeThongBao();
-        EndDrawing();
-    }
-    UnloadTexture(BackGround);
-    CloseWindow();
-}
-
 void DrawSidebar(int &currentScreen)
 {
     static bool isLoaded = false;
@@ -225,11 +251,11 @@ void DrawMainContent(int &currentScreen, Texture2D &BackGround, QLNV *QL)
     }
     else if (currentScreen == 2)
     {
-        // Draw_Screen_Deparment(QL);
+        Draw_Screen_Deparment(QL);
     }
     else if (currentScreen == 3)
     {
-        // Draw_Screen_Salary(QL);
+        Draw_Screen_Salary(QL);
     }
     else if (currentScreen == 4)
     {
@@ -241,14 +267,15 @@ void DrawMainContent(int &currentScreen, Texture2D &BackGround, QLNV *QL)
     }
 }
 
-void HieuUngGo(bool &active, Rectangle &btn, char input[])
+void HieuUngGo(bool &active, Rectangle &btn, char input[], int fSize)
 {
+    float yOffset = btn.y + (btn.height - fSize) / 2.0f;
     if (active && ((int)(GetTime() * 2) % 2 == 0))
     {
-        int textWidth = MeasureText(input, 20);
-        DrawTextEx(myFont, "_", {btn.x + 12 + textWidth, btn.y + 8}, 20, 1, MAROON);
+        float textWidth = MeasureTextEx(myFont, input, fSize, 1).x;
+        DrawTextEx(myFont, "_", {btn.x + 10 + textWidth, yOffset}, fSize, 1, MAROON);
     }
-    DrawTextEx(myFont, input, {btn.x + 10, btn.y + 8}, 20, 1, BLACK);
+    DrawTextEx(myFont, input, {btn.x + 10, yOffset}, fSize, 1, BLACK);
 }
 // 1. Hàm tính số ngày trong tháng
 int GetDaysInMonth(const int &m, const int &y)
@@ -672,27 +699,9 @@ void VeODate(Rectangle r, const char *text, bool open, Vector2 mousePos, const c
     DrawLineEx({ix + 5, iy}, {ix + 5, iy + 4}, 1.8f, DARKGRAY);
     DrawLineEx({ix + 13, iy}, {ix + 13, iy + 4}, 1.8f, DARKGRAY);
 }
-void Draw_Screen_Employee(QLNV *QL)
+
+void Draw_Screen_NhanVien(Vector2 mousePos, bool Clicked, QLNV *QL)
 {
-    Rectangle panelBang = {330, 160, 1450.0f, 835.0f};
-    DrawRectangleRounded({panelBang.x + 3, panelBang.y + 4, panelBang.width, panelBang.height}, 0.03f, 10, Fade(BLACK, 0.08f));
-    DrawRectangleRounded(panelBang, 0.03f, 10, WHITE);
-    DrawRectangleRoundedLinesEx(panelBang, 0.03f, 10, 1.5f, Color{225, 230, 240, 255});
-    static Texture2D a1;
-    static bool isLoaded = false;
-    if (!isLoaded)
-    {
-        a1 = LoadTexture("photo/icon/Asset-1.png");
-        isLoaded = true;
-    }
-    Vector2 pa1 = {370.0f, 45.0f}; // Tọa độ (x, y) postion
-    float ra1 = 0.0f;              // Góc xoay (0 độ) rotation
-    float sa1 = 0.33f;
-    DrawTextureEx(a1, pa1, ra1, sa1, WHITE);
-    DrawTextEx(tieude, "Quản Lý Nhân Sự", {pa1.x + 100, pa1.y}, 45, 1, WHITE);
-    DrawTextEx(myFont, "Danh sách và thông tin nhân sự của công ty", {pa1.x + 100, pa1.y + 50}, 30, 1, WHITE);
-    Vector2 mousePos = GetMousePosition();
-    bool Clicked = IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
     static bool clickThem = false;
     static bool clickSua = false;
     static bool isOpenDelete = false;
@@ -704,22 +713,22 @@ void Draw_Screen_Employee(QLNV *QL)
     static string selectedMNV = "";
     // MeNu
 
-    Rectangle comboChucVu = {350, 220, 250, 45};
+    Rectangle comboChucVu = {350, 290, 250, 45};
     static bool isChucVuOpen = false;
     static int selectedChucVuIndex = 0;
     string default_choice = "Tất cả";
 
-    Rectangle comboPhong = {620, 220, 250, 45};
+    Rectangle comboPhong = {620, 290, 250, 45};
     static bool isPhongOpen = false;
     static int selectedPhongIndex = 0;
 
-    Rectangle textHoTen = {890, 220, 350, 45};
+    Rectangle textHoTen = {890, 290, 350, 45};
     // Các biến cho ô nhập liệu Họ Tên
     static bool isHoTenActive = false; // Trạng thái: ô có đang được click vào không
     static char hoTenInput[50] = "\0"; // Chuỗi lưu ký tự người dùng gõ
     static int letterCount = 0;
 
-    Rectangle comboSortTT = {1560, 220, 200, 45}; // thứ tự (a->z, z->a, tuổi ...)
+    Rectangle comboSortTT = {1560, 290, 200, 45}; // thứ tự (a->z, z->a, tuổi ...)
     static bool isSortTTOpen = false;
     static int selectedSortTTIndex = 0;
 
@@ -739,7 +748,7 @@ void Draw_Screen_Employee(QLNV *QL)
         scrollY = 0.0f;
     // Cấu hình khoảng cách và kích thước chữ
     float startX = 350.f; // Lề trái
-    float startY = 290.f; // Lề trên
+    float startY = 400.f; // Lề trên
     int rowHeight = 60;   // Chiều cao mỗi dòng
     int fontSize = 30;    // Kích thước chữ
 
@@ -852,7 +861,7 @@ void Draw_Screen_Employee(QLNV *QL)
         idx++;
     }
     EndScissorMode();
-    DrawTextEx(myFont, "Chức Vụ", {350, 170}, 40, 1, BLACK);
+    DrawTextEx(myFont, "Chức Vụ", {350, 240}, 40, 1, BLACK);
 
     int nCV = QL->get_DB()->get_ListCV()->get_size();
     string dsCVFilter[nCV + 1];
@@ -875,7 +884,7 @@ void Draw_Screen_Employee(QLNV *QL)
     {
         XuLyCombo(comboChucVu, isChucVuOpen, selectedChucVuIndex, nCV + 1, mousePos, Clicked);
     }
-    DrawTextEx(myFont, "Phòng Ban", {620, 175}, 40, 1, BLACK);
+    DrawTextEx(myFont, "Phòng Ban", {620, 240}, 40, 1, BLACK);
 
     int nPB = QL->get_DB()->get_ListPB()->get_size();
     string dsPBFilter[nPB + 1];
@@ -904,10 +913,10 @@ void Draw_Screen_Employee(QLNV *QL)
     //     // TODO: Viết code lọc danh sách nhân viên ở đây
     // }
     // 3. Cụm "Họ Tên"
-    DrawTextEx(myFont, "Tìm kiếm", {890, 170}, 40, 1, BLACK);
+    DrawTextEx(myFont, "Tìm kiếm", {890, 240}, 40, 1, BLACK);
     // Vẽ khung trắng bo góc cho ô nhập liệu, nếu đang active thì viền xám nhẹ
     DrawRectangleRounded(textHoTen, 0.5f, 10, isHoTenActive ? LIGHTGRAY : WHITE);
-    DrawRectangleRoundedLinesEx(textHoTen, 0.3f, 12, 3.0f, RED);
+    DrawRectangleRoundedLinesEx(textHoTen, 0.3f, 12, 3.0f, LIGHTGRAY);
     // In chữ người dùng đã gõ ra màn hình
     DrawTextEx(myFont, hoTenInput, {textHoTen.x + 10, textHoTen.y + 8}, 35, 1, BLACK);
 
@@ -921,13 +930,13 @@ void Draw_Screen_Employee(QLNV *QL)
     // 4. Nút bấm Lọc (Nút gradient/màu nổi)
     // Do Raylib không hỗ trợ sẵn gradient cho hình bo góc, ta dùng màu tím đậm tạm thời
 
-    Rectangle comboSort = {1290, 220, 250, 45};
+    Rectangle comboSort = {1290, 290, 250, 45};
     static bool isSortOpen = false;
     static int selectedSortIndex = 0;
     string dsSort[] = {"...", "Mã NV", "Họ và Tên", "Ngày Sinh"};
     int nSort = 3;
 
-    DrawTextEx(myFont, "Sắp xếp theo:", {1290, 170}, 40, 1, BLACK);
+    DrawTextEx(myFont, "Sắp xếp theo:", {1290, 240}, 40, 1, BLACK);
     // Vẽ đường gạch dưới
     // DrawLine(comboSort.x, comboSort.y + 30, comboSort.x + comboSort.width, comboSort.y + 30, GRAY);
     // Vẽ box
@@ -1028,6 +1037,7 @@ void Draw_Screen_Employee(QLNV *QL)
             isOpenTable = true;
         }
     }
+
     if (isOpenTable)
     {
         // ================= 1. KHAI BÁO BIẾN LƯU TRẠNG THÁI FORM =================
@@ -1371,19 +1381,40 @@ void Draw_Screen_Employee(QLNV *QL)
                     ViTriViecLam *vt = (*QL->get_DB()->get_ListVTVL())[selVT]->Data;
                     int bac = selBac + 1;
 
+                    Employee *oldEmp = QL->TimTheoMa(mnv);
+                    int oldThuong = (oldEmp != nullptr) ? oldEmp->get_ThuongPhat() : 0;
+                    int oldSNC = 0;
+                    if (oldEmp != nullptr)
+                    {
+                        FullTime *oldFT = dynamic_cast<FullTime *>(oldEmp);
+                        if (oldFT != nullptr)
+                            oldSNC = oldFT->get_SoNgayCong();
+                    }
+
                     if (selLoai == 0)
-                        nv = new FullTime(mnv, ten, ngaySinh, gioiTinh, cv, vt, pb, ngayVaoLam, bac);
+                        nv = new FullTime(mnv, ten, ngaySinh, gioiTinh, cv, vt, pb, ngayVaoLam, bac, oldThuong, oldSNC);
                     else
-                        nv = new PartTime(mnv, ten, ngaySinh, gioiTinh, cv, vt, pb, ngayVaoLam, bac);
+                    {
+                        int oldTime = 80;
+                        if (oldEmp != nullptr)
+                        {
+                            PartTime *oldPT = dynamic_cast<PartTime *>(oldEmp);
+                            if (oldPT != nullptr)
+                                oldTime = oldPT->get_TimeWork();
+                        }
+                        nv = new PartTime(mnv, ten, ngaySinh, gioiTinh, cv, vt, pb, ngayVaoLam, bac, oldThuong, oldTime);
+                    }
 
                     if (clickThem)
                     {
                         QL->ThemEmployee(nv);
+                        QL->get_DB()->SaveFileEmployee();
                         HienThongBao("Thêm nhân viên mới thành công!", false); // false = Màu xanh
                     }
                     else
                     {
                         QL->SuaEmployee(nv);
+                        QL->get_DB()->SaveFileEmployee();
                         delete nv;
                         nv = nullptr;
                         HienThongBao("Cập nhật thông tin thành công!", false); // false = Màu xanh
@@ -1491,152 +1522,3350 @@ void Draw_Screen_Employee(QLNV *QL)
         }
         EndScissorMode();
     }
+    DrawTextEx(myFont, ("Tổng nhân viên: " + to_string(QL->get_DB()->get_ListEmployee()->get_size())).c_str(), {1550, 960}, 25, 1, BLACK);
 }
-/**
-void Draw_Screen_Deparment(QLNV *QL)
+
+void Draw_Screen_VTVL(Vector2 mousePos, bool Clicked, QLNV *QL)
+{
+    // bảng đầu
+    static bool isMaVTActive = false;  // Trạng thái: ô có đang được click vào không
+    static bool isTenVTActive = false; // Trạng thái: ô có đang được click vào không
+    static bool needfill = false;
+    static set<string> dsXoaVTVL;
+
+    Rectangle panelBang1 = {330, 230, 1450.0f, 280.0f};
+    DrawRectangleRounded({panelBang1.x + 3, panelBang1.y + 4, panelBang1.width, panelBang1.height}, 0.03f, 10, Fade(BLACK, 0.08f));
+    DrawRectangleRounded(panelBang1, 0.03f, 10, WHITE);
+    DrawRectangleRoundedLinesEx(panelBang1, 0.03f, 10, 1.5f, Color{225, 230, 240, 255});
+    DrawTextEx(myFont, "Thông tin vị trí", {360.0f, 250.0f}, 40, 1, BLACK);
+
+    static Texture2D a1;
+    static bool isLoaded = false;
+    if (!isLoaded)
+    {
+        a1 = LoadTexture("photo/anhto/vtri.png");
+        isLoaded = true;
+    }
+    Vector2 pa1 = {360.0f, 300.0f}; // Tọa độ (x, y) postion
+    float ra1 = 0.0f;               // Góc xoay (0 độ) rotation
+    float sa1 = 0.6f;
+    DrawTextureEx(a1, pa1, ra1, sa1, WHITE);
+
+    Rectangle textMaVT = {850, 350, 300, 40};
+    static char MaVTInput[50] = "\0"; // Chuỗi lưu ký tự người dùng gõ
+    static int letterCount_Ma = 0;
+    DrawTextEx(myFont, "Mã vị trí:", {700.0f, 350.0f}, 35, 1, BLACK);
+    DrawRectangle(textMaVT.x, textMaVT.y, textMaVT.width, textMaVT.height, isMaVTActive ? LIGHTGRAY : WHITE);
+    DrawRectangleRoundedLinesEx(textMaVT, 0.3f, 12, 3.0f, LIGHTGRAY);
+
+    Rectangle textTenVT = {850, 420, 300, 40};
+    static char TenVTInput[50] = "\0"; // Chuỗi lưu ký tự người dùng gõ
+    static int letterCount_Ten = 0;
+    DrawTextEx(myFont, "Tên vị trí:", {700.0f, 420.0f}, 35, 1, BLACK);
+    DrawRectangle(textTenVT.x, textTenVT.y, textTenVT.width, textTenVT.height, isTenVTActive ? LIGHTGRAY : WHITE);
+    DrawRectangleRoundedLinesEx(textTenVT, 0.3f, 12, 3.0f, LIGHTGRAY);
+    if (Clicked)
+    {
+        if (CheckCollisionPointRec(mousePos, textMaVT))
+        {
+            isMaVTActive = true;
+            isTenVTActive = false;
+        }
+        else if (CheckCollisionPointRec(mousePos, textTenVT))
+        {
+            isTenVTActive = true;
+            isMaVTActive = false;
+        }
+    }
+
+    Rectangle btnThemViTri = {350, 940, 230, 50};
+    static bool OpenThem = false;
+
+    Rectangle btnSuaViTri = {610, 940, 230, 50};
+    static bool OpenSua = false;
+
+    Rectangle btnXoaViTri = {870, 940, 230, 50};
+    static bool OpenXoa = false;
+
+    Rectangle btnXacNhan = {350, 940, 230, 50};
+    static bool isXacNhan = false;
+
+    Rectangle btnHuy = {610, 940, 230, 50};
+    static bool isHuy = false;
+
+    Rectangle btnHuyXoa = {350, 940, 230, 50};
+    Rectangle btnXacNhanXoa = {610, 940, 230, 50};
+
+    if (Clicked)
+    {
+        if (OpenXoa)
+        {
+            if (CheckCollisionPointRec(mousePos, btnHuyXoa))
+            {
+                dsXoaVTVL.clear();
+                OpenXoa = false;
+            }
+            else if (CheckCollisionPointRec(mousePos, btnXacNhanXoa))
+            {
+                if (dsXoaVTVL.empty())
+                {
+                    HienThongBao("Chưa chọn vị trí nào để xóa!", true);
+                }
+                else
+                {
+                    vector<ViTriViecLam *> canXoa;
+                    Node<ViTriViecLam> *p = QL->get_DB()->get_ListVTVL()->get_header()->Next;
+                    while (p != nullptr)
+                    {
+                        if (p->Data && dsXoaVTVL.find(p->Data->get_MaVTVL()) != dsXoaVTVL.end())
+                        {
+                            canXoa.push_back(p->Data);
+                        }
+                        p = p->Next;
+                    }
+
+                    int dem = 0;
+                    string loiCuoi = "";
+                    for (ViTriViecLam *vt : canXoa)
+                    {
+                        try
+                        {
+                            QL->XoaViTri(vt);
+                            dem++;
+                        }
+                        catch (const string &loi)
+                        {
+                            loiCuoi = loi;
+                        }
+                    }
+
+                    if (dem > 0)
+                    {
+                        QL->get_DB()->SaveFileVTVL();
+                        QL->get_DB()->SaveFileML();
+                        if (loiCuoi.empty())
+                        {
+                            HienThongBao("Đã xóa " + to_string(dem) + " vị trí thành công!", false);
+                        }
+                        else
+                        {
+                            HienThongBao("Đã xóa " + to_string(dem) + " vị trí. " + loiCuoi, true);
+                        }
+                    }
+                    else
+                    {
+                        HienThongBao(loiCuoi.empty() ? "Xóa không thành công!" : loiCuoi, true);
+                    }
+
+                    dsXoaVTVL.clear();
+                    OpenXoa = false;
+                    MaVTInput[0] = '\0';
+                    TenVTInput[0] = '\0';
+                    letterCount_Ma = 0;
+                    letterCount_Ten = 0;
+                }
+            }
+        }
+        else if (OpenThem || OpenSua)
+        {
+            // Chỉ xử lý Xác nhận
+            if (CheckCollisionPointRec(mousePos, btnXacNhan))
+            {
+                isXacNhan = true;
+            }
+            // Chỉ xử lý Hủy
+            else if (CheckCollisionPointRec(mousePos, btnHuy))
+            {
+                isHuy = true;
+            }
+        }
+        else
+        {
+            if (CheckCollisionPointRec(mousePos, btnThemViTri))
+            {
+                OpenThem = true;
+                MaVTInput[0] = '\0';
+                TenVTInput[0] = '\0';
+                letterCount_Ma = 0;
+                letterCount_Ten = 0;
+            }
+            else if (CheckCollisionPointRec(mousePos, btnSuaViTri))
+            {
+                OpenSua = true;
+            }
+            else if (CheckCollisionPointRec(mousePos, btnXoaViTri))
+            {
+                OpenXoa = true;
+                dsXoaVTVL.clear();
+            }
+        }
+    }
+
+    if (OpenXoa)
+    {
+        DrawRectangleRounded(btnHuyXoa, 0.2f, 10, WHITE);
+        DrawRectangleRoundedLinesEx(btnHuyXoa, 0.2f, 10, 1.5f, DARKGRAY);
+        DrawTextEx(myFont, "Hủy xóa", {btnHuyXoa.x + 55, btnHuyXoa.y + 10}, 30, 1, BLACK);
+
+        DrawRectangleRounded(btnXacNhanXoa, 0.2f, 10, RED);
+        DrawTextEx(myFont, "Xác nhận xoá", {btnXacNhanXoa.x + 32, btnXacNhanXoa.y + 10}, 30, 1, WHITE);
+    }
+    else if (OpenSua || OpenThem)
+    {
+        DrawRectangleRounded(btnXacNhan, 0.2f, 10, GREEN);
+        DrawTextEx(myFont, "   Xác nhận", {btnXacNhan.x + 32, btnXacNhan.y + 10}, 30, 1, WHITE);
+
+        DrawRectangleRounded(btnHuy, 0.2f, 10, BLUE);
+        DrawTextEx(myFont, "   Hủy", {btnHuy.x + 32, btnHuy.y + 10}, 30, 1, WHITE);
+    }
+    else
+    {
+        DrawRectangleRounded(btnThemViTri, 0.2f, 10, GREEN);
+        DrawTextEx(myFont, "   Thêm vị trí", {btnThemViTri.x + 32, btnThemViTri.y + 10}, 30, 1, WHITE);
+        DrawRectangleRounded(btnSuaViTri, 0.2f, 10, BLUE);
+        DrawTextEx(myFont, "   Sửa vị trí", {btnSuaViTri.x + 32, btnSuaViTri.y + 10}, 30, 1, WHITE);
+        DrawRectangleRounded(btnXoaViTri, 0.2f, 10, RED);
+        DrawTextEx(myFont, "   Xóa vị trí", {btnXoaViTri.x + 32, btnXoaViTri.y + 10}, 30, 1, WHITE);
+    }
+
+    // bảng 2
+    Rectangle panelBang2 = {330, 530, 1450.0f, 390.0f};
+    DrawRectangleRounded({panelBang2.x + 3, panelBang2.y + 4, panelBang2.width, panelBang2.height}, 0.03f, 10, Fade(BLACK, 0.08f));
+    DrawRectangleRounded(panelBang2, 0.03f, 10, WHITE);
+    DrawRectangleRoundedLinesEx(panelBang2, 0.03f, 10, 1.5f, Color{225, 230, 240, 255});
+    static float scrollY = 0.0f;
+    float scrollSpeed = 30.0f; // Tốc độ cuộn mỗi nấc chuột
+
+    // Lấy thao tác lăn chuột và cộng dồn vào scrollY
+    float wheel = GetMouseWheelMove(); // Lăn chuột xuống trả về -1 ngược lại lên
+    if (wheel != 0.0f)
+    {
+        scrollY += wheel * scrollSpeed;
+    }
+
+    // Chặn cuộn quá đà lên trên (danh sách không bị tụt xuống dưới tiêu đề)
+    if (scrollY > 0.0f)
+        scrollY = 0.0f;
+    // Cấu hình khoảng cách và kích thước chữ
+    int startX = 350;   // Lề trái
+    int startY = 600;   // Lề trên
+    int rowHeight = 60; // Chiều cao mỗi dòng
+    int fontSize = 30;  // Kích thước chữ
+
+    // Tọa độ X của từng cột (Bạn cần tinh chỉnh các số này cho vừa với màn hình)
+    int colX[] = {350, 600, 900, 950, 860, 1000, 1200, 1460};
+
+    // 1. VẼ TIÊU ĐỀ CỘT (Header)
+    float lech = OpenXoa ? 30.f : 0.f;
+    DrawTextEx(myFont, "Mã Vị Trí", {colX[0] + lech, (float)startY}, fontSize, 1, DARKGRAY);
+    DrawTextEx(myFont, "Tên Vị Trí", {colX[1] + lech, (float)startY}, fontSize, 1, DARKGRAY);
+    DrawTextEx(myFont, "Số Lượng Nhân Viên", {colX[2] + lech, (float)startY}, fontSize, 1, DARKGRAY);
+
+    // Kẻ đường gạch ngang dưới tiêu đề
+    DrawLine(startX, startY + 30, 1900, startY + 30, LIGHTGRAY);
+
+    // 4. KHU VỰC VẼ DANH SÁCH BỊ CẮT (Scissor Mode)
+    int listStartY = startY + 60;                         // Điểm bắt đầu vẽ dữ liệu (ngay dưới đường kẻ)
+    int listHeight = GetScreenHeight() - listStartY - 80; // Chiều cao khu vực hiển thị dữ liệu
+
+    // Bật chế độ Scissor: Bất cứ thứ gì vẽ bên ngoài hình chữ nhật này sẽ bị ẩn đi
+    BeginScissorMode(startX, listStartY, GetScreenWidth() - startX, listHeight);
+    Rectangle listArea = {(float)startX, (float)listStartY, (float)(GetScreenWidth() - startX), (float)listHeight};
+    // Chỉ hover khi chuột nằm trong vùng danh sách
+    bool canHover = CheckCollisionPointRec(mousePos, listArea);
+
+    // Tọa độ Y hiện tại bắt đầu = Tọa độ gốc + Độ lệch cuộn
+    float currentY = listStartY + scrollY;
+
+    Node<ViTriViecLam> *current = QL->get_DB()->get_ListVTVL()->get_header()->Next;
+
+    // Đếm tổng số lượng dòng để chặn cuộn quá đà xuống dưới (tùy chọn nâng cao)
+    int totalRows = 0;
+
+    ViTriViecLam *selPB = nullptr;
+    static string selectedPhongBan = "";
+    while (current != nullptr)
+    {
+        string mpb = current->Data->get_MaVTVL();
+        string name = current->Data->get_TenVTVL();
+        int size = current->Data->get_ListNV()->get_size();
+        string vt_size = to_string(size);
+
+        // ----- HOVER + CHỌN DÒNG -----
+        Rectangle rowRect = {(float)startX, currentY - 5, (float)(GetScreenWidth() - startX - 20), 35};
+        bool isHover = canHover && CheckCollisionPointRec(mousePos, rowRect);
+        if (isHover && Clicked)
+        {
+            if (OpenXoa)
+            {
+                if (dsXoaVTVL.find(mpb) != dsXoaVTVL.end())
+                    dsXoaVTVL.erase(mpb);
+                else
+                    dsXoaVTVL.insert(mpb);
+            }
+            else
+            {
+                selectedPhongBan = mpb;
+                needfill = true;
+            }
+        }
+        bool isSelected = (mpb == selectedPhongBan);
+
+        if (OpenXoa)
+        {
+            if (dsXoaVTVL.find(mpb) != dsXoaVTVL.end())
+            {
+                DrawRectangleRec(rowRect, Color{255, 230, 230, 255});
+            }
+            else if (isHover)
+            {
+                DrawRectangleRec(rowRect, Color{245, 245, 250, 255});
+            }
+
+            Rectangle box = {(float)colX[0] + 2, currentY + 4, 20, 20};
+            DrawRectangleRec(box, WHITE);
+            DrawRectangleLinesEx(box, 2, DARKGRAY);
+            if (dsXoaVTVL.find(mpb) != dsXoaVTVL.end())
+            {
+                DrawRectangleRec({box.x + 4, box.y + 4, box.width - 8, box.height - 8}, DARKGREEN);
+            }
+        }
+        else if (isSelected)
+        {
+            // đã chọn: đậm hơn; vừa chọn vừa rê chuột: đậm thêm chút
+            DrawRectangleRec(rowRect, isHover ? Color{180, 195, 230, 255} : Color{200, 210, 235, 255});
+            // lưu nhân viên đang chọn
+            selPB = current->Data;
+        }
+        else if (isHover)
+        {
+            DrawRectangleRec(rowRect, Color{235, 235, 240, 255});
+        }
+        // ------------------------------
+
+        DrawTextEx(myFont, mpb.c_str(), {colX[0] + lech, currentY}, fontSize, 1, BLACK);
+        DrawTextEx(myFont, name.c_str(), {colX[1] + lech, currentY}, fontSize, 1, BLACK);
+        DrawTextEx(myFont, vt_size.c_str(), {colX[2] + lech, currentY}, fontSize, 1, BLACK);
+        DrawLine(startX, currentY + 30, GetScreenWidth() - 20, currentY + 30, Fade(LIGHTGRAY, 0.5f));
+
+        currentY += rowHeight;
+        totalRows++;
+
+        current = current->Next;
+    }
+
+    // Tính toán chiều cao tổng của danh sách để chặn cuộn quá đáy
+    float totalListHeight = totalRows * rowHeight;
+    float maxScroll = listHeight - totalListHeight;
+    // Nếu danh sách dài hơn màn hình và cuộn quá mức dưới, ép nó về mức tối đa
+    if (totalListHeight > listHeight && scrollY < maxScroll)
+    {
+        scrollY = maxScroll;
+    }
+    // Nếu danh sách ngắn hơn màn hình, không cho cuộn
+    else if (totalListHeight <= listHeight)
+    {
+        scrollY = 0.0f;
+    }
+
+    // Tắt chế độ Scissor để các phần vẽ sau (nếu có) không bị ảnh hưởng
+    EndScissorMode();
+
+    if (needfill && selPB != nullptr)
+    {
+        strncpy(MaVTInput, selPB->get_MaVTVL().c_str(), 49);
+        letterCount_Ma = strlen(MaVTInput);
+        MaVTInput[letterCount_Ma] = '\0';
+
+        strncpy(TenVTInput, selPB->get_TenVTVL().c_str(), 49);
+        letterCount_Ten = strlen(TenVTInput);
+        TenVTInput[letterCount_Ten] = '\0';
+
+        needfill = false;
+    }
+
+    if (OpenThem)
+    {
+        Typing(isMaVTActive, MaVTInput, letterCount_Ma, mousePos, textMaVT);
+        HieuUngGo(isMaVTActive, textMaVT, MaVTInput, 28);
+
+        Typing(isTenVTActive, TenVTInput, letterCount_Ten, mousePos, textTenVT);
+        HieuUngGo(isTenVTActive, textTenVT, TenVTInput, 28);
+    }
+    else if (OpenSua && selPB != nullptr)
+    { // Ô nhập chữ chế độ sửa
+        DrawTextEx(myFont, MaVTInput, {textMaVT.x + 10, textMaVT.y + 6}, 28, 1, BLACK);
+        Typing(isTenVTActive, TenVTInput, letterCount_Ten, mousePos, textTenVT);
+        HieuUngGo(isTenVTActive, textTenVT, TenVTInput, 28);
+    }
+    else if (selPB != nullptr || MaVTInput[0] != '\0')
+    {
+        // Khi click vào 1 đối tượng trong danh sách (chế độ xem)
+        DrawTextEx(myFont, MaVTInput, {textMaVT.x + 10, textMaVT.y + 6}, 28, 1, BLACK);
+        DrawTextEx(myFont, TenVTInput, {textTenVT.x + 10, textTenVT.y + 6}, 28, 1, BLACK);
+    }
+
+    if (isXacNhan)
+    {
+        if (OpenThem)
+        {
+            ViTriViecLam *VTnew = new ViTriViecLam(MaVTInput, TenVTInput);
+            try
+            {
+                QL->ThemViTri(VTnew);
+                QL->get_DB()->SaveFileVTVL();
+                needfill = false;
+                letterCount_Ma = 0;
+                letterCount_Ten = 0;
+                OpenSua = OpenThem = OpenXoa = isHuy = isXacNhan = false;
+                MaVTInput[0] = '\0';
+                TenVTInput[0] = '\0';
+                HienThongBao("Thêm vị trí mới thành công!", false);
+            }
+            catch (const string &loi)
+            {
+                needfill = false;
+                letterCount_Ma = 0;
+                letterCount_Ten = 0;
+                OpenSua = OpenThem = OpenXoa = isHuy = isXacNhan = false;
+                MaVTInput[0] = '\0';
+                TenVTInput[0] = '\0';
+                HienThongBao(loi, true); // true màu đỏ
+            }
+        }
+        else if (OpenSua && selPB != nullptr)
+        {
+            selPB->set_TenVTVL(TenVTInput);
+            QL->get_DB()->SaveFileVTVL();
+            OpenSua = OpenThem = OpenXoa = isHuy = isXacNhan = false;
+            MaVTInput[0] = '\0';
+            TenVTInput[0] = '\0';
+            letterCount_Ma = 0;
+            letterCount_Ten = 0;
+            HienThongBao("Cập nhật vị trí thành công!", false);
+        }
+    }
+
+    if (isHuy && CheckCollisionPointRec(mousePos, btnHuy))
+    {
+        OpenSua = OpenThem = OpenXoa = isHuy = isXacNhan = false;
+        MaVTInput[0] = '\0';
+        TenVTInput[0] = '\0';
+        letterCount_Ma = 0;
+        letterCount_Ten = 0;
+    }
+
+    DrawTextEx(myFont, ("Tổng vị trí: " + to_string(QL->get_DB()->get_ListVTVL()->get_size())).c_str(), {1550, 960}, 25, 1, BLACK);
+}
+
+void Draw_Screen_Employee(QLNV *QL)
+{
+    static Texture2D a1;
+    static bool isLoaded = false;
+    if (!isLoaded)
+    {
+        a1 = LoadTexture("photo/icon/Asset-1.png");
+        isLoaded = true;
+    }
+    Vector2 pa1 = {370.0f, 45.0f}; // Tọa độ (x, y) postion
+    float ra1 = 0.0f;              // Góc xoay (0 độ) rotation
+    float sa1 = 0.33f;
+    DrawTextureEx(a1, pa1, ra1, sa1, WHITE);
+    DrawTextEx(tieude, "Quản Lý Nhân Sự/Vị Trí Việc Làm", {pa1.x + 100, pa1.y}, 45, 1, WHITE);
+    DrawTextEx(myFont, "Danh sách và thông tin nhân sự/vị trí của công ty", {pa1.x + 100, pa1.y + 50}, 30, 1, WHITE);
+    static bool isOpenNV = false;
+    static bool isOpenVT = true;
+    Vector2 mousePos = GetMousePosition();
+    bool Clicked = IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
+
+    float TabX = 330.0f;
+    float TabY = 160.0f;
+    float TabH = 90.0f;
+    Rectangle TabNV = {TabX, TabY, 300.0f, TabH};
+    Rectangle TabVTVL = {TabX + 310.0f, TabY, 400.0f, TabH};
+    bool hoverNV = CheckCollisionPointRec(mousePos, TabNV);
+    bool hoverVTVL = CheckCollisionPointRec(mousePos, TabVTVL);
+    Color CTabNV = isOpenNV == 1 ? BLUE : WHITE;
+    Color CTabVT = isOpenVT == 1 ? BLUE : WHITE;
+    if (isOpenNV == true && hoverVTVL)
+        CTabVT = Fade(BLUE, 0.4);
+    if (isOpenVT == true && hoverNV)
+        CTabNV = Fade(BLUE, 0.4);
+    DrawRectangleRounded(TabNV, 0.3f, 10, CTabNV);
+    DrawRectangleRoundedLinesEx(TabNV, 0.3f, 10, 1.5f, Color{225, 230, 240, 255});
+    DrawTextEx(myFont, "Nhân viên", {TabNV.x + 70.0f, TabNV.y + 15.0f}, 40, 1, BLACK);
+
+    DrawRectangleRounded(TabVTVL, 0.3f, 10, CTabVT);
+    DrawRectangleRoundedLinesEx(TabNV, 0.3f, 10, 1.5f, Color{225, 230, 240, 255});
+    DrawTextEx(myFont, "Vị trí việc làm", {TabVTVL.x + 90.0f, TabVTVL.y + 15.0f}, 40, 1, BLACK);
+
+    Rectangle panelBang = {330, 230, 1450.0f, 690.0f};
+    DrawRectangleRounded({panelBang.x + 3, panelBang.y + 4, panelBang.width, panelBang.height}, 0.03f, 10, Fade(BLACK, 0.08f));
+    DrawRectangleRounded(panelBang, 0.03f, 10, WHITE);
+    DrawRectangleRoundedLinesEx(panelBang, 0.03f, 10, 1.5f, Color{225, 230, 240, 255});
+
+    if (Clicked && CheckCollisionPointRec(mousePos, TabNV))
+    {
+        isOpenNV = true;
+        isOpenVT = false;
+    }
+    else if (Clicked && CheckCollisionPointRec(mousePos, TabVTVL))
+    {
+        isOpenVT = true;
+        isOpenNV = false;
+    }
+
+    if (isOpenNV)
+    {
+        Draw_Screen_NhanVien(mousePos, Clicked, QL);
+    }
+    else if (isOpenVT)
+    {
+        Draw_Screen_VTVL(mousePos, Clicked, QL);
+    }
+}
+
+void Draw_Screen_PhongBan(Vector2 mousePos, bool Clicked, QLNV *QL)
 {
     // Vẽ tiêu đề
-    Vector2 mousePos = GetMousePosition();
-    Rectangle Title = {300.0f, 0.0f, 1620.0f, 60.0f};
+    static bool isMaPhongBanActive = false;  // Trạng thái: ô có đang được click vào không
+    static bool isTenPhongBanActive = false; // Trạng thái: ô có đang được click vào không
+    static bool isOpenCalendar = false;
+    static bool needfill = false;
+    static set<string> dsXoaPB;
 
-    Rectangle textMaPhongBan = {900, 200, 300, 40};
-    // Các biến cho ô nhập liệu MaPhongBan
-    static bool isMaPhongBanActive = false; // Trạng thái: ô có đang được click vào không
+    Rectangle panelBang1 = {330, 230, 1450.0f, 320.0f};
+    DrawRectangleRounded({panelBang1.x + 3, panelBang1.y + 4, panelBang1.width, panelBang1.height}, 0.03f, 10, Fade(BLACK, 0.08f));
+    DrawRectangleRounded(panelBang1, 0.03f, 10, WHITE);
+    DrawRectangleRoundedLinesEx(panelBang1, 0.03f, 10, 1.5f, Color{225, 230, 240, 255});
+    DrawTextEx(myFont, "Thông tin phòng ban", {360.0f, 250.0f}, 40, 1, BLACK);
+
+    static Texture2D a1;
+    static bool isLoaded = false;
+    if (!isLoaded)
+    {
+        a1 = LoadTexture("photo/anhto/pban.png");
+        isLoaded = true;
+    }
+    Vector2 pa1 = {360.0f, 320.0f}; // Tọa độ (x, y) postion
+    float ra1 = 0.0f;               // Góc xoay (0 độ) rotation
+    float sa1 = 0.6f;
+    DrawTextureEx(a1, pa1, ra1, sa1, WHITE);
+
+    Rectangle textMaPhongBan = {930, 350, 300, 40};
     static char MaPhongBanInput[50] = "\0"; // Chuỗi lưu ký tự người dùng gõ
     static int letterCount_Ma = 0;
-    Typing(isMaPhongBanActive, MaPhongBanInput, letterCount_Ma, mousePos, textMaPhongBan);
-
-    DrawText("Ma Phong Ban", 730, 210, 20, BLACK);
-    DrawRectangle(Title.x, Title.y, Title.width, Title.height, GRAY);
-    DrawText("Quan ly phong ban", 300.0f, 15.0f, 25, BLACK);
+    DrawTextEx(myFont, "Mã Phòng Ban:", {700.0f, 350.0f}, 35, 1, BLACK);
     DrawRectangleRounded(textMaPhongBan, 0.5f, 10, isMaPhongBanActive ? LIGHTGRAY : WHITE);
-    DrawText(MaPhongBanInput, textMaPhongBan.x + 10, textMaPhongBan.y + 8, 20, BLACK);
-    // Nhấp nháy con trỏ chuột mô phỏng (dấu gạch dưới)
-    if (isMaPhongBanActive && ((int)(GetTime() * 2) % 2 == 0))
-    {
-        int textWidth = MeasureText(MaPhongBanInput, 20);
-        DrawText("_", textMaPhongBan.x + 12 + textWidth, textMaPhongBan.y + 8, 20, MAROON);
-    }
+    DrawRectangleRoundedLinesEx(textMaPhongBan, 0.3f, 12, 3.0f, LIGHTGRAY);
 
-    Rectangle textTenPhongBan = {900, 285, 300, 40};
-    // Các biến cho ô nhập liệu MaPhongBan
-    static bool isTenPhongBanActive = false; // Trạng thái: ô có đang được click vào không
+    Rectangle textTenPhongBan = {930, 420, 300, 40};
     static char TenPhongBanInput[50] = "\0"; // Chuỗi lưu ký tự người dùng gõ
     static int letterCount_Ten = 0;
-
-    Typing(isTenPhongBanActive, TenPhongBanInput, letterCount_Ten, mousePos, textTenPhongBan);
-
-    DrawText("Ten Phong Ban", 730, 300, 20, BLACK);
+    DrawTextEx(myFont, "Tên Phòng Ban:", {700.0f, 420.0f}, 35, 1, BLACK);
     DrawRectangleRounded(textTenPhongBan, 0.5f, 10, isTenPhongBanActive ? LIGHTGRAY : WHITE);
-    DrawText(TenPhongBanInput, textTenPhongBan.x + 10, textTenPhongBan.y + 8, 20, BLACK);
-    // Nhấp nháy con trỏ chuột mô phỏng (dấu gạch dưới)
-    if (isTenPhongBanActive && ((int)(GetTime() * 2) % 2 == 0))
-    {
-        int textWidth = MeasureText(MaPhongBanInput, 20);
-        DrawText("_", textTenPhongBan.x + 12 + textWidth, textTenPhongBan.y + 8, 20, MAROON);
-    }
+    DrawRectangleRoundedLinesEx(textTenPhongBan, 0.3f, 12, 3.0f, LIGHTGRAY);
 
-    DrawText("Ngay thanh lap", 730, 370, 20, BLACK);
-    Rectangle textNgayThanhLap = {900, 360, 300, 40};
-    static bool isOpenCalendar = false;
-
-    string textCalendar = to_string(day) + '/' + to_string(month) + '/' + to_string(year);
-    if (day < 10)
+    Rectangle textNgayThanhLap = {930, 490, 300, 40};
+    static int day1 = day, month1 = month, year1 = year;
+    DrawTextEx(myFont, "Ngày thành lập:", {700, 490}, 35, 1, BLACK);
+    DrawRectangleRoundedLinesEx(textNgayThanhLap, 0.3f, 12, 3.0f, LIGHTGRAY);
+    string textCalendar = to_string(day1) + '/' + to_string(month1) + '/' + to_string(year1);
+    if (day1 < 10)
     {
         textCalendar = '0' + textCalendar;
     }
-    if (month + 1 < 10)
+    if (month1 < 10)
     {
         textCalendar.insert(3, "0");
     }
+
+    if (Clicked)
+    {
+        if (CheckCollisionPointRec(mousePos, textMaPhongBan))
+        {
+            isMaPhongBanActive = true;
+            isTenPhongBanActive = isOpenCalendar = false;
+        }
+        else if (CheckCollisionPointRec(mousePos, textTenPhongBan))
+        {
+            isTenPhongBanActive = true;
+            isMaPhongBanActive = isOpenCalendar = false;
+        }
+        else if (CheckCollisionPointRec(mousePos, textNgayThanhLap))
+        {
+            isOpenCalendar = true;
+            isMaPhongBanActive = isTenPhongBanActive = false;
+        }
+    }
+
     DrawRectangleRounded(textNgayThanhLap, 0.5f, 10, isOpenCalendar ? LIGHTGRAY : WHITE);
-    DrawText(textCalendar.c_str(), textNgayThanhLap.x + 5, textNgayThanhLap.y + 10, 25, BLACK);
 
     // Vẽ nút chức năng để ở trên để không bị che
-    Rectangle btnThemPhongBan = {450, 500, 200, 40};
-    DrawRectangleRounded(btnThemPhongBan, 0.2f, 10, BLUE);
-    DrawText("Them Phong Ban", btnThemPhongBan.x + 15, btnThemPhongBan.y + 10, 20, BLACK);
-    Rectangle btnSuaPhongBan = {1050, 500, 200, 40};
-    DrawRectangleRounded(btnSuaPhongBan, 0.2f, 10, BLUE);
-    DrawText("Sua Phong Ban", btnSuaPhongBan.x + 20, btnSuaPhongBan.y + 10, 20, BLACK);
-    Rectangle btnLamMoi = {1650, 500, 200, 40};
-    DrawRectangleRounded(btnLamMoi, 0.2f, 10, BLUE);
-    DrawText("Lam Moi", btnLamMoi.x + 65, btnLamMoi.y + 10, 20, BLACK);
+    Rectangle btnThemPhongBan = {350, 940, 280, 50};
+    static bool OpenThem = false;
+
+    Rectangle btnSuaPhongBan = {660, 940, 280, 50};
+    static bool OpenSua = false;
+
+    Rectangle btnXoaPhongBan = {970, 940, 280, 50};
+    static bool OpenXoa = false;
+
+    Rectangle btnXacNhan = {350, 940, 230, 50};
+    static bool isXacNhan = false;
+    Rectangle btnHuy = {610, 940, 230, 50};
+    static bool isHuy = false;
+
+    Rectangle btnHuyXoa = {350, 940, 230, 50};
+    Rectangle btnXacNhanXoa = {610, 940, 230, 50};
+
+    if (Clicked)
+    {
+        if (OpenXoa)
+        {
+            if (CheckCollisionPointRec(mousePos, btnHuyXoa))
+            {
+                dsXoaPB.clear();
+                OpenXoa = false;
+            }
+            else if (CheckCollisionPointRec(mousePos, btnXacNhanXoa))
+            {
+                if (dsXoaPB.empty())
+                {
+                    HienThongBao("Chưa chọn phòng ban nào để xóa!", true);
+                }
+                else
+                {
+                    vector<PhongBan *> canXoa;
+                    Node<PhongBan> *p = QL->get_DB()->get_ListPB()->get_header()->Next;
+                    while (p != nullptr)
+                    {
+                        if (p->Data && dsXoaPB.find(p->Data->get_MaPhongBan()) != dsXoaPB.end())
+                        {
+                            canXoa.push_back(p->Data);
+                        }
+                        p = p->Next;
+                    }
+
+                    int dem = 0;
+                    string loiCuoi = "";
+                    for (PhongBan *pb : canXoa)
+                    {
+                        try
+                        {
+                            QL->XoaPhongBan(pb);
+                            dem++;
+                        }
+                        catch (const string &loi)
+                        {
+                            loiCuoi = loi;
+                        }
+                    }
+
+                    if (dem > 0)
+                    {
+                        QL->get_DB()->SaveFilePB();
+                        if (loiCuoi.empty())
+                        {
+                            HienThongBao("Đã xóa " + to_string(dem) + " phòng ban thành công!", false);
+                        }
+                        else
+                        {
+                            HienThongBao("Đã xóa " + to_string(dem) + " phòng ban. " + loiCuoi, true);
+                        }
+                    }
+                    else
+                    {
+                        HienThongBao(loiCuoi.empty() ? "Xóa không thành công!" : loiCuoi, true);
+                    }
+
+                    dsXoaPB.clear();
+                    OpenXoa = false;
+                    MaPhongBanInput[0] = '\0';
+                    TenPhongBanInput[0] = '\0';
+                    textCalendar = "";
+                    letterCount_Ma = letterCount_Ten = 0;
+                }
+            }
+        }
+        else if (OpenThem || OpenSua)
+        {
+            // Chỉ xử lý Xác nhận
+            if (CheckCollisionPointRec(mousePos, btnXacNhan))
+            {
+                isXacNhan = true;
+            }
+            // Chỉ xử lý Hủy
+            else if (CheckCollisionPointRec(mousePos, btnHuy))
+            {
+                isHuy = true;
+            }
+        }
+        else
+        {
+            if (CheckCollisionPointRec(mousePos, btnThemPhongBan))
+            {
+                OpenThem = true;
+                MaPhongBanInput[0] = '\0';
+                TenPhongBanInput[0] = '\0';
+                textCalendar = "";
+                letterCount_Ma = 0;
+                letterCount_Ten = 0;
+            }
+            else if (CheckCollisionPointRec(mousePos, btnSuaPhongBan))
+            {
+                OpenSua = true;
+            }
+            else if (CheckCollisionPointRec(mousePos, btnXoaPhongBan))
+            {
+                OpenXoa = true;
+                dsXoaPB.clear();
+            }
+        }
+    }
+
+    if (OpenXoa)
+    {
+        DrawRectangleRounded(btnHuyXoa, 0.2f, 10, WHITE);
+        DrawRectangleRoundedLinesEx(btnHuyXoa, 0.2f, 10, 1.5f, DARKGRAY);
+        DrawTextEx(myFont, "Hủy xóa", {btnHuyXoa.x + 55, btnHuyXoa.y + 10}, 30, 1, BLACK);
+
+        DrawRectangleRounded(btnXacNhanXoa, 0.2f, 10, RED);
+        DrawTextEx(myFont, "Xác nhận xoá", {btnXacNhanXoa.x + 32, btnXacNhanXoa.y + 10}, 30, 1, WHITE);
+    }
+    else if (OpenSua || OpenThem)
+    {
+        DrawRectangleRounded(btnXacNhan, 0.2f, 10, GREEN);
+        DrawTextEx(myFont, "   Xác nhận", {btnXacNhan.x + 32, btnXacNhan.y + 10}, 30, 1, WHITE);
+
+        DrawRectangleRounded(btnHuy, 0.2f, 10, BLUE);
+        DrawTextEx(myFont, "   Hủy", {btnHuy.x + 32, btnHuy.y + 10}, 30, 1, WHITE);
+    }
+    else
+    {
+        DrawRectangleRounded(btnThemPhongBan, 0.2f, 10, GREEN);
+        DrawTextEx(myFont, "   Thêm Phòng Ban", {btnThemPhongBan.x + 32, btnThemPhongBan.y + 10}, 30, 1, WHITE);
+        DrawRectangleRounded(btnSuaPhongBan, 0.2f, 10, BLUE);
+        DrawTextEx(myFont, "   Sửa Phòng Ban", {btnSuaPhongBan.x + 32, btnSuaPhongBan.y + 10}, 30, 1, WHITE);
+        DrawRectangleRounded(btnXoaPhongBan, 0.2f, 10, RED);
+        DrawTextEx(myFont, "   Xóa Phòng Ban", {btnXoaPhongBan.x + 32, btnXoaPhongBan.y + 10}, 30, 1, WHITE);
+    }
+
+    // Bảng 2
+    Rectangle panelBang2 = {330, 580, 1450.0f, 350.0f};
+    DrawRectangleRounded({panelBang2.x + 3, panelBang2.y + 4, panelBang2.width, panelBang2.height}, 0.03f, 10, Fade(BLACK, 0.08f));
+    DrawRectangleRounded(panelBang2, 0.03f, 10, WHITE);
+    DrawRectangleRoundedLinesEx(panelBang2, 0.03f, 10, 1.5f, Color{225, 230, 240, 255});
+    static float scrollY = 0.0f;
+    float scrollSpeed = 30.0f; // Tốc độ cuộn mỗi nấc chuột
+
+    // Lấy thao tác lăn chuột và cộng dồn vào scrollY
+    float wheel = GetMouseWheelMove(); // Lăn chuột xuống trả về -1 ngược lại lên
+    if (wheel != 0.0f)
+    {
+        scrollY += wheel * scrollSpeed;
+    }
+
+    // Chặn cuộn quá đà lên trên (danh sách không bị tụt xuống dưới tiêu đề)
+    if (scrollY > 0.0f)
+        scrollY = 0.0f;
+    // Cấu hình khoảng cách và kích thước chữ
+    int startX = 350;   // Lề trái
+    int startY = 650;   // Lề trên
+    int rowHeight = 60; // Chiều cao mỗi dòng
+    int fontSize = 30;  // Kích thước chữ
+
+    // Tọa độ X của từng cột (Bạn cần tinh chỉnh các số này cho vừa với màn hình)
+    int colX[] = {350, 600, 900, 1250};
+
+    // 1. VẼ TIÊU ĐỀ CỘT (Header)
+    float lech = OpenXoa ? 30.f : 0.f;
+    DrawTextEx(myFont, "Mã Phòng Ban", {colX[0] + lech, (float)startY}, fontSize, 1, DARKGRAY);
+    DrawTextEx(myFont, "Tên Phòng Ban", {colX[1] + lech, (float)startY}, fontSize, 1, DARKGRAY);
+    DrawTextEx(myFont, "Ngày Thành Lập", {colX[2] + lech, (float)startY}, fontSize, 1, DARKGRAY);
+    DrawTextEx(myFont, "Số Lượng Nhân Viên", {colX[3] + lech, (float)startY}, fontSize, 1, DARKGRAY);
+
+    // Kẻ đường gạch ngang dưới tiêu đề
+    DrawLine(startX, startY + 30, 1900, startY + 30, LIGHTGRAY);
+
+    // 4. KHU VỰC VẼ DANH SÁCH BỊ CẮT (Scissor Mode)
+    int listStartY = startY + 60;                         // Điểm bắt đầu vẽ dữ liệu (ngay dưới đường kẻ)
+    int listHeight = GetScreenHeight() - listStartY - 80; // Chiều cao khu vực hiển thị dữ liệu
+
+    // Bật chế độ Scissor: Bất cứ thứ gì vẽ bên ngoài hình chữ nhật này sẽ bị ẩn đi
+    BeginScissorMode(startX, listStartY, GetScreenWidth() - startX, listHeight);
+    Rectangle listArea = {(float)startX, (float)listStartY, (float)(GetScreenWidth() - startX), (float)listHeight};
+    // Chỉ hover khi chuột nằm trong vùng danh sách
+    bool canHover = CheckCollisionPointRec(mousePos, listArea);
+
+    // Tọa độ Y hiện tại bắt đầu = Tọa độ gốc + Độ lệch cuộn
+    float currentY = listStartY + scrollY;
+
+    Node<PhongBan> *current = QL->get_DB()->get_ListPB()->get_header()->Next;
+
+    // Đếm tổng số lượng dòng để chặn cuộn quá đà xuống dưới (tùy chọn nâng cao)
+    int totalRows = 0;
+
+    PhongBan *selPB = nullptr;
+    static string selectedPhongBan = "";
+    while (current != nullptr)
+    {
+        string mpb = current->Data->get_MaPhongBan();
+        string name = current->Data->get_TenPhongBan();
+        string NTL = current->Data->get_NgayThanhLap().ToString();
+        int size = current->Data->get_ListNV()->get_size();
+        string pb_size = to_string(size);
+
+        // ----- HOVER + CHỌN DÒNG -----
+        Rectangle rowRect = {(float)startX, currentY - 5, (float)(GetScreenWidth() - startX - 20), 35};
+        bool isHover = canHover && CheckCollisionPointRec(mousePos, rowRect);
+        if (isHover && Clicked)
+        {
+            if (OpenXoa)
+            {
+                if (dsXoaPB.find(mpb) != dsXoaPB.end())
+                    dsXoaPB.erase(mpb);
+                else
+                    dsXoaPB.insert(mpb);
+            }
+            else
+            {
+                selectedPhongBan = mpb;
+                needfill = true;
+            }
+        }
+        bool isSelected = (mpb == selectedPhongBan);
+
+        if (OpenXoa)
+        {
+            if (dsXoaPB.find(mpb) != dsXoaPB.end())
+            {
+                DrawRectangleRec(rowRect, Color{255, 230, 230, 255});
+            }
+            else if (isHover)
+            {
+                DrawRectangleRec(rowRect, Color{245, 245, 250, 255});
+            }
+
+            Rectangle box = {(float)colX[0] + 2, currentY + 4, 20, 20};
+            DrawRectangleRec(box, WHITE);
+            DrawRectangleLinesEx(box, 2, DARKGRAY);
+            if (dsXoaPB.find(mpb) != dsXoaPB.end())
+            {
+                DrawRectangleRec({box.x + 4, box.y + 4, box.width - 8, box.height - 8}, DARKGREEN);
+            }
+        }
+        else if (isSelected)
+        {
+            // đã chọn: đậm hơn; vừa chọn vừa rê chuột: đậm thêm chút
+            DrawRectangleRec(rowRect, isHover ? Color{180, 195, 230, 255} : Color{200, 210, 235, 255});
+            // lưu phòng ban đang chọn
+            selPB = current->Data;
+        }
+        else if (isHover)
+        {
+            DrawRectangleRec(rowRect, Color{235, 235, 240, 255});
+        }
+        // ------------------------------
+
+        DrawTextEx(myFont, mpb.c_str(), {colX[0] + lech, currentY}, fontSize, 1, BLACK);
+        DrawTextEx(myFont, name.c_str(), {colX[1] + lech, currentY}, fontSize, 1, BLACK);
+        DrawTextEx(myFont, NTL.c_str(), {colX[2] + lech, currentY}, fontSize, 1, BLACK);
+        DrawTextEx(myFont, pb_size.c_str(), {colX[3] + lech, currentY}, fontSize, 1, BLACK);
+        DrawLine(startX, currentY + 30, GetScreenWidth() - 20, currentY + 30, Fade(LIGHTGRAY, 0.5f));
+
+        currentY += rowHeight;
+        totalRows++;
+
+        current = current->Next;
+    }
+
+    // Tính toán chiều cao tổng của danh sách để chặn cuộn quá đáy
+    float totalListHeight = totalRows * rowHeight;
+    float maxScroll = listHeight - totalListHeight;
+    // Nếu danh sách dài hơn màn hình và cuộn quá mức dưới, ép nó về mức tối đa
+    if (totalListHeight > listHeight && scrollY < maxScroll)
+    {
+        scrollY = maxScroll;
+    }
+    // Nếu danh sách ngắn hơn màn hình, không cho cuộn
+    else if (totalListHeight <= listHeight)
+    {
+        scrollY = 0.0f;
+    }
+
+    // Tắt chế độ Scissor để các phần vẽ sau (nếu có) không bị ảnh hưởng
+    EndScissorMode();
+    if (needfill && selPB != nullptr)
+    {
+        strncpy(MaPhongBanInput, selPB->get_MaPhongBan().c_str(), 49);
+        letterCount_Ma = strlen(MaPhongBanInput);
+        MaPhongBanInput[letterCount_Ma] = '\0';
+
+        strncpy(TenPhongBanInput, selPB->get_TenPhongBan().c_str(), 49);
+        letterCount_Ten = strlen(TenPhongBanInput);
+        TenPhongBanInput[letterCount_Ten] = '\0';
+
+        textCalendar = selPB->get_NgayThanhLap().ToString();
+        needfill = false;
+    }
+
+    if (OpenThem)
+    {
+        Typing(isMaPhongBanActive, MaPhongBanInput, letterCount_Ma, mousePos, textMaPhongBan);
+        HieuUngGo(isMaPhongBanActive, textMaPhongBan, MaPhongBanInput, 28);
+
+        Typing(isTenPhongBanActive, TenPhongBanInput, letterCount_Ten, mousePos, textTenPhongBan);
+        HieuUngGo(isTenPhongBanActive, textTenPhongBan, TenPhongBanInput, 28);
+        DrawTextEx(myFont, textCalendar.c_str(), {textNgayThanhLap.x + 10, textNgayThanhLap.y + 6}, 28, 1, BLACK);
+        if (isOpenCalendar)
+        {
+            DrawCalendar(mousePos, day1, month1, year1, textNgayThanhLap, isOpenCalendar);
+        }
+    }
+    else if (OpenSua && selPB != nullptr)
+    { // Ô nhập chữ chế độ sửa
+        DrawTextEx(myFont, MaPhongBanInput, {textMaPhongBan.x + 10, textMaPhongBan.y + 6}, 28, 1, BLACK);
+        Typing(isTenPhongBanActive, TenPhongBanInput, letterCount_Ten, mousePos, textTenPhongBan);
+        HieuUngGo(isTenPhongBanActive, textTenPhongBan, TenPhongBanInput, 28);
+        DrawTextEx(myFont, textCalendar.c_str(), {textNgayThanhLap.x + 10, textNgayThanhLap.y + 6}, 28, 1, BLACK);
+        if (isOpenCalendar)
+        {
+            DrawCalendar(mousePos, day1, month1, year1, textNgayThanhLap, isOpenCalendar);
+        }
+    }
+    else if (selPB != nullptr || MaPhongBanInput[0] != '\0')
+    {
+        // Khi click vào 1 đối tượng trong danh sách (chế độ xem)
+        DrawTextEx(myFont, MaPhongBanInput, {textMaPhongBan.x + 10, textMaPhongBan.y + 6}, 28, 1, BLACK);
+        DrawTextEx(myFont, TenPhongBanInput, {textTenPhongBan.x + 10, textTenPhongBan.y + 6}, 28, 1, BLACK);
+        DrawTextEx(myFont, textCalendar.c_str(), {textNgayThanhLap.x + 10, textNgayThanhLap.y + 6}, 28, 1, BLACK);
+    }
+
+    if (isXacNhan)
+    {
+        if (OpenThem)
+        {
+            PhongBan *Pbnew = new PhongBan(MaPhongBanInput, TenPhongBanInput, Date(textCalendar));
+            try
+            {
+                QL->ThemPhongBan(Pbnew);
+                QL->get_DB()->SaveFilePB();
+                needfill = false;
+                letterCount_Ma = 0;
+                letterCount_Ten = 0;
+                OpenSua = OpenThem = OpenXoa = isHuy = isXacNhan = false;
+                MaPhongBanInput[0] = '\0';
+                TenPhongBanInput[0] = '\0';
+                day1 = day, month1 = month, year1 = year;
+                HienThongBao("Thêm phòng ban mới thành công!", false); // true màu đỏ
+            }
+            catch (const string &loi)
+            {
+                needfill = false;
+                letterCount_Ma = 0;
+                letterCount_Ten = 0;
+                OpenSua = OpenThem = OpenXoa = isHuy = isXacNhan = false;
+                MaPhongBanInput[0] = '\0';
+                TenPhongBanInput[0] = '\0';
+                day1 = day, month1 = month, year1 = year;
+                HienThongBao(loi, true); // true màu đỏ
+            }
+        }
+        else if (OpenSua && selPB != nullptr)
+        {
+            selPB->set_NgayThanhLap(textCalendar);
+            selPB->set_TenPhongBan(TenPhongBanInput);
+            QL->get_DB()->SaveFilePB();
+            OpenSua = OpenThem = OpenXoa = isHuy = isXacNhan = false;
+            MaPhongBanInput[0] = '\0';
+            TenPhongBanInput[0] = '\0';
+            letterCount_Ma = 0;
+            letterCount_Ten = 0;
+            day1 = day, month1 = month, year1 = year;
+            HienThongBao("Cập nhật phòng ban thành công!", false);
+        }
+    }
+
+    if (isHuy && CheckCollisionPointRec(mousePos, btnHuy))
+    {
+        OpenSua = OpenThem = OpenXoa = isHuy = isXacNhan = false;
+        MaPhongBanInput[0] = '\0';
+        TenPhongBanInput[0] = '\0';
+        letterCount_Ma = 0;
+        letterCount_Ten = 0;
+        day1 = day, month1 = month, year1 = year;
+    }
+
+    DrawTextEx(myFont, ("Tổng phòng ban: " + to_string(QL->get_DB()->get_ListPB()->get_size())).c_str(), {1550, 960}, 25, 1, BLACK);
+}
+
+void Draw_Screen_ChucVu(Vector2 mousepos, bool Clicked, QLNV *QL)
+{
+    static bool isMaChucVuActive = false;
+    static bool isTenChucVuActive = false;
+    static bool isPhucCapActive = false;
+    static bool needfill = false;
+    static set<string> dsXoaCV;
+
+    Rectangle panelBang1 = {330, 230, 1450.0f, 320.0f};
+    DrawRectangleRounded({panelBang1.x + 3, panelBang1.y + 4, panelBang1.width, panelBang1.height}, 0.03f, 10, Fade(BLACK, 0.08f));
+    DrawRectangleRounded(panelBang1, 0.03f, 10, WHITE);
+    DrawRectangleRoundedLinesEx(panelBang1, 0.03f, 10, 1.5f, Color{225, 230, 240, 255});
+    DrawTextEx(myFont, "Thông tin chức vụ", {360.0f, 250.0f}, 40, 1, BLACK);
+
+    static Texture2D a1;
+    static bool isLoaded = false;
+    if (!isLoaded)
+    {
+        a1 = LoadTexture("photo/anhto/cvu.png");
+        isLoaded = true;
+    }
+    Vector2 pa1 = {360.0f, 320.0f}; // Tọa độ (x, y) postion
+    float ra1 = 0.0f;               // Góc xoay (0 độ) rotation
+    float sa1 = 0.6f;
+    DrawTextureEx(a1, pa1, ra1, sa1, WHITE);
+
+    Rectangle MaChucVu = {930, 350, 300, 40};
+    static char MaChucVuInput[50] = "\0"; // Chuỗi lưu ký tự người dùng gõ
+    static int letterCount_Ma = 0;
+    DrawTextEx(myFont, "Mã Chức Vụ:", {MaChucVu.x - 230, MaChucVu.y}, 35, 1, BLACK);
+    DrawRectangleRounded(MaChucVu, 0.5f, 10, isMaChucVuActive ? LIGHTGRAY : WHITE);
+    DrawRectangleRoundedLinesEx(MaChucVu, 0.3f, 12, 3.0f, LIGHTGRAY);
+
+    Rectangle TenChucVu = {930, 420, 300, 40};
+    static char TenChucVuInput[50] = "\0";
+    static int letterCount_Ten = 0;
+    DrawTextEx(myFont, "Tên Chức Vụ:", {TenChucVu.x - 230, TenChucVu.y}, 35, 1, BLACK);
+    DrawRectangleRounded(TenChucVu, 0.5f, 10, isTenChucVuActive ? LIGHTGRAY : WHITE);
+    DrawRectangleRoundedLinesEx(TenChucVu, 0.3f, 12, 3.0f, LIGHTGRAY);
+
+    Rectangle PhucCap = {930, 490, 300, 40};
+    static char PhuCapInput[50] = "\0";
+    static int letterCount_PhuCap = 0;
+    DrawTextEx(myFont, "Phụ Cấp:", {PhucCap.x - 230, PhucCap.y}, 35, 1, BLACK);
+    DrawRectangleRounded(PhucCap, 0.5f, 10, isPhucCapActive ? LIGHTGRAY : WHITE);
+    DrawRectangleRoundedLinesEx(PhucCap, 0.3f, 12, 3.0f, LIGHTGRAY);
+
+    if (Clicked)
+    {
+        if (CheckCollisionPointRec(mousepos, MaChucVu))
+        {
+            isMaChucVuActive = true;
+            isTenChucVuActive = isPhucCapActive = false;
+        }
+        else if (CheckCollisionPointRec(mousepos, TenChucVu))
+        {
+            isTenChucVuActive = true;
+            isMaChucVuActive = isPhucCapActive = false;
+        }
+        else if (CheckCollisionPointRec(mousepos, PhucCap))
+        {
+            isPhucCapActive = true;
+            isMaChucVuActive = isTenChucVuActive = false;
+        }
+    }
+
+    Rectangle btnThemChucVu = {350, 940, 280, 50};
+    static bool OpenThem = false;
+
+    Rectangle btnSuaChucVu = {660, 940, 280, 50};
+    static bool OpenSua = false;
+
+    Rectangle btnXoa = {970, 940, 280, 50};
+    static bool OpenXoa = false;
+
+    Rectangle btnXacNhan = {350, 940, 230, 50};
+    static bool isXacNhan = false;
+    Rectangle btnHuy = {610, 940, 230, 50};
+    static bool isHuy = false;
+
+    Rectangle btnHuyXoa = {350, 940, 230, 50};
+    Rectangle btnXacNhanXoa = {610, 940, 230, 50};
+
+    if (Clicked)
+    {
+        if (OpenXoa)
+        {
+            if (CheckCollisionPointRec(mousepos, btnHuyXoa))
+            {
+                dsXoaCV.clear();
+                OpenXoa = false;
+            }
+            else if (CheckCollisionPointRec(mousepos, btnXacNhanXoa))
+            {
+                if (dsXoaCV.empty())
+                {
+                    HienThongBao("Chưa chọn chức vụ nào để xóa!", true);
+                }
+                else
+                {
+                    vector<ChucVu *> canXoa;
+                    Node<ChucVu> *p = QL->get_DB()->get_ListCV()->get_header()->Next;
+                    while (p != nullptr)
+                    {
+                        if (p->Data && dsXoaCV.find(p->Data->get_MaChucVu()) != dsXoaCV.end())
+                        {
+                            canXoa.push_back(p->Data);
+                        }
+                        p = p->Next;
+                    }
+
+                    int dem = 0;
+                    string loiCuoi = "";
+                    for (ChucVu *cv : canXoa)
+                    {
+                        try
+                        {
+                            QL->XoaChucVu(cv);
+                            dem++;
+                        }
+                        catch (const string &loi)
+                        {
+                            loiCuoi = loi;
+                        }
+                    }
+
+                    if (dem > 0)
+                    {
+                        QL->get_DB()->SaveFileCV();
+                        if (loiCuoi.empty())
+                        {
+                            HienThongBao("Đã xóa " + to_string(dem) + " chức vụ thành công!", false);
+                        }
+                        else
+                        {
+                            HienThongBao("Đã xóa " + to_string(dem) + " chức vụ. " + loiCuoi, true);
+                        }
+                    }
+                    else
+                    {
+                        HienThongBao(loiCuoi.empty() ? "Xóa không thành công!" : loiCuoi, true);
+                    }
+
+                    dsXoaCV.clear();
+                    OpenXoa = false;
+                    MaChucVuInput[0] = '\0';
+                    TenChucVuInput[0] = '\0';
+                    PhuCapInput[0] = '\0';
+                    letterCount_Ma = letterCount_Ten = letterCount_PhuCap = 0;
+                }
+            }
+        }
+        else if (OpenThem || OpenSua)
+        {
+            // Chỉ xử lý Xác nhận
+            if (CheckCollisionPointRec(mousepos, btnXacNhan))
+            {
+                isXacNhan = true;
+            }
+            // Chỉ xử lý Hủy
+            else if (CheckCollisionPointRec(mousepos, btnHuy))
+            {
+                isHuy = true;
+            }
+        }
+        else
+        {
+            if (CheckCollisionPointRec(mousepos, btnThemChucVu))
+            {
+                OpenThem = true;
+                MaChucVuInput[0] = '\0';
+                TenChucVuInput[0] = '\0';
+                PhuCapInput[0] = '\0';
+                letterCount_Ma = 0;
+                letterCount_Ten = 0;
+                letterCount_PhuCap = 0;
+            }
+            else if (CheckCollisionPointRec(mousepos, btnSuaChucVu))
+            {
+                OpenSua = true;
+            }
+            else if (CheckCollisionPointRec(mousepos, btnXoa))
+            {
+                OpenXoa = true;
+                dsXoaCV.clear();
+            }
+        }
+    }
+
+    if (OpenXoa)
+    {
+        DrawRectangleRounded(btnHuyXoa, 0.2f, 10, WHITE);
+        DrawRectangleRoundedLinesEx(btnHuyXoa, 0.2f, 10, 1.5f, DARKGRAY);
+        DrawTextEx(myFont, "Hủy xóa", {btnHuyXoa.x + 55, btnHuyXoa.y + 10}, 30, 1, BLACK);
+
+        DrawRectangleRounded(btnXacNhanXoa, 0.2f, 10, RED);
+        DrawTextEx(myFont, "Xác nhận xoá", {btnXacNhanXoa.x + 32, btnXacNhanXoa.y + 10}, 30, 1, WHITE);
+    }
+    else if (OpenSua || OpenThem)
+    {
+        DrawRectangleRounded(btnXacNhan, 0.2f, 10, GREEN);
+        DrawTextEx(myFont, "   Xác nhận", {btnXacNhan.x + 32, btnXacNhan.y + 10}, 30, 1, WHITE);
+
+        DrawRectangleRounded(btnHuy, 0.2f, 10, BLUE);
+        DrawTextEx(myFont, "   Hủy", {btnHuy.x + 70, btnHuy.y + 10}, 30, 1, WHITE);
+    }
+    else
+    {
+        DrawRectangleRounded(btnThemChucVu, 0.2f, 10, GREEN);
+        DrawTextEx(myFont, "   Thêm Chức Vụ", {btnThemChucVu.x + 15, btnThemChucVu.y + 10}, 30, 1, WHITE);
+
+        DrawRectangleRounded(btnSuaChucVu, 0.2f, 10, BLUE);
+        DrawTextEx(myFont, "   Sửa Chức Vụ", {btnSuaChucVu.x + 20, btnSuaChucVu.y + 10}, 30, 1, WHITE);
+
+        DrawRectangleRounded(btnXoa, 0.2f, 10, RED);
+        DrawTextEx(myFont, "   Xóa Chức Vụ", {btnXoa.x + 65, btnXoa.y + 10}, 30, 1, WHITE);
+    }
+
+    Rectangle panelBang2 = {330, 580, 1450.0f, 350.0f};
+    DrawRectangleRounded({panelBang2.x + 3, panelBang2.y + 4, panelBang2.width, panelBang2.height}, 0.03f, 10, Fade(BLACK, 0.08f));
+    DrawRectangleRounded(panelBang2, 0.03f, 10, WHITE);
+    DrawRectangleRoundedLinesEx(panelBang2, 0.03f, 10, 1.5f, Color{225, 230, 240, 255});
+    // 1. TẠO BIẾN CUỘN (Dùng 'static' để giữ nguyên giá trị qua mỗi khung hình)
+    static float scrollY = 0.0f;
+    float scrollSpeed = 30.0f; // Tốc độ cuộn mỗi nấc chuột
+
+    // Lấy thao tác lăn chuột và cộng dồn vào scrollY
+    float wheel = GetMouseWheelMove(); // Lăn chuột xuống trả về -1 ngược lại lên
+    if (wheel != 0.0f)
+    {
+        scrollY += wheel * scrollSpeed;
+    }
+
+    // Chặn cuộn quá đà lên trên (danh sách không bị tụt xuống dưới tiêu đề)
+    if (scrollY > 0.0f)
+        scrollY = 0.0f;
+    // Cấu hình khoảng cách và kích thước chữ
+    int startX = 350;   // Lề trái
+    int startY = 650;   // Lề trên
+    int rowHeight = 60; // Chiều cao mỗi dòng
+    int fontSize = 30;  // Kích thước chữ
+
+    // Tọa độ X của từng cột (Bạn cần tinh chỉnh các số này cho vừa với màn hình)
+    int colX[] = {350, 600, 900, 1250};
+
+    // 1. VẼ TIÊU ĐỀ CỘT (Header)
+    float lech = OpenXoa ? 30.f : 0.f;
+    DrawTextEx(myFont, "Mã Chức Vụ", {colX[0] + lech, (float)startY}, fontSize, 1, DARKGRAY);
+    DrawTextEx(myFont, "Tên Chức Vụ", {colX[1] + lech, (float)startY}, fontSize, 1, DARKGRAY);
+    DrawTextEx(myFont, "Phụ Cấp", {colX[2] + lech, (float)startY}, fontSize, 1, DARKGRAY);
+    DrawTextEx(myFont, "Số lượng", {colX[3] + lech, (float)startY}, fontSize, 1, DARKGRAY);
+
+    // Kẻ đường gạch ngang dưới tiêu đề
+    DrawLine(startX, startY + 30, 1900, startY + 30, LIGHTGRAY);
+
+    // 4. KHU VỰC VẼ DANH SÁCH BỊ CẮT (Scissor Mode)
+    int listStartY = startY + 60;                         // Điểm bắt đầu vẽ dữ liệu (ngay dưới đường kẻ)
+    int listHeight = GetScreenHeight() - listStartY - 80; // Chiều cao khu vực hiển thị dữ liệu
+
+    // Bật chế độ Scissor: Bất cứ thứ gì vẽ bên ngoài hình chữ nhật này sẽ bị ẩn đi
+    BeginScissorMode(startX, listStartY, GetScreenWidth() - startX, listHeight);
+    Rectangle listArea = {(float)startX, (float)listStartY, (float)(GetScreenWidth() - startX), (float)listHeight};
+    // Chỉ hover khi chuột nằm trong vùng danh sách
+    bool canHover = CheckCollisionPointRec(mousepos, listArea);
+
+    // Tọa độ Y hiện tại bắt đầu = Tọa độ gốc + Độ lệch cuộn
+    float currentY = listStartY + scrollY;
+
+    Node<ChucVu> *current = QL->get_DB()->get_ListCV()->get_header()->Next;
+
+    // Đếm tổng số lượng dòng để chặn cuộn quá đà xuống dưới (tùy chọn nâng cao)
+    int totalRows = 0;
+
+    ChucVu *selCV = nullptr;
+    static string selectedMCV = "";
+    while (current != nullptr)
+    {
+        string mcv = current->Data->get_MaChucVu();
+        string name = current->Data->get_TenChucVu();
+        string pc = to_string(current->Data->get_PhuCap());
+        int size = current->Data->get_ListNV()->get_size();
+        string cv_size = to_string(size);
+
+        // ----- HOVER + CHỌN DÒNG -----
+        Rectangle rowRect = {(float)startX, currentY - 5, (float)(GetScreenWidth() - startX - 20), 35};
+        bool isHover = canHover && CheckCollisionPointRec(mousepos, rowRect);
+        if (isHover && Clicked)
+        {
+            if (OpenXoa)
+            {
+                if (dsXoaCV.find(mcv) != dsXoaCV.end())
+                    dsXoaCV.erase(mcv);
+                else
+                    dsXoaCV.insert(mcv);
+            }
+            else
+            {
+                selectedMCV = mcv;
+                needfill = true;
+            }
+        }
+        bool isSelected = (mcv == selectedMCV);
+
+        if (OpenXoa)
+        {
+            if (dsXoaCV.find(mcv) != dsXoaCV.end())
+            {
+                DrawRectangleRec(rowRect, Color{255, 230, 230, 255});
+            }
+            else if (isHover)
+            {
+                DrawRectangleRec(rowRect, Color{245, 245, 250, 255});
+            }
+
+            Rectangle box = {(float)colX[0] + 2, currentY + 4, 20, 20};
+            DrawRectangleRec(box, WHITE);
+            DrawRectangleLinesEx(box, 2, DARKGRAY);
+            if (dsXoaCV.find(mcv) != dsXoaCV.end())
+            {
+                DrawRectangleRec({box.x + 4, box.y + 4, box.width - 8, box.height - 8}, DARKGREEN);
+            }
+        }
+        else if (isSelected)
+        {
+            // đã chọn: đậm hơn; vừa chọn vừa rê chuột: đậm thêm chút
+            DrawRectangleRec(rowRect, isHover ? Color{180, 195, 230, 255} : Color{200, 210, 235, 255});
+            // lưu chức vụ đang chọn
+            selCV = current->Data;
+        }
+        else if (isHover)
+        {
+            DrawRectangleRec(rowRect, Color{235, 235, 240, 255});
+        }
+        // ------------------------------
+
+        DrawTextEx(myFont, mcv.c_str(), {colX[0] + lech, currentY}, fontSize, 1, BLACK);
+        DrawTextEx(myFont, name.c_str(), {colX[1] + lech, currentY}, fontSize, 1, BLACK);
+        DrawTextEx(myFont, pc.c_str(), {colX[2] + lech, currentY}, fontSize, 1, BLACK);
+        DrawTextEx(myFont, cv_size.c_str(), {colX[3] + lech, currentY}, fontSize, 1, BLACK);
+        DrawLine(startX, currentY + 30, GetScreenWidth() - 20, currentY + 30, Fade(LIGHTGRAY, 0.5f));
+
+        currentY += rowHeight;
+        totalRows++;
+
+        current = current->Next;
+    }
+
+    // Tính toán chiều cao tổng của danh sách để chặn cuộn quá đáy
+    float totalListHeight = totalRows * rowHeight;
+    float maxScroll = listHeight - totalListHeight;
+    // Nếu danh sách dài hơn màn hình và cuộn quá mức dưới, ép nó về mức tối đa
+    if (totalListHeight > listHeight && scrollY < maxScroll)
+    {
+        scrollY = maxScroll;
+    }
+    // Nếu danh sách ngắn hơn màn hình, không cho cuộn
+    else if (totalListHeight <= listHeight)
+    {
+        scrollY = 0.0f;
+    }
+
+    // Tắt chế độ Scissor để các phần vẽ sau (nếu có) không bị ảnh hưởng
+    EndScissorMode();
+
+    if (needfill && selCV != nullptr)
+    {
+        strncpy(MaChucVuInput, selCV->get_MaChucVu().c_str(), 49);
+        letterCount_Ma = strlen(MaChucVuInput);
+        MaChucVuInput[letterCount_Ma] = '\0';
+
+        strncpy(TenChucVuInput, selCV->get_TenChucVu().c_str(), 49);
+        letterCount_Ten = strlen(TenChucVuInput);
+        TenChucVuInput[letterCount_Ten] = '\0';
+
+        snprintf(PhuCapInput, sizeof(PhuCapInput), "%lld", (long long)selCV->get_PhuCap());
+        letterCount_PhuCap = strlen(PhuCapInput);
+
+        needfill = false;
+    }
+
+    if (OpenThem)
+    {
+        Typing(isMaChucVuActive, MaChucVuInput, letterCount_Ma, mousepos, MaChucVu);
+        HieuUngGo(isMaChucVuActive, MaChucVu, MaChucVuInput, 28);
+
+        Typing(isTenChucVuActive, TenChucVuInput, letterCount_Ten, mousepos, TenChucVu);
+        HieuUngGo(isTenChucVuActive, TenChucVu, TenChucVuInput, 28);
+
+        Typing(isPhucCapActive, PhuCapInput, letterCount_PhuCap, mousepos, PhucCap);
+        HieuUngGo(isPhucCapActive, PhucCap, PhuCapInput, 28);
+    }
+    else if (OpenSua && selCV != nullptr)
+    { // Ô nhập chữ chế độ sửa
+        DrawTextEx(myFont, MaChucVuInput, {MaChucVu.x + 10, MaChucVu.y + 6}, 28, 1, BLACK);
+
+        Typing(isTenChucVuActive, TenChucVuInput, letterCount_Ten, mousepos, TenChucVu);
+        HieuUngGo(isTenChucVuActive, TenChucVu, TenChucVuInput, 28);
+
+        Typing(isPhucCapActive, PhuCapInput, letterCount_PhuCap, mousepos, PhucCap);
+        HieuUngGo(isPhucCapActive, PhucCap, PhuCapInput, 28);
+    }
+    else if (selCV != nullptr || MaChucVuInput[0] != '\0')
+    {
+        // Khi click vào 1 đối tượng trong danh sách (chế độ xem)
+        DrawTextEx(myFont, MaChucVuInput, {MaChucVu.x + 10, MaChucVu.y + 6}, 28, 1, BLACK);
+        DrawTextEx(myFont, TenChucVuInput, {TenChucVu.x + 10, TenChucVu.y + 6}, 28, 1, BLACK);
+        DrawTextEx(myFont, PhuCapInput, {PhucCap.x + 10, PhucCap.y + 6}, 28, 1, BLACK);
+    }
+
+    if (isXacNhan)
+    {
+        if (OpenThem)
+        {
+            double pc = 0.0;
+            try
+            {
+                pc = stod(PhuCapInput);
+            }
+            catch (...)
+            {
+                pc = 0.0;
+            }
+            ChucVu *CVnew = new ChucVu(MaChucVuInput, TenChucVuInput, pc);
+            try
+            {
+                QL->ThemChucVu(CVnew);
+                QL->get_DB()->SaveFileCV();
+                needfill = false;
+                letterCount_Ma = 0;
+                letterCount_Ten = 0;
+                letterCount_PhuCap = 0;
+                OpenSua = OpenThem = OpenXoa = isHuy = isXacNhan = false;
+                MaChucVuInput[0] = '\0';
+                TenChucVuInput[0] = '\0';
+                PhuCapInput[0] = '\0';
+                HienThongBao("Thêm chức vụ mới thành công!", false);
+            }
+            catch (const string &loi)
+            {
+                needfill = false;
+                letterCount_Ma = 0;
+                letterCount_Ten = 0;
+                letterCount_PhuCap = 0;
+                OpenSua = OpenThem = OpenXoa = isHuy = isXacNhan = false;
+                MaChucVuInput[0] = '\0';
+                TenChucVuInput[0] = '\0';
+                PhuCapInput[0] = '\0';
+                HienThongBao(loi, true);
+            }
+        }
+        else if (OpenSua && selCV != nullptr)
+        {
+            selCV->set_TenChucVu(TenChucVuInput);
+            try
+            {
+                selCV->set_PhuCap(stod(PhuCapInput));
+            }
+            catch (...)
+            {
+            }
+            QL->get_DB()->SaveFileCV();
+            OpenSua = OpenThem = OpenXoa = isHuy = isXacNhan = false;
+            MaChucVuInput[0] = '\0';
+            TenChucVuInput[0] = '\0';
+            PhuCapInput[0] = '\0';
+            letterCount_Ma = 0;
+            letterCount_Ten = 0;
+            letterCount_PhuCap = 0;
+            HienThongBao("Cập nhật chức vụ thành công!", false);
+        }
+    }
+
+    if (isHuy && CheckCollisionPointRec(mousepos, btnHuy))
+    {
+        OpenSua = OpenThem = OpenXoa = isHuy = isXacNhan = false;
+        MaChucVuInput[0] = '\0';
+        TenChucVuInput[0] = '\0';
+        PhuCapInput[0] = '\0';
+        letterCount_Ma = 0;
+        letterCount_Ten = 0;
+        letterCount_PhuCap = 0;
+    }
+
+    DrawTextEx(myFont, ("Tổng chức vụ: " + to_string(QL->get_DB()->get_ListCV()->get_size())).c_str(), {1550, 960}, 25, 1, BLACK);
+}
+
+void Draw_Screen_Deparment(QLNV *QL)
+{
+    static Texture2D a1;
+    static bool isLoaded = false;
+    if (!isLoaded)
+    {
+        a1 = LoadTexture("photo/icon/Asset-2.png");
+        isLoaded = true;
+    }
+    Vector2 pa1 = {370.0f, 45.0f}; // Tọa độ (x, y) postion
+    float ra1 = 0.0f;              // Góc xoay (0 độ) rotation
+    float sa1 = 0.33f;
+    DrawTextureEx(a1, pa1, ra1, sa1, WHITE);
+    DrawTextEx(tieude, "Quản Lý Phòng Ban/Chức Vụ", {pa1.x + 100, pa1.y}, 45, 1, WHITE);
+    DrawTextEx(myFont, "Danh sách và thông tin phòng ban/chức vụ của công ty", {pa1.x + 100, pa1.y + 50}, 30, 1, WHITE);
+    static bool isOpenPB = false;
+    static bool isOpenCV = true;
+    Vector2 mousePos = GetMousePosition();
+    bool Clicked = IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
+
+    float TabX = 330.0f;
+    float TabY = 160.0f;
+    float TabH = 90.0f;
+    Rectangle TabPB = {TabX, TabY, 300.0f, TabH};
+    Rectangle TabCV = {TabX + 310.0f, TabY, 300.0f, TabH};
+    bool hoverPB = CheckCollisionPointRec(mousePos, TabPB);
+    bool hoverCV = CheckCollisionPointRec(mousePos, TabCV);
+    Color CTabPB = isOpenPB == 1 ? BLUE : WHITE;
+    Color CTabVT = isOpenCV == 1 ? BLUE : WHITE;
+    if (isOpenPB == true && hoverCV)
+        CTabVT = Fade(BLUE, 0.4);
+    if (isOpenCV == true && hoverPB)
+        CTabPB = Fade(BLUE, 0.4);
+    DrawRectangleRounded(TabPB, 0.3f, 10, CTabPB);
+    DrawRectangleRoundedLinesEx(TabPB, 0.3f, 10, 1.5f, Color{225, 230, 240, 255});
+    DrawTextEx(myFont, "Phòng ban", {TabPB.x + 70.0f, TabPB.y + 15.0f}, 40, 1, BLACK);
+
+    DrawRectangleRounded(TabCV, 0.3f, 10, CTabVT);
+    DrawRectangleRoundedLinesEx(TabPB, 0.3f, 10, 1.5f, Color{225, 230, 240, 255});
+    DrawTextEx(myFont, "Chức vụ", {TabCV.x + 90.0f, TabCV.y + 15.0f}, 40, 1, BLACK);
+
+    Rectangle panelBang = {330, 230, 1450.0f, 690.0f};
+    DrawRectangleRounded({panelBang.x + 3, panelBang.y + 4, panelBang.width, panelBang.height}, 0.03f, 10, Fade(BLACK, 0.08f));
+    DrawRectangleRounded(panelBang, 0.03f, 10, WHITE);
+    DrawRectangleRoundedLinesEx(panelBang, 0.03f, 10, 1.5f, Color{225, 230, 240, 255});
+
+    if (Clicked && CheckCollisionPointRec(mousePos, TabPB))
+    {
+        isOpenPB = true;
+        isOpenCV = false;
+    }
+    else if (Clicked && CheckCollisionPointRec(mousePos, TabCV))
+    {
+        isOpenCV = true;
+        isOpenPB = false;
+    }
+
+    if (isOpenPB)
+    {
+        Draw_Screen_PhongBan(mousePos, Clicked, QL);
+    }
+    else if (isOpenCV)
+    {
+        Draw_Screen_ChucVu(mousePos, Clicked, QL);
+    }
+}
+
+void Draw_Screen_BangLuong(Vector2 mousePos, bool Clicked, QLNV *QL)
+{
+    static bool isOpenFT = true;
+    static bool isOpenPT = false;
+
+    // Khung chứa dài hết cỡ chiều ngang (1450px)
+    Rectangle panelBang = {330, 230, 1450.0f, 95.0f};
+    DrawRectangleRounded({panelBang.x + 3, panelBang.y + 4, panelBang.width, panelBang.height}, 0.04f, 10, Fade(BLACK, 0.08f));
+    DrawRectangleRounded(panelBang, 0.04f, 10, Color{242, 245, 252, 255});
+    DrawRectangleRoundedLinesEx(panelBang, 0.04f, 10, 1.5f, Color{218, 226, 242, 255});
+
+    // 2 Tab chia đều dài hết cỡ theo chiều ngang
+    float tabMargin = 10.0f;
+    float tabGap = 10.0f;
+    float tabW = (panelBang.width - 2 * tabMargin - tabGap) / 2.0f; // 710px mỗi tab
+    float tabH = 75.0f;
+    float tabY = panelBang.y + tabMargin;
+
+    Rectangle TabFT = {panelBang.x + tabMargin, tabY, tabW, tabH};
+    Rectangle TabPT = {panelBang.x + tabMargin + tabW + tabGap, tabY, tabW, tabH};
+
+    bool hoverFT = CheckCollisionPointRec(mousePos, TabFT);
+    bool hoverPT = CheckCollisionPointRec(mousePos, TabPT);
+
+    // Màu sắc nổi bật, không dùng màu trắng để nhìn rõ ràng
+    Color cActiveBg = Color{55, 100, 235, 255}; // Xanh dương nổi bật khi chọn
+    Color cActiveBorder = Color{40, 80, 210, 255};
+    Color cInactiveBg = Color{230, 236, 247, 255}; // Màu xám xanh nhẹ rõ nét khi chưa chọn
+    Color cHoverBg = Color{218, 226, 242, 255};    // Màu khi rê chuột
+    Color cInactiveBorder = Color{200, 212, 230, 255};
+
+    Color CTabFT = isOpenFT ? cActiveBg : (hoverFT ? cHoverBg : cInactiveBg);
+    Color borderFT = isOpenFT ? cActiveBorder : cInactiveBorder;
+    Color textFT = isOpenFT ? WHITE : Color{55, 65, 85, 255};
+
+    Color CTabPT = isOpenPT ? cActiveBg : (hoverPT ? cHoverBg : cInactiveBg);
+    Color borderPT = isOpenPT ? cActiveBorder : cInactiveBorder;
+    Color textPT = isOpenPT ? WHITE : Color{55, 65, 85, 255};
+
+    // Vẽ Tab FullTime
+    if (isOpenFT)
+        DrawRectangleRounded({TabFT.x + 2, TabFT.y + 3, TabFT.width, TabFT.height}, 0.25f, 8, Fade(BLACK, 0.12f));
+    DrawRectangleRounded(TabFT, 0.25f, 8, CTabFT);
+    DrawRectangleRoundedLinesEx(TabFT, 0.25f, 8, 1.5f, borderFT);
+    float twFT = MeasureTextEx(tieude, "Full Time", 36, 1).x;
+    DrawTextEx(tieude, "Full Time", {TabFT.x + (TabFT.width - twFT) / 2.0f, TabFT.y + (TabFT.height - 36) / 2.0f}, 36, 1, textFT);
+
+    // Vẽ Tab PartTime
+    if (isOpenPT)
+        DrawRectangleRounded({TabPT.x + 2, TabPT.y + 3, TabPT.width, TabPT.height}, 0.25f, 8, Fade(BLACK, 0.12f));
+    DrawRectangleRounded(TabPT, 0.25f, 8, CTabPT);
+    DrawRectangleRoundedLinesEx(TabPT, 0.25f, 8, 1.5f, borderPT);
+    float twPT = MeasureTextEx(tieude, "Part Time", 36, 1).x;
+    DrawTextEx(tieude, "Part Time", {TabPT.x + (TabPT.width - twPT) / 2.0f, TabPT.y + (TabPT.height - 36) / 2.0f}, 36, 1, textPT);
+
+    if (Clicked && CheckCollisionPointRec(mousePos, TabFT))
+    {
+        isOpenFT = true;
+        isOpenPT = false;
+    }
+    else if (Clicked && CheckCollisionPointRec(mousePos, TabPT))
+    {
+        isOpenPT = true;
+        isOpenFT = false;
+    }
+
+    if (isOpenFT)
+    {
+        Draw_Screen_FullTime(mousePos, Clicked, QL);
+    }
+    else if (isOpenPT)
+    {
+        Draw_Screen_PartTime(mousePos, Clicked, QL);
+    }
+}
+
+void Draw_Screen_MucLuong(Vector2 mousePos, bool Clicked, QLNV *QL)
+{
+    static bool isTabFullTime = true; // true: FullTime, false: PartTime
+
+    static bool isMaVTActive = false;
+    static bool isBacActive = false;
+    static bool isLuongActive = false;
+    static bool needfill = false;
+    static set<string> dsXoaML;
+    static string selectedMLKey = "";
+
+    static char MaVTInput[50] = "\0";
+    static int letterCount_Ma = 0;
+
+    static char BacInput[50] = "\0";
+    static int letterCount_Bac = 0;
+
+    static char LuongInput[50] = "\0";
+    static int letterCount_Luong = 0;
+
+    static bool OpenThem = false;
+    static bool OpenSua = false;
+    static bool OpenXoa = false;
+
+    // =========== 2 TAB SWITCHER: FULLTIME / PARTTIME ===========
+    float tabMargin = 10.0f;
+    float tabGap = 10.0f;
+    float panelTabW = 1450.0f;
+    float tabW = (panelTabW - 2 * tabMargin - tabGap) / 2.0f; // 710px
+    float tabH = 60.0f;
+    float tabY = 230.0f;
+
+    Rectangle panelTabs = {330, tabY - 5, panelTabW, tabH + 10};
+    DrawRectangleRounded({panelTabs.x + 3, panelTabs.y + 4, panelTabs.width, panelTabs.height}, 0.04f, 10, Fade(BLACK, 0.08f));
+    DrawRectangleRounded(panelTabs, 0.04f, 10, Color{242, 245, 252, 255});
+    DrawRectangleRoundedLinesEx(panelTabs, 0.04f, 10, 1.5f, Color{218, 226, 242, 255});
+
+    Rectangle TabFT = {panelTabs.x + tabMargin, tabY, tabW, tabH};
+    Rectangle TabPT = {panelTabs.x + tabMargin + tabW + tabGap, tabY, tabW, tabH};
+
+    bool hoverFT = CheckCollisionPointRec(mousePos, TabFT);
+    bool hoverPT = CheckCollisionPointRec(mousePos, TabPT);
+
+    Color cActiveBg = Color{55, 100, 235, 255};
+    Color cActiveBorder = Color{40, 80, 210, 255};
+    Color cInactiveBg = Color{230, 236, 247, 255};
+    Color cHoverBg = Color{218, 226, 242, 255};
+    Color cInactiveBorder = Color{200, 212, 230, 255};
+
+    Color CTabFT = isTabFullTime ? cActiveBg : (hoverFT ? cHoverBg : cInactiveBg);
+    Color borderFT = isTabFullTime ? cActiveBorder : cInactiveBorder;
+    Color textFT = isTabFullTime ? WHITE : Color{55, 65, 85, 255};
+
+    Color CTabPT = !isTabFullTime ? cActiveBg : (hoverPT ? cHoverBg : cInactiveBg);
+    Color borderPT = !isTabFullTime ? cActiveBorder : cInactiveBorder;
+    Color textPT = !isTabFullTime ? WHITE : Color{55, 65, 85, 255};
+
+    if (isTabFullTime)
+        DrawRectangleRounded({TabFT.x + 2, TabFT.y + 3, TabFT.width, TabFT.height}, 0.25f, 8, Fade(BLACK, 0.12f));
+    DrawRectangleRounded(TabFT, 0.25f, 8, CTabFT);
+    DrawRectangleRoundedLinesEx(TabFT, 0.25f, 8, 1.5f, borderFT);
+    float twFT = MeasureTextEx(tieude, "Mức Lương Full Time", 32, 1).x;
+    DrawTextEx(tieude, "Mức Lương Full Time", {TabFT.x + (TabFT.width - twFT) / 2.0f, TabFT.y + (TabFT.height - 32) / 2.0f}, 32, 1, textFT);
+
+    if (!isTabFullTime)
+        DrawRectangleRounded({TabPT.x + 2, TabPT.y + 3, TabPT.width, TabPT.height}, 0.25f, 8, Fade(BLACK, 0.12f));
+    DrawRectangleRounded(TabPT, 0.25f, 8, CTabPT);
+    DrawRectangleRoundedLinesEx(TabPT, 0.25f, 8, 1.5f, borderPT);
+    float twPT = MeasureTextEx(tieude, "Mức Lương Part Time", 32, 1).x;
+    DrawTextEx(tieude, "Mức Lương Part Time", {TabPT.x + (TabPT.width - twPT) / 2.0f, TabPT.y + (TabPT.height - 32) / 2.0f}, 32, 1, textPT);
+
+    if (Clicked && CheckCollisionPointRec(mousePos, TabFT) && !isTabFullTime)
+    {
+        isTabFullTime = true;
+        selectedMLKey = "";
+        MaVTInput[0] = BacInput[0] = LuongInput[0] = '\0';
+        letterCount_Ma = letterCount_Bac = letterCount_Luong = 0;
+        dsXoaML.clear();
+        OpenThem = OpenSua = OpenXoa = false;
+    }
+    else if (Clicked && CheckCollisionPointRec(mousePos, TabPT) && isTabFullTime)
+    {
+        isTabFullTime = false;
+        selectedMLKey = "";
+        MaVTInput[0] = BacInput[0] = LuongInput[0] = '\0';
+        letterCount_Ma = letterCount_Bac = letterCount_Luong = 0;
+        dsXoaML.clear();
+        OpenThem = OpenSua = OpenXoa = false;
+    }
+
+    // =========== BẢNG 1: THÔNG TIN MỨC LƯƠNG ===========
+    Rectangle panelBang1 = {330, 305, 1450.0f, 225.0f};
+    DrawRectangleRounded({panelBang1.x + 3, panelBang1.y + 4, panelBang1.width, panelBang1.height}, 0.03f, 10, Fade(BLACK, 0.08f));
+    DrawRectangleRounded(panelBang1, 0.03f, 10, WHITE);
+    DrawRectangleRoundedLinesEx(panelBang1, 0.03f, 10, 1.5f, Color{225, 230, 240, 255});
+
+    string loaiNV = isTabFullTime ? "FullTime" : "PartTime";
+    DrawTextEx(myFont, ("Thông tin mức lương (" + loaiNV + ")").c_str(), {360.0f, 315.0f}, 36, 1, BLACK);
+
+    static Texture2D iconML;
+    static bool isIconLoaded = false;
+    if (!isIconLoaded)
+    {
+        iconML = LoadTexture("photo/anhto/vtri.png");
+        isIconLoaded = true;
+    }
+    DrawTextureEx(iconML, {360.0f, 360.0f}, 0.0f, 0.5f, WHITE);
+
+    // Ô nhập Mã vị trí
+    Rectangle textMaVT = {870, 355, 300, 40};
+    DrawTextEx(myFont, "Mã vị trí:", {680.0f, 355.0f}, 32, 1, BLACK);
+    DrawRectangleRounded(textMaVT, 0.5f, 10, isMaVTActive ? LIGHTGRAY : WHITE);
+    DrawRectangleRoundedLinesEx(textMaVT, 0.3f, 12, 3.0f, LIGHTGRAY);
+
+    ViTriViecLam *vtFound = QL->get_DB()->FindVTVL(MaVTInput);
+    if (vtFound != nullptr)
+    {
+        DrawTextEx(myFont, vtFound->get_TenVTVL().c_str(), {1190.0f, 360.0f}, 28, 1, DARKGREEN);
+    }
+    else if (letterCount_Ma > 0)
+    {
+        DrawTextEx(myFont, "(Chưa có vị trí)", {1190.0f, 360.0f}, 24, 1, MAROON);
+    }
+
+    // Ô nhập Bậc
+    Rectangle textBac = {870, 410, 300, 40};
+    DrawTextEx(myFont, "Bậc vị trí:", {680.0f, 410.0f}, 32, 1, BLACK);
+    DrawRectangleRounded(textBac, 0.5f, 10, isBacActive ? LIGHTGRAY : WHITE);
+    DrawRectangleRoundedLinesEx(textBac, 0.3f, 12, 3.0f, LIGHTGRAY);
+    DrawTextEx(myFont, "(1, 2, 3...)", {1190.0f, 415.0f}, 24, 1, DARKGRAY);
+
+    // Ô nhập Lương
+    Rectangle textLuong = {870, 465, 300, 40};
+    DrawTextEx(myFont, isTabFullTime ? "Lương tháng:" : "Lương/giờ:", {680.0f, 465.0f}, 32, 1, BLACK);
+    DrawRectangleRounded(textLuong, 0.5f, 10, isLuongActive ? LIGHTGRAY : WHITE);
+    DrawRectangleRoundedLinesEx(textLuong, 0.3f, 12, 3.0f, LIGHTGRAY);
+
+    if (letterCount_Luong > 0)
+    {
+        long long valLuong = atoll(LuongInput);
+        if (valLuong > 0)
+        {
+            string fmt = FormatSoTien(valLuong) + (isTabFullTime ? " đ/tháng" : " đ/h");
+            DrawTextEx(myFont, fmt.c_str(), {1190.0f, 470.0f}, 28, 1, Color{40, 80, 200, 255});
+        }
+    }
+
+    if (Clicked)
+    {
+        if (CheckCollisionPointRec(mousePos, textMaVT))
+        {
+            isMaVTActive = true;
+            isBacActive = isLuongActive = false;
+        }
+        else if (CheckCollisionPointRec(mousePos, textBac))
+        {
+            isBacActive = true;
+            isMaVTActive = isLuongActive = false;
+        }
+        else if (CheckCollisionPointRec(mousePos, textLuong))
+        {
+            isLuongActive = true;
+            isMaVTActive = isBacActive = false;
+        }
+    }
+
+    // =========== BẢNG 2: DANH SÁCH MỨC LƯƠNG ===========
+    Rectangle panelBang2 = {330, 540, 1450.0f, 385.0f};
+    DrawRectangleRounded({panelBang2.x + 3, panelBang2.y + 4, panelBang2.width, panelBang2.height}, 0.03f, 10, Fade(BLACK, 0.08f));
+    DrawRectangleRounded(panelBang2, 0.03f, 10, WHITE);
+    DrawRectangleRoundedLinesEx(panelBang2, 0.03f, 10, 1.5f, Color{225, 230, 240, 255});
+
+    static float scrollY = 0.0f;
+    float scrollSpeed = 30.0f;
+    float wheel = GetMouseWheelMove();
+    if (wheel != 0.0f)
+    {
+        scrollY += wheel * scrollSpeed;
+    }
+    if (scrollY > 0.0f)
+        scrollY = 0.0f;
+
+    int startX = 350;
+    int startY = 560;
+    int rowHeight = 60;
+    int fontSize = 30;
+
+    int colX[] = {350, 520, 850, 1060, 1370};
+
+    float lech = OpenXoa ? 30.f : 0.f;
+    DrawTextEx(myFont, "Mã Vị Trí", {colX[0] + lech, (float)startY}, fontSize, 1, DARKGRAY);
+    DrawTextEx(myFont, "Tên Vị Trí", {colX[1] + lech, (float)startY}, fontSize, 1, DARKGRAY);
+    DrawTextEx(myFont, "Bậc", {colX[2] + lech, (float)startY}, fontSize, 1, DARKGRAY);
+    DrawTextEx(myFont, isTabFullTime ? "Lương Tháng" : "Lương Theo Giờ", {colX[3] + lech, (float)startY}, fontSize, 1, DARKGRAY);
+    DrawTextEx(myFont, "Số Nhân Viên", {colX[4] + lech, (float)startY}, fontSize, 1, DARKGRAY);
+
+    DrawLine(startX, startY + 35, 1750, startY + 35, LIGHTGRAY);
+
+    int listStartY = startY + 50;
+    int listHeight = 310;
+
+    BeginScissorMode(startX, listStartY, GetScreenWidth() - startX, listHeight);
+    Rectangle listArea = {(float)startX, (float)listStartY, (float)(GetScreenWidth() - startX), (float)listHeight};
+    bool canHover = CheckCollisionPointRec(mousePos, listArea);
+
+    float currentY = listStartY + scrollY;
+
+    Node<MucLuong> *current = QL->get_DB()->get_ListML()->get_header()->Next;
+    int totalRows = 0;
+    MucLuong *selML = nullptr;
+
+    while (current != nullptr)
+    {
+        if (current->Data && current->Data->get_Loai_NV() == loaiNV)
+        {
+            MucLuong *ml = current->Data;
+            string mvt = ml->get_Ma_VTVL();
+            string tenVT = ml->get_VTVL() ? ml->get_VTVL()->get_TenVTVL() : "";
+            int bac = ml->get_Bac_VTVL();
+            long long luong = (long long)ml->get_Luong();
+            int soNV = QL->DemNVThamChieuML(mvt, bac, loaiNV);
+            string key = mvt + "_" + to_string(bac);
+
+            Rectangle rowRect = {(float)startX, currentY - 5, (float)(GetScreenWidth() - startX - 20), 35};
+            bool isHover = canHover && CheckCollisionPointRec(mousePos, rowRect);
+            if (isHover && Clicked)
+            {
+                if (OpenXoa)
+                {
+                    if (dsXoaML.find(key) != dsXoaML.end())
+                        dsXoaML.erase(key);
+                    else
+                        dsXoaML.insert(key);
+                }
+                else
+                {
+                    selectedMLKey = key;
+                    needfill = true;
+                }
+            }
+
+            bool isSelected = (key == selectedMLKey);
+
+            if (OpenXoa)
+            {
+                if (dsXoaML.find(key) != dsXoaML.end())
+                {
+                    DrawRectangleRec(rowRect, Color{255, 230, 230, 255});
+                }
+                else if (isHover)
+                {
+                    DrawRectangleRec(rowRect, Color{245, 245, 250, 255});
+                }
+
+                Rectangle box = {(float)colX[0] + 2, currentY + 4, 20, 20};
+                DrawRectangleRec(box, WHITE);
+                DrawRectangleLinesEx(box, 2, DARKGRAY);
+                if (dsXoaML.find(key) != dsXoaML.end())
+                {
+                    DrawRectangleRec({box.x + 4, box.y + 4, box.width - 8, box.height - 8}, DARKGREEN);
+                }
+            }
+            else if (isSelected)
+            {
+                DrawRectangleRec(rowRect, isHover ? Color{180, 195, 230, 255} : Color{200, 210, 235, 255});
+                selML = ml;
+            }
+            else if (isHover)
+            {
+                DrawRectangleRec(rowRect, Color{235, 235, 240, 255});
+            }
+
+            DrawTextEx(myFont, mvt.c_str(), {colX[0] + lech, currentY}, fontSize, 1, BLACK);
+            DrawTextEx(myFont, tenVT.c_str(), {colX[1] + lech, currentY}, fontSize, 1, BLACK);
+            DrawTextEx(myFont, to_string(bac).c_str(), {colX[2] + lech, currentY}, fontSize, 1, BLACK);
+
+            string strLuong = FormatSoTien(luong) + (isTabFullTime ? " đ" : " đ/h");
+            DrawTextEx(myFont, strLuong.c_str(), {colX[3] + lech, currentY}, fontSize, 1, BLACK);
+            DrawTextEx(myFont, to_string(soNV).c_str(), {colX[4] + lech, currentY}, fontSize, 1, BLACK);
+            DrawLine(startX, currentY + 30, GetScreenWidth() - 20, currentY + 30, Fade(LIGHTGRAY, 0.5f));
+
+            currentY += rowHeight;
+            totalRows++;
+        }
+        current = current->Next;
+    }
+
+    float totalListHeight = totalRows * rowHeight;
+    float maxScroll = listHeight - totalListHeight;
+    if (totalListHeight > listHeight && scrollY < maxScroll)
+    {
+        scrollY = maxScroll;
+    }
+    else if (totalListHeight <= listHeight)
+    {
+        scrollY = 0.0f;
+    }
+
+    EndScissorMode();
+
+    if (needfill && selML != nullptr)
+    {
+        strncpy(MaVTInput, selML->get_Ma_VTVL().c_str(), 49);
+        letterCount_Ma = strlen(MaVTInput);
+        MaVTInput[letterCount_Ma] = '\0';
+
+        strncpy(BacInput, to_string(selML->get_Bac_VTVL()).c_str(), 49);
+        letterCount_Bac = strlen(BacInput);
+        BacInput[letterCount_Bac] = '\0';
+
+        snprintf(LuongInput, sizeof(LuongInput), "%lld", (long long)selML->get_Luong());
+        letterCount_Luong = strlen(LuongInput);
+
+        needfill = false;
+    }
+
+    if (OpenThem)
+    {
+        Typing(isMaVTActive, MaVTInput, letterCount_Ma, mousePos, textMaVT);
+        HieuUngGo(isMaVTActive, textMaVT, MaVTInput, 28);
+
+        Typing(isBacActive, BacInput, letterCount_Bac, mousePos, textBac);
+        HieuUngGo(isBacActive, textBac, BacInput, 28);
+
+        Typing(isLuongActive, LuongInput, letterCount_Luong, mousePos, textLuong);
+        HieuUngGo(isLuongActive, textLuong, LuongInput, 28);
+    }
+    else if (OpenSua && selML != nullptr)
+    {
+        DrawTextEx(myFont, MaVTInput, {textMaVT.x + 10, textMaVT.y + 6}, 28, 1, DARKGRAY);
+        DrawTextEx(myFont, BacInput, {textBac.x + 10, textBac.y + 6}, 28, 1, DARKGRAY);
+
+        Typing(isLuongActive, LuongInput, letterCount_Luong, mousePos, textLuong);
+        HieuUngGo(isLuongActive, textLuong, LuongInput, 28);
+    }
+    else if (selML != nullptr || MaVTInput[0] != '\0')
+    {
+        DrawTextEx(myFont, MaVTInput, {textMaVT.x + 10, textMaVT.y + 6}, 28, 1, BLACK);
+        DrawTextEx(myFont, BacInput, {textBac.x + 10, textBac.y + 6}, 28, 1, BLACK);
+        DrawTextEx(myFont, LuongInput, {textLuong.x + 10, textLuong.y + 6}, 28, 1, BLACK);
+    }
+
+    // =========== CÁC NÚT ĐIỀU KHIỂN DƯỚI CÙNG ===========
+    Rectangle btnThemMucLuong = {350, 940, 280, 50};
+    Rectangle btnSuaMucLuong = {660, 940, 280, 50};
+    Rectangle btnXoaMucLuong = {970, 940, 280, 50};
+
+    Rectangle btnXacNhan = {350, 940, 230, 50};
+    Rectangle btnHuy = {610, 940, 230, 50};
+
+    Rectangle btnHuyXoa = {350, 940, 230, 50};
+    Rectangle btnXacNhanXoa = {610, 940, 230, 50};
+
+    if (Clicked)
+    {
+        if (OpenXoa)
+        {
+            if (CheckCollisionPointRec(mousePos, btnHuyXoa))
+            {
+                dsXoaML.clear();
+                OpenXoa = false;
+            }
+            else if (CheckCollisionPointRec(mousePos, btnXacNhanXoa))
+            {
+                if (dsXoaML.empty())
+                {
+                    HienThongBao("Chưa chọn mức lương nào để xóa!", true);
+                }
+                else
+                {
+                    vector<MucLuong *> canXoa;
+                    Node<MucLuong> *p = QL->get_DB()->get_ListML()->get_header()->Next;
+                    while (p != nullptr)
+                    {
+                        if (p->Data && p->Data->get_Loai_NV() == loaiNV)
+                        {
+                            string key = p->Data->get_Ma_VTVL() + "_" + to_string(p->Data->get_Bac_VTVL());
+                            if (dsXoaML.find(key) != dsXoaML.end())
+                            {
+                                canXoa.push_back(p->Data);
+                            }
+                        }
+                        p = p->Next;
+                    }
+
+                    int dem = 0;
+                    string loiCuoi = "";
+                    for (MucLuong *ml : canXoa)
+                    {
+                        try
+                        {
+                            QL->XoaMucLuong(ml);
+                            dem++;
+                        }
+                        catch (const string &loi)
+                        {
+                            loiCuoi = loi;
+                        }
+                    }
+
+                    if (dem > 0)
+                    {
+                        QL->get_DB()->SaveFileML();
+                        if (loiCuoi.empty())
+                        {
+                            HienThongBao("Đã xóa " + to_string(dem) + " mức lương thành công!", false);
+                        }
+                        else
+                        {
+                            HienThongBao("Đã xóa " + to_string(dem) + " mức lương. " + loiCuoi, true);
+                        }
+                    }
+                    else
+                    {
+                        HienThongBao(loiCuoi.empty() ? "Xóa không thành công!" : loiCuoi, true);
+                    }
+
+                    dsXoaML.clear();
+                    OpenXoa = false;
+                    selectedMLKey = "";
+                    MaVTInput[0] = BacInput[0] = LuongInput[0] = '\0';
+                    letterCount_Ma = letterCount_Bac = letterCount_Luong = 0;
+                }
+            }
+        }
+        else if (OpenThem || OpenSua)
+        {
+            if (CheckCollisionPointRec(mousePos, btnXacNhan))
+            {
+                if (OpenThem)
+                {
+                    ViTriViecLam *vt = QL->get_DB()->FindVTVL(MaVTInput);
+                    if (vt == nullptr)
+                    {
+                        HienThongBao("Mã vị trí không tồn tại trong hệ thống!", true);
+                    }
+                    else
+                    {
+                        int bac = atoi(BacInput);
+                        double luong = atof(LuongInput);
+                        if (bac <= 0)
+                        {
+                            HienThongBao("Bậc vị trí phải lớn hơn 0!", true);
+                        }
+                        else if (luong <= 0)
+                        {
+                            HienThongBao("Mức lương phải lớn hơn 0!", true);
+                        }
+                        else
+                        {
+                            MucLuong *mlNew = nullptr;
+                            if (isTabFullTime)
+                                mlNew = new MucLuong_FullTime(vt, bac, luong);
+                            else
+                                mlNew = new MucLuong_PartTime(vt, bac, luong);
+
+                            try
+                            {
+                                QL->ThemMucLuong(mlNew);
+                                QL->get_DB()->SaveFileML();
+                                OpenThem = false;
+                                MaVTInput[0] = BacInput[0] = LuongInput[0] = '\0';
+                                letterCount_Ma = letterCount_Bac = letterCount_Luong = 0;
+                                HienThongBao("Thêm mức lương mới thành công!", false);
+                            }
+                            catch (const string &loi)
+                            {
+                                delete mlNew;
+                                HienThongBao(loi, true);
+                            }
+                        }
+                    }
+                }
+                else if (OpenSua && selML != nullptr)
+                {
+                    double luong = atof(LuongInput);
+                    if (luong <= 0)
+                    {
+                        HienThongBao("Mức lương phải lớn hơn 0!", true);
+                    }
+                    else
+                    {
+                        selML->set_Luong(luong);
+                        QL->get_DB()->SaveFileML();
+                        OpenSua = false;
+                        MaVTInput[0] = BacInput[0] = LuongInput[0] = '\0';
+                        letterCount_Ma = letterCount_Bac = letterCount_Luong = 0;
+                        HienThongBao("Cập nhật mức lương thành công!", false);
+                    }
+                }
+            }
+            else if (CheckCollisionPointRec(mousePos, btnHuy))
+            {
+                OpenThem = OpenSua = false;
+                MaVTInput[0] = BacInput[0] = LuongInput[0] = '\0';
+                letterCount_Ma = letterCount_Bac = letterCount_Luong = 0;
+            }
+        }
+        else
+        {
+            if (CheckCollisionPointRec(mousePos, btnThemMucLuong))
+            {
+                OpenThem = true;
+                selectedMLKey = "";
+                MaVTInput[0] = BacInput[0] = LuongInput[0] = '\0';
+                letterCount_Ma = letterCount_Bac = letterCount_Luong = 0;
+            }
+            else if (CheckCollisionPointRec(mousePos, btnSuaMucLuong))
+            {
+                if (selML == nullptr)
+                {
+                    HienThongBao("Vui lòng chọn 1 mức lương trong danh sách để sửa!", true);
+                }
+                else
+                {
+                    OpenSua = true;
+                }
+            }
+            else if (CheckCollisionPointRec(mousePos, btnXoaMucLuong))
+            {
+                OpenXoa = true;
+                dsXoaML.clear();
+            }
+        }
+    }
+
+    if (OpenXoa)
+    {
+        DrawRectangleRounded(btnHuyXoa, 0.2f, 10, WHITE);
+        DrawRectangleRoundedLinesEx(btnHuyXoa, 0.2f, 10, 1.5f, DARKGRAY);
+        DrawTextEx(myFont, "Hủy xóa", {btnHuyXoa.x + 55, btnHuyXoa.y + 10}, 30, 1, BLACK);
+
+        DrawRectangleRounded(btnXacNhanXoa, 0.2f, 10, RED);
+        DrawTextEx(myFont, "Xác nhận xoá", {btnXacNhanXoa.x + 32, btnXacNhanXoa.y + 10}, 30, 1, WHITE);
+    }
+    else if (OpenSua || OpenThem)
+    {
+        DrawRectangleRounded(btnXacNhan, 0.2f, 10, GREEN);
+        DrawTextEx(myFont, "   Xác nhận", {btnXacNhan.x + 32, btnXacNhan.y + 10}, 30, 1, WHITE);
+
+        DrawRectangleRounded(btnHuy, 0.2f, 10, BLUE);
+        DrawTextEx(myFont, "   Hủy", {btnHuy.x + 70, btnHuy.y + 10}, 30, 1, WHITE);
+    }
+    else
+    {
+        DrawRectangleRounded(btnThemMucLuong, 0.2f, 10, GREEN);
+        DrawTextEx(myFont, "   Thêm Mức Lương", {btnThemMucLuong.x + 15, btnThemMucLuong.y + 10}, 30, 1, WHITE);
+
+        DrawRectangleRounded(btnSuaMucLuong, 0.2f, 10, BLUE);
+        DrawTextEx(myFont, "   Sửa Mức Lương", {btnSuaMucLuong.x + 20, btnSuaMucLuong.y + 10}, 30, 1, WHITE);
+
+        DrawRectangleRounded(btnXoaMucLuong, 0.2f, 10, RED);
+        DrawTextEx(myFont, "   Xóa Mức Lương", {btnXoaMucLuong.x + 20, btnXoaMucLuong.y + 10}, 30, 1, WHITE);
+    }
+
+    DrawTextEx(myFont, ("Tổng mức lương: " + to_string(totalRows)).c_str(), {1520, 960}, 25, 1, BLACK);
+}
+// Hàm format số có dấu chấm phân cách hàng nghìn (VD: 8450000 -> "8.450.000")
+
+void Draw_Screen_FullTime(Vector2 mousePos, bool Clicked, QLNV *QL)
+{
+    Rectangle panelBang = {330, 345, 1450.0f, 640.0f};
+    DrawRectangleRounded({panelBang.x + 3, panelBang.y + 4, panelBang.width, panelBang.height}, 0.03f, 10, Fade(BLACK, 0.08f));
+    DrawRectangleRounded(panelBang, 0.03f, 10, WHITE);
+    DrawRectangleRoundedLinesEx(panelBang, 0.03f, 10, 1.5f, Color{225, 230, 240, 255});
+
+    string default_choice = "Tất cả";
+
+    // =========== COMBO CHỨC VỤ ===========
+    Rectangle comboChucVu1 = {350, 400, 250, 45};
+    static bool isChucVuOpen1 = false;
+    static int selectedChucVuIndex1 = 0;
+
+    // =========== COMBO PHÒNG BAN ===========
+    Rectangle comboPhong1 = {620, 400, 250, 45};
+    static bool isPhongOpen1 = false;
+    static int selectedPhongIndex1 = 0;
+
+    // =========== Ô TÌM KIẾM ===========
+    Rectangle textHoTen1 = {890, 400, 350, 45};
+    static bool isHoTenActive1 = false;
+    static char hoTenInput1[50] = "\0";
+    static int letterCount1 = 0;
+
+    // =========== COMBO SẮP XẾP LƯƠNG (CHỈ TĂNG HOẶC GIẢM) ===========
+    Rectangle comboSort1 = {1290, 400, 260, 45};
+    static bool isSortOpen1 = false;
+    static int selectedSortIndex1 = 0;
+    string dsSort[] = {"...", "Lương tăng dần", "Lương giảm dần"};
+    int nSort = 2;
+
+    // =========== TRẠNG THÁI CHỌN NHÂN VIÊN & CHI TIẾT ===========
+    static string selectedMNV_FT = "";
+    static bool isOpenChiTiet = false;
+    bool openedThisFrame = false; // Cờ chống nháy khi vừa bấm mở modal
+    static bool isEditingThuong = false;
+    static bool isThuongActive = false;
+    static char thuongInput[20] = "";
+    static int thuongLetterCount = 0;
+    static string lastSelectedMNV = "";
+    if (lastSelectedMNV != selectedMNV_FT)
+    {
+        lastSelectedMNV = selectedMNV_FT;
+        isEditingThuong = false;
+        isThuongActive = false;
+    }
+
+    // =========== LẤY TIÊU CHÍ LỌC ===========
+    static string tieuchi_CV = "";
+    static string tieuchi_PB = "";
+
+    if (selectedChucVuIndex1 != 0)
+        tieuchi_CV = (*QL->get_DB()->get_ListCV())[selectedChucVuIndex1 - 1]->Data->get_MaChucVu();
+    else
+        tieuchi_CV = "";
+
+    if (selectedPhongIndex1 != 0)
+        tieuchi_PB = (*QL->get_DB()->get_ListPB())[selectedPhongIndex1 - 1]->Data->get_MaPhongBan();
+    else
+        tieuchi_PB = "";
+
+    // =========== CẤU HÌNH BẢNG ===========
+    static float scrollY = 0.0f;
+    float scrollSpeed = 30.0f;
+    float wheel = GetMouseWheelMove();
+    if (wheel != 0.0f)
+        scrollY += wheel * scrollSpeed;
+    if (scrollY > 0.0f)
+        scrollY = 0.0f;
+
+    int startX = 350;
+    int startY = 500;
+    int rowHeight = 60;
+    int fontSize = 30;
+
+    float colX[] = {350.f, 470.f, 730.f, 890.f, 1100.f, 1350.f, 1450.f, 1600.f};
+
+    // =========== HEADER ===========
+    DrawTextEx(myFont, "Mã NV", {colX[0], (float)startY}, fontSize, 1, DARKGRAY);
+    DrawTextEx(myFont, "Họ tên", {colX[1], (float)startY}, fontSize, 1, DARKGRAY);
+    DrawTextEx(myFont, "Phòng ban", {colX[2], (float)startY}, fontSize, 1, DARKGRAY);
+    DrawTextEx(myFont, "Chức vụ", {colX[3], (float)startY}, fontSize, 1, DARKGRAY);
+    DrawTextEx(myFont, "Vị trí", {colX[4], (float)startY}, fontSize, 1, DARKGRAY);
+    DrawTextEx(myFont, "Hệ số", {colX[5], (float)startY}, fontSize, 1, DARKGRAY);
+    DrawTextEx(myFont, "Ngày công", {colX[6], (float)startY}, fontSize, 1, DARKGRAY);
+    DrawTextEx(myFont, "Tổng lương", {colX[7], (float)startY}, fontSize, 1, DARKGRAY);
+    DrawLine(startX, startY + 30, 1780, startY + 30, LIGHTGRAY);
+
+    // =========== THU THẬP VÀ SẮP XẾP DANH SÁCH FULLTIME ===========
+    vector<FullTime *> listFT;
+    Node<Employee> *cur = QL->get_ListEmployee()->get_header()->Next;
+    while (cur != nullptr)
+    {
+        Employee *emp = cur->Data;
+        FullTime *ft = dynamic_cast<FullTime *>(emp);
+        if (ft != nullptr && CheckEmployee(emp, tieuchi_CV, tieuchi_PB, hoTenInput1))
+        {
+            listFT.push_back(ft);
+        }
+        cur = cur->Next;
+    }
+
+    // Sắp xếp lương theo yêu cầu (1: Tăng dần, 2: Giảm dần)
+    if (selectedSortIndex1 == 1)
+    {
+        sort(listFT.begin(), listFT.end(), [QL](FullTime *a, FullTime *b)
+             { return QL->TinhLuong(a) < QL->TinhLuong(b); });
+    }
+    else if (selectedSortIndex1 == 2)
+    {
+        sort(listFT.begin(), listFT.end(), [QL](FullTime *a, FullTime *b)
+             { return QL->TinhLuong(a) > QL->TinhLuong(b); });
+    }
+
+    // =========== VẼ DANH SÁCH NHÂN VIÊN ===========
+    int listStartY = startY + 35;
+    int listHeight = GetScreenHeight() - listStartY - 120;
+
+    Rectangle listArea = {(float)startX, (float)listStartY, (float)(GetScreenWidth() - startX), (float)listHeight};
+    bool canHover = !isOpenChiTiet && !isChucVuOpen1 && !isPhongOpen1 && !isSortOpen1 && CheckCollisionPointRec(mousePos, listArea);
+
+    float currentY = listStartY + scrollY;
+    int totalRows = (int)listFT.size();
+    Employee *selEmp = nullptr;
+    if (!selectedMNV_FT.empty())
+        selEmp = QL->TimTheoMa(selectedMNV_FT);
+
+    BeginScissorMode(startX, listStartY, GetScreenWidth() - startX, listHeight);
+    for (FullTime *ft : listFT)
+    {
+        Employee *emp = ft;
+        string mnv = emp->get_mnv();
+        string name = emp->get_name();
+        string phong = emp->get_PhongBan() ? emp->get_PhongBan()->get_TenPhongBan() : "";
+        string cv = emp->get_ChucVu() ? emp->get_ChucVu()->get_TenChucVu() : "";
+        string vitri = emp->get_ViTri() ? emp->get_ViTri()->get_TenVTVL() : "";
+
+        ostringstream oss;
+        oss << ft->get_HeSo();
+        double tongluong = QL->TinhLuong(ft);
+        if (tongluong < 0)
+            tongluong = 0;
+        int ngaycong = ft->get_SoNgayCong();
+
+        string strHeSo = oss.str();
+        string strNgayCong = to_string(ngaycong);
+        string strLuong = FormatSoTien((long long)tongluong);
+
+        // ----- HOVER + CHỌN DÒNG -----
+        Rectangle rowRect = {(float)startX, currentY - 5, (float)(GetScreenWidth() - startX - 20), 35};
+        bool isHover = canHover && CheckCollisionPointRec(mousePos, rowRect);
+        if (isHover && Clicked)
+        {
+            selectedMNV_FT = mnv;
+            selEmp = emp;
+        }
+        bool isSelected = (mnv == selectedMNV_FT);
+
+        if (isSelected)
+        {
+            DrawRectangleRec(rowRect, isHover ? Color{180, 195, 230, 255} : Color{200, 210, 235, 255});
+            selEmp = emp;
+        }
+        else if (isHover)
+        {
+            DrawRectangleRec(rowRect, Color{235, 235, 240, 255});
+        }
+
+        DrawTextEx(myFont, mnv.c_str(), {colX[0], currentY}, fontSize, 1, BLACK);
+        DrawTextEx(myFont, name.c_str(), {colX[1], currentY}, fontSize, 1, BLACK);
+        DrawTextEx(myFont, phong.c_str(), {colX[2], currentY}, fontSize, 1, BLACK);
+        DrawTextEx(myFont, cv.c_str(), {colX[3], currentY}, fontSize, 1, BLACK);
+        DrawTextEx(myFont, vitri.c_str(), {colX[4], currentY}, fontSize, 1, BLACK);
+        DrawTextEx(myFont, strHeSo.c_str(), {colX[5], currentY}, fontSize, 1, BLACK);
+        DrawTextEx(myFont, (strNgayCong + "/26").c_str(), {colX[6], currentY}, fontSize, 1, BLACK);
+        DrawTextEx(myFont, strLuong.c_str(), {colX[7], currentY}, fontSize, 1, BLACK);
+        DrawLine(startX, currentY + 30, GetScreenWidth() - 20, currentY + 30, Fade(LIGHTGRAY, 0.5f));
+        currentY += rowHeight;
+    }
+    EndScissorMode();
+
+    // =========== CHẶN SCROLL ===========
+    float totalListHeight = totalRows * rowHeight;
+    float maxScroll = listHeight - totalListHeight;
+    if (totalListHeight > listHeight && scrollY < maxScroll)
+        scrollY = maxScroll;
+    else if (totalListHeight <= listHeight)
+        scrollY = 0.0f;
+
+    // =========== VẼ LABEL + COMBO CHỨC VỤ ===========
+    DrawTextEx(myFont, "Chức Vụ", {350, 360}, 40, 1, BLACK);
+    int nCV = QL->get_DB()->get_ListCV()->get_size();
+    string dsCVFilter[nCV + 1];
+    dsCVFilter[0] = default_choice;
+    for (int i = 0; i < nCV; i++)
+        dsCVFilter[i + 1] = (*QL->get_DB()->get_ListCV())[i]->Data->get_TenChucVu();
+
+    VeDanhSachCombo(comboChucVu1, isChucVuOpen1, dsCVFilter, nCV + 1, mousePos, 35);
+    if (selectedChucVuIndex1 == 0)
+        DrawTextEx(myFont, default_choice.c_str(), {comboChucVu1.x + 15, comboChucVu1.y + 5}, 35, 1, DARKGRAY);
+    else
+        DrawTextEx(myFont, (*QL->get_DB()->get_ListCV())[selectedChucVuIndex1 - 1]->Data->get_TenChucVu().c_str(), {comboChucVu1.x + 15, comboChucVu1.y + 5}, 35, 1, DARKGRAY);
+
+    if (Clicked)
+        XuLyCombo(comboChucVu1, isChucVuOpen1, selectedChucVuIndex1, nCV + 1, mousePos, Clicked);
+
+    // =========== VẼ LABEL + COMBO PHÒNG BAN ===========
+    DrawTextEx(myFont, "Phòng Ban", {620, 360}, 40, 1, BLACK);
+    int nPB = QL->get_DB()->get_ListPB()->get_size();
+    string dsPBFilter[nPB + 1];
+    dsPBFilter[0] = default_choice;
+    for (int i = 0; i < nPB; i++)
+        dsPBFilter[i + 1] = (*QL->get_DB()->get_ListPB())[i]->Data->get_TenPhongBan();
+
+    VeDanhSachCombo(comboPhong1, isPhongOpen1, dsPBFilter, nPB + 1, mousePos, 35);
+    if (selectedPhongIndex1 == 0)
+        DrawTextEx(myFont, default_choice.c_str(), {comboPhong1.x + 15, comboPhong1.y + 5}, 35, 1, DARKGRAY);
+    else
+        DrawTextEx(myFont, (*QL->get_DB()->get_ListPB())[selectedPhongIndex1 - 1]->Data->get_TenPhongBan().c_str(), {comboPhong1.x + 15, comboPhong1.y + 5}, 35, 1, DARKGRAY);
+
+    if (Clicked)
+        XuLyCombo(comboPhong1, isPhongOpen1, selectedPhongIndex1, nPB + 1, mousePos, Clicked);
+
+    // =========== VẼ Ô TÌM KIẾM ===========
+    Typing(isHoTenActive1, hoTenInput1, letterCount1, mousePos, textHoTen1);
+    DrawTextEx(myFont, "Tìm kiếm", {890, 360}, 40, 1, BLACK);
+    DrawRectangleRounded(textHoTen1, 0.5f, 10, isHoTenActive1 ? LIGHTGRAY : WHITE);
+    DrawRectangleRoundedLinesEx(textHoTen1, 0.3f, 12, 3.0f, LIGHTGRAY);
+    DrawTextEx(myFont, hoTenInput1, {textHoTen1.x + 10, textHoTen1.y + 8}, 35, 1, BLACK);
+    if (isHoTenActive1 && ((int)(GetTime() * 2) % 2 == 0))
+    {
+        int textWidth = MeasureText(hoTenInput1, 35);
+        DrawTextEx(myFont, "_", {textHoTen1.x + 12 + textWidth, textHoTen1.y + 8}, 35, 1, MAROON);
+    }
+
+    // =========== VẼ COMBO SẮP XẾP LƯƠNG ===========
+    DrawTextEx(myFont, "Sắp xếp theo:", {1290, 360}, 40, 1, BLACK);
+    VeDanhSachCombo(comboSort1, isSortOpen1, dsSort, nSort + 1, mousePos, 35);
+    if (selectedSortIndex1 == 0)
+        DrawTextEx(myFont, dsSort[0].c_str(), {comboSort1.x + 15, comboSort1.y + 5}, 35, 1, DARKGRAY);
+    else
+        DrawTextEx(myFont, dsSort[selectedSortIndex1].c_str(), {comboSort1.x + 15, comboSort1.y + 5}, 35, 1, DARKGRAY);
+
+    if (Clicked && !isOpenChiTiet)
+        XuLyCombo(comboSort1, isSortOpen1, selectedSortIndex1, nSort + 1, mousePos, Clicked);
+
+    // =========== NÚT CHI TIẾT GÓC DƯỚI BÊN PHẢI KHI CHỌN NHÂN VIÊN ===========
+    if (selEmp != nullptr && !selectedMNV_FT.empty())
+    {
+        Rectangle btnChiTiet = {1530, 940, 220, 48};
+        bool hoverChiTiet = CheckCollisionPointRec(mousePos, btnChiTiet);
+        DrawRectangleRounded(btnChiTiet, 0.25f, 8, hoverChiTiet ? Color{80, 50, 215, 255} : Color{98, 70, 234, 255});
+        DrawRectangleRoundedLinesEx(btnChiTiet, 0.25f, 8, 1.5f, Color{80, 60, 220, 255});
+
+        float tw = MeasureTextEx(tieude, "Chi tiết", 26, 1).x;
+        DrawTextEx(tieude, "Chi tiết", {btnChiTiet.x + (btnChiTiet.width - tw) / 2.0f, btnChiTiet.y + 11}, 26, 1, WHITE);
+
+        if (Clicked && !isOpenChiTiet && hoverChiTiet)
+        {
+            isOpenChiTiet = true;
+            openedThisFrame = true; // Ngăn chặn sự kiện click này tự đóng modal ngay lập tức
+        }
+    }
+
+    // =========== MODAL CHI TIẾT TÍNH LƯƠNG (GIỐNG HÌNH ẢNH) ===========
+    if (isOpenChiTiet && selEmp != nullptr)
+    {
+        FullTime *ft = dynamic_cast<FullTime *>(selEmp);
+        if (ft != nullptr)
+        {
+            float screenW = GetScreenWidth();
+            float screenH = GetScreenHeight();
+
+            // Overlay mờ che nền
+            DrawRectangle(0, 0, screenW, screenH, Fade(BLACK, 0.45f));
+
+            // Kích thước modal (được tăng to hơn rõ ràng, rộng rãi)
+            float modalW = 580.0f;
+            float modalH = 670.0f;
+            Rectangle modal = {(screenW - modalW) / 2.0f, (screenH - modalH) / 2.0f, modalW, modalH};
+
+            // Đổ bóng mờ nhẹ
+            DrawRectangleRounded({modal.x + 4, modal.y + 6, modal.width, modal.height}, 0.04f, 10, Fade(BLACK, 0.16f));
+            // Hộp trắng chính bo góc
+            DrawRectangleRounded(modal, 0.04f, 10, WHITE);
+            DrawRectangleRoundedLinesEx(modal, 0.04f, 10, 1.5f, Color{225, 220, 245, 255});
+
+            // Vạch điểm nhấn màu tím góc trái tiêu đề
+            DrawRectangleRounded({modal.x + 36, modal.y + 26, 7, 30}, 0.5f, 4, Color{110, 65, 240, 255});
+
+            // Tiêu đề
+            DrawTextEx(tieude, "Chi tiết tính lương", {modal.x + 54, modal.y + 24}, 30, 1, Color{50, 30, 140, 255});
+
+            // Tên và mã nhân viên nhỏ bên dưới tiêu đề
+            string infoNV = selEmp->get_name() + " (" + selEmp->get_mnv() + ")";
+            DrawTextEx(myFont, infoNV.c_str(), {modal.x + 36, modal.y + 64}, 22, 1, Color{120, 130, 145, 255});
+
+            // Nút đóng [X]
+            Rectangle btnDong = {modal.x + modal.width - 54, modal.y + 22, 34, 34};
+            bool hoverX = CheckCollisionPointRec(mousePos, btnDong);
+            DrawRectangleRounded(btnDong, 0.3f, 6, hoverX ? Color{235, 240, 250, 255} : Color{245, 246, 250, 255});
+            DrawLineEx({btnDong.x + 10, btnDong.y + 10}, {btnDong.x + 24, btnDong.y + 24}, 2.0f, DARKGRAY);
+            DrawLineEx({btnDong.x + 24, btnDong.y + 10}, {btnDong.x + 10, btnDong.y + 24}, 2.0f, DARKGRAY);
+
+            // Đường gạch ngang phân cách
+            DrawLine(modal.x + 36, modal.y + 98, modal.x + modal.width - 36, modal.y + 98, Color{235, 240, 248, 255});
+
+            // Lấy các chỉ số tính lương
+            double lcb = QL->get_LuongCoBan(ft);
+            if (lcb < 0)
+                lcb = 0;
+            double heso = ft->get_HeSo();
+            int ngaycong = ft->get_SoNgayCong();
+            double phucap = (ft->get_ChucVu() != nullptr) ? ft->get_ChucVu()->get_PhuCap() : 0.0;
+            double thuong = ft->get_ThuongPhat();
+            double tongluong = QL->TinhLuong(ft);
+            if (tongluong < 0)
+                tongluong = 0;
+            double khautru = 0; // Khấu trừ
+            double thuclinh = tongluong - khautru;
+
+            float leftX = modal.x + 38;
+            float rightX = modal.x + modal.width - 38;
+            float rowY = modal.y + 118;
+            float rowSpacing = 46;
+            int labelSize = 24;
+            int valSize = 24;
+            Color labelColor = Color{45, 55, 72, 255};
+            Color valColor = Color{25, 30, 45, 255};
+
+            // 1. Lương cơ bản
+            DrawTextEx(myFont, "Lương cơ bản", {leftX, rowY}, labelSize, 1, labelColor);
+            string sLCB = FormatSoTien((long long)lcb) + " đ";
+            float wLCB = MeasureTextEx(myFont, sLCB.c_str(), valSize, 1).x;
+            DrawTextEx(myFont, sLCB.c_str(), {rightX - wLCB, rowY}, valSize, 1, valColor);
+            rowY += rowSpacing;
+
+            // 2. Hệ số lương
+            DrawTextEx(myFont, "Hệ số lương", {leftX, rowY}, labelSize, 1, labelColor);
+            ostringstream ossHS;
+            ossHS << fixed << setprecision(1) << heso;
+            string sHS = ossHS.str();
+            float wHS = MeasureTextEx(myFont, sHS.c_str(), valSize, 1).x;
+            DrawTextEx(myFont, sHS.c_str(), {rightX - wHS, rowY}, valSize, 1, valColor);
+            rowY += rowSpacing;
+
+            // 3. Ngày công thực tế
+            DrawTextEx(myFont, "Ngày công thực tế", {leftX, rowY}, labelSize, 1, labelColor);
+            string sNC = to_string(ngaycong) + " / 26";
+            float wNC = MeasureTextEx(myFont, sNC.c_str(), valSize, 1).x;
+            DrawTextEx(myFont, sNC.c_str(), {rightX - wNC, rowY}, valSize, 1, valColor);
+            rowY += rowSpacing;
+
+            // 4. Phụ cấp
+            DrawTextEx(myFont, "Phụ cấp", {leftX, rowY}, labelSize, 1, labelColor);
+            string sPC = FormatSoTien((long long)phucap) + " đ";
+            float wPC = MeasureTextEx(myFont, sPC.c_str(), valSize, 1).x;
+            DrawTextEx(myFont, sPC.c_str(), {rightX - wPC, rowY}, valSize, 1, valColor);
+            rowY += rowSpacing;
+
+            // 5. Thưởng (Có chức năng xem và chỉnh sửa trực tiếp)
+            DrawTextEx(myFont, "Thưởng", {leftX, rowY}, labelSize, 1, labelColor);
+
+            if (!isEditingThuong)
+            {
+                // Nút "Sửa" nhỏ bên cạnh chữ Thưởng
+                Rectangle btnSuaThuong = {leftX + 85, rowY - 2, 54, 28};
+                bool hoverSua = CheckCollisionPointRec(mousePos, btnSuaThuong);
+                DrawRectangleRounded(btnSuaThuong, 0.3f, 6, hoverSua ? Color{225, 218, 255, 255} : Color{242, 238, 255, 255});
+                DrawRectangleRoundedLinesEx(btnSuaThuong, 0.3f, 6, 1.2f, Color{160, 140, 230, 255});
+                DrawTextEx(myFont, "Sửa", {btnSuaThuong.x + 12, btnSuaThuong.y + 3}, 18, 1, Color{98, 70, 234, 255});
+
+                string sThuong = FormatSoTien((long long)thuong) + " đ";
+                float wThuong = MeasureTextEx(myFont, sThuong.c_str(), valSize, 1).x;
+                Rectangle recThuongVal = {rightX - wThuong - 4, rowY - 2, wThuong + 8, 30};
+                bool hoverVal = CheckCollisionPointRec(mousePos, recThuongVal);
+
+                DrawTextEx(myFont, sThuong.c_str(), {rightX - wThuong, rowY}, valSize, 1, hoverVal ? Color{98, 70, 234, 255} : valColor);
+
+                if (Clicked && (hoverSua || hoverVal))
+                {
+                    isEditingThuong = true;
+                    isThuongActive = true;
+                    snprintf(thuongInput, sizeof(thuongInput), "%lld", (long long)thuong);
+                    thuongLetterCount = (int)strlen(thuongInput);
+                }
+            }
+            else
+            {
+                Rectangle boxThuong = {rightX - 250, rowY - 4, 130, 34};
+                Rectangle btnLuuThuong = {rightX - 112, rowY - 4, 54, 34};
+                Rectangle btnHuyThuong = {rightX - 52, rowY - 4, 48, 34};
+
+                bool hoverLuu = CheckCollisionPointRec(mousePos, btnLuuThuong);
+                bool hoverHuy = CheckCollisionPointRec(mousePos, btnHuyThuong);
+
+                if (Clicked)
+                {
+                    if (CheckCollisionPointRec(mousePos, boxThuong))
+                        isThuongActive = true;
+                    else if (!hoverLuu && !hoverHuy)
+                        isThuongActive = false;
+                }
+
+                if (isThuongActive)
+                {
+                    int key = GetCharPressed();
+                    while (key > 0)
+                    {
+                        if (key >= '0' && key <= '9' && thuongLetterCount < 11)
+                        {
+                            thuongInput[thuongLetterCount++] = (char)key;
+                            thuongInput[thuongLetterCount] = '\0';
+                        }
+                        key = GetCharPressed();
+                    }
+                    if (IsKeyPressed(KEY_BACKSPACE) || IsKeyPressedRepeat(KEY_BACKSPACE))
+                    {
+                        if (thuongLetterCount > 0)
+                        {
+                            thuongLetterCount--;
+                            thuongInput[thuongLetterCount] = '\0';
+                        }
+                    }
+                }
+
+                // Vẽ ô nhập số tiền thưởng
+                DrawRectangleRounded(boxThuong, 0.25f, 6, isThuongActive ? WHITE : Color{245, 246, 250, 255});
+                DrawRectangleRoundedLinesEx(boxThuong, 0.25f, 6, 1.5f, isThuongActive ? Color{98, 70, 234, 255} : LIGHTGRAY);
+                DrawTextEx(myFont, thuongInput, {boxThuong.x + 8, boxThuong.y + 6}, 20, 1, BLACK);
+
+                // Con trỏ nhấp nháy
+                if (isThuongActive && ((int)(GetTime() * 2) % 2 == 0))
+                {
+                    float tw = MeasureTextEx(myFont, thuongInput, 20, 1).x;
+                    DrawLineEx({boxThuong.x + 8 + tw + 2, boxThuong.y + 6}, {boxThuong.x + 8 + tw + 2, boxThuong.y + 28}, 1.5f, Color{98, 70, 234, 255});
+                }
+
+                // Nút Lưu
+                DrawRectangleRounded(btnLuuThuong, 0.25f, 6, hoverLuu ? Color{80, 50, 215, 255} : Color{98, 70, 234, 255});
+                DrawTextEx(tieude, "Lưu", {btnLuuThuong.x + 12, btnLuuThuong.y + 8}, 18, 1, WHITE);
+
+                // Nút Hủy
+                DrawRectangleRounded(btnHuyThuong, 0.25f, 6, hoverHuy ? Color{225, 230, 238, 255} : Color{240, 242, 246, 255});
+                DrawRectangleRoundedLinesEx(btnHuyThuong, 0.25f, 6, 1.0f, Color{200, 205, 215, 255});
+                DrawTextEx(myFont, "Hủy", {btnHuyThuong.x + 11, btnHuyThuong.y + 8}, 18, 1, DARKGRAY);
+
+                // Xử lý Lưu: click Lưu hoặc nhấn Enter
+                bool doSave = (Clicked && hoverLuu) || (isThuongActive && (IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_KP_ENTER)));
+                if (doSave)
+                {
+                    int newT = 0;
+                    if (strlen(thuongInput) > 0)
+                    {
+                        try
+                        {
+                            long long val = stoll(thuongInput);
+                            if (val < 0)
+                                val = 0;
+                            if (val > 2000000000LL)
+                                val = 2000000000LL;
+                            newT = (int)val;
+                        }
+                        catch (...)
+                        {
+                            newT = 0;
+                        }
+                    }
+                    ft->set_ThuongPhat(newT);
+                    QL->get_DB()->SaveFileEmployee();
+                    tongluong = QL->TinhLuong(ft);
+                    if (tongluong < 0)
+                        tongluong = 0;
+                    thuclinh = tongluong - khautru;
+                    HienThongBao("Cập nhật tiền thưởng thành công!", false);
+                    isEditingThuong = false;
+                    isThuongActive = false;
+                }
+
+                // Xử lý Hủy: click Hủy hoặc nhấn Escape
+                if ((Clicked && hoverHuy) || IsKeyPressed(KEY_ESCAPE))
+                {
+                    isEditingThuong = false;
+                    isThuongActive = false;
+                }
+            }
+            rowY += rowSpacing + 10;
+
+            // 6. Box Tổng thu nhập (Hộp xanh nhạt bo góc với icon máy tính)
+            Rectangle boxTongThuNhap = {leftX, rowY, modal.width - 76, 58};
+            DrawRectangleRounded(boxTongThuNhap, 0.25f, 8, Color{242, 246, 255, 255});
+            DrawRectangleRoundedLinesEx(boxTongThuNhap, 0.25f, 8, 1.2f, Color{220, 230, 252, 255});
+
+            // Vẽ icon máy tính nhỏ
+            Rectangle iconCalc = {leftX + 16, rowY + 16, 22, 26};
+            DrawRectangleRounded(iconCalc, 0.2f, 4, Color{50, 90, 220, 255});
+            DrawRectangle(iconCalc.x + 3, iconCalc.y + 4, 16, 4, WHITE);
+            DrawCircle(iconCalc.x + 6, iconCalc.y + 13, 1.5f, WHITE);
+            DrawCircle(iconCalc.x + 11, iconCalc.y + 13, 1.5f, WHITE);
+            DrawCircle(iconCalc.x + 16, iconCalc.y + 13, 1.5f, WHITE);
+            DrawCircle(iconCalc.x + 6, iconCalc.y + 20, 1.5f, WHITE);
+            DrawCircle(iconCalc.x + 11, iconCalc.y + 20, 1.5f, WHITE);
+            DrawCircle(iconCalc.x + 16, iconCalc.y + 20, 1.5f, WHITE);
+
+            DrawTextEx(tieude, "Tổng thu nhập", {leftX + 50, rowY + 16}, 24, 1, Color{40, 75, 215, 255});
+            string sTong = FormatSoTien((long long)tongluong) + " đ";
+            float wTong = MeasureTextEx(tieude, sTong.c_str(), 26, 1).x;
+            DrawTextEx(tieude, sTong.c_str(), {rightX - wTong - 16, rowY + 15}, 26, 1, Color{30, 60, 200, 255});
+            rowY += 72;
+
+            // 7. Khấu trừ (Icon tròn đỏ có dấu trừ)
+            DrawCircle(leftX + 18, rowY + 13, 12, Color{245, 95, 85, 255});
+            DrawLineEx({leftX + 11, rowY + 13}, {leftX + 25, rowY + 13}, 2.2f, WHITE);
+            DrawTextEx(myFont, "Khấu trừ", {leftX + 44, rowY}, labelSize, 1, Color{100, 105, 115, 255});
+            string sKT = FormatSoTien((long long)khautru) + " đ";
+            float wKT = MeasureTextEx(myFont, sKT.c_str(), valSize, 1).x;
+            DrawTextEx(myFont, sKT.c_str(), {rightX - wKT, rowY}, valSize, 1, Color{100, 105, 115, 255});
+            rowY += 52;
+
+            // 8. Box Thực lĩnh (Hộp tím nhạt bo góc với icon checkmark tím)
+            Rectangle boxThucLinh = {leftX, rowY, modal.width - 76, 62};
+            DrawRectangleRounded(boxThucLinh, 0.25f, 8, Color{246, 242, 255, 255});
+            DrawRectangleRoundedLinesEx(boxThucLinh, 0.25f, 8, 1.2f, Color{225, 215, 250, 255});
+
+            // Icon tròn tím có dấu checkmark
+            DrawCircle(leftX + 20, rowY + 31, 13, Color{98, 70, 234, 255});
+            DrawLineEx({leftX + 14, rowY + 31}, {leftX + 19, rowY + 36}, 2.4f, WHITE);
+            DrawLineEx({leftX + 19, rowY + 36}, {leftX + 27, rowY + 24}, 2.4f, WHITE);
+
+            DrawTextEx(tieude, "Thực lĩnh", {leftX + 50, rowY + 18}, 26, 1, Color{98, 70, 234, 255});
+            string sTL = FormatSoTien((long long)thuclinh) + " đ";
+            float wTL = MeasureTextEx(tieude, sTL.c_str(), 28, 1).x;
+            DrawTextEx(tieude, sTL.c_str(), {rightX - wTL - 16, rowY + 17}, 28, 1, Color{98, 70, 234, 255});
+
+            // Xử lý đóng modal: click [X] hoặc click ra ngoài modal (chỉ khi không phải vừa mở ở frame này)
+            if (Clicked && !openedThisFrame)
+            {
+                if (hoverX || !CheckCollisionPointRec(mousePos, modal))
+                {
+                    isOpenChiTiet = false;
+                    isEditingThuong = false;
+                    isThuongActive = false;
+                }
+            }
+        }
+    }
+}
+void Draw_Screen_PartTime(Vector2 mousePos, bool Clicked, QLNV *QL)
+{
+    Rectangle panelBang = {330, 345, 1450.0f, 640.0f};
+    DrawRectangleRounded({panelBang.x + 3, panelBang.y + 4, panelBang.width, panelBang.height}, 0.03f, 10, Fade(BLACK, 0.08f));
+    DrawRectangleRounded(panelBang, 0.03f, 10, WHITE);
+    DrawRectangleRoundedLinesEx(panelBang, 0.03f, 10, 1.5f, Color{225, 230, 240, 255});
+
+    string default_choice = "Tất cả";
+
+    // =========== COMBO CHỨC VỤ ===========
+    Rectangle comboChucVu2 = {350, 400, 250, 45};
+    static bool isChucVuOpen2 = false;
+    static int selectedChucVuIndex2 = 0;
+
+    // =========== COMBO PHÒNG BAN ===========
+    Rectangle comboPhong2 = {620, 400, 250, 45};
+    static bool isPhongOpen2 = false;
+    static int selectedPhongIndex2 = 0;
+
+    // =========== Ô TÌM KIẾM ===========
+    Rectangle textHoTen2 = {890, 400, 350, 45};
+    static bool isHoTenActive2 = false;
+    static char hoTenInput2[50] = "\0";
+    static int letterCount2 = 0;
+
+    // =========== COMBO SẮP XẾP LƯƠNG (CHỈ TĂNG HOẶC GIẢM) ===========
+    Rectangle comboSort2 = {1290, 400, 260, 45};
+    static bool isSortOpen2 = false;
+    static int selectedSortIndex2 = 0;
+    string dsSort[] = {"...", "Lương tăng dần", "Lương giảm dần"};
+    int nSort = 2;
+
+    // =========== TRẠNG THÁI CHỌN NHÂN VIÊN & CHI TIẾT ===========
+    static string selectedMNV_PT = "";
+    static bool isOpenChiTiet2 = false;
+    bool openedThisFrame2 = false; // Cờ chống nháy khi vừa bấm mở modal
+    static bool isEditingThuong2 = false;
+    static bool isThuongActive2 = false;
+    static char thuongInput2[20] = "";
+    static int thuongLetterCount2 = 0;
+    static string lastSelectedMNV2 = "";
+    if (lastSelectedMNV2 != selectedMNV_PT)
+    {
+        lastSelectedMNV2 = selectedMNV_PT;
+        isEditingThuong2 = false;
+        isThuongActive2 = false;
+    }
+
+    // =========== LẤY TIÊU CHÍ LỌC ===========
+    static string tieuchi_CV = "";
+    static string tieuchi_PB = "";
+
+    if (selectedChucVuIndex2 != 0)
+        tieuchi_CV = (*QL->get_DB()->get_ListCV())[selectedChucVuIndex2 - 1]->Data->get_MaChucVu();
+    else
+        tieuchi_CV = "";
+
+    if (selectedPhongIndex2 != 0)
+        tieuchi_PB = (*QL->get_DB()->get_ListPB())[selectedPhongIndex2 - 1]->Data->get_MaPhongBan();
+    else
+        tieuchi_PB = "";
+
+    // =========== CẤU HÌNH BẢNG ===========
+    static float scrollY = 0.0f;
+    float scrollSpeed = 30.0f;
+    float wheel = GetMouseWheelMove();
+    if (wheel != 0.0f)
+        scrollY += wheel * scrollSpeed;
+    if (scrollY > 0.0f)
+        scrollY = 0.0f;
+
+    int startX = 350;
+    int startY = 500;
+    int rowHeight = 60;
+    int fontSize = 30;
+
+    float colX[] = {350.f, 470.f, 730.f, 890.f, 1100.f, 1390.f, 1600.f};
+
+    // =========== HEADER ===========
+    DrawTextEx(myFont, "Mã NV", {colX[0], (float)startY}, fontSize, 1, DARKGRAY);
+    DrawTextEx(myFont, "Họ tên", {colX[1], (float)startY}, fontSize, 1, DARKGRAY);
+    DrawTextEx(myFont, "Phòng ban", {colX[2], (float)startY}, fontSize, 1, DARKGRAY);
+    DrawTextEx(myFont, "Chức vụ", {colX[3], (float)startY}, fontSize, 1, DARKGRAY);
+    DrawTextEx(myFont, "Vị trí", {colX[4], (float)startY}, fontSize, 1, DARKGRAY);
+    DrawTextEx(myFont, "Số giờ làm", {colX[5], (float)startY}, fontSize, 1, DARKGRAY);
+    DrawTextEx(myFont, "Tổng lương", {colX[6], (float)startY}, fontSize, 1, DARKGRAY);
+    DrawLine(startX, startY + 30, 1780, startY + 30, LIGHTGRAY);
+
+    // =========== THU THẬP VÀ SẮP XẾP DANH SÁCH PARTTIME ===========
+    vector<PartTime *> listPT;
+    Node<Employee> *cur = QL->get_ListEmployee()->get_header()->Next;
+    while (cur != nullptr)
+    {
+        Employee *emp = cur->Data;
+        PartTime *pt = dynamic_cast<PartTime *>(emp);
+        if (pt != nullptr && CheckEmployee(emp, tieuchi_CV, tieuchi_PB, hoTenInput2))
+        {
+            listPT.push_back(pt);
+        }
+        cur = cur->Next;
+    }
+
+    // Sắp xếp lương theo yêu cầu (1: Tăng dần, 2: Giảm dần)
+    if (selectedSortIndex2 == 1)
+    {
+        sort(listPT.begin(), listPT.end(), [QL](PartTime *a, PartTime *b)
+             { return QL->TinhLuong(a) < QL->TinhLuong(b); });
+    }
+    else if (selectedSortIndex2 == 2)
+    {
+        sort(listPT.begin(), listPT.end(), [QL](PartTime *a, PartTime *b)
+             { return QL->TinhLuong(a) > QL->TinhLuong(b); });
+    }
+
+    // =========== VẼ DANH SÁCH NHÂN VIÊN ===========
+    int listStartY = startY + 35;
+    int listHeight = GetScreenHeight() - listStartY - 120;
+
+    Rectangle listArea = {(float)startX, (float)listStartY, (float)(GetScreenWidth() - startX), (float)listHeight};
+    bool canHover = !isOpenChiTiet2 && !isChucVuOpen2 && !isPhongOpen2 && !isSortOpen2 && CheckCollisionPointRec(mousePos, listArea);
+
+    float currentY = listStartY + scrollY;
+    int totalRows = (int)listPT.size();
+    Employee *selEmp = nullptr;
+    if (!selectedMNV_PT.empty())
+        selEmp = QL->TimTheoMa(selectedMNV_PT);
+
+    BeginScissorMode(startX, listStartY, GetScreenWidth() - startX, listHeight);
+    for (PartTime *pt : listPT)
+    {
+        Employee *emp = pt;
+        string mnv = emp->get_mnv();
+        string name = emp->get_name();
+        string phong = emp->get_PhongBan() ? emp->get_PhongBan()->get_TenPhongBan() : "";
+        string cv = emp->get_ChucVu() ? emp->get_ChucVu()->get_TenChucVu() : "";
+        string vitri = emp->get_ViTri() ? emp->get_ViTri()->get_TenVTVL() : "";
+
+        double tongluong = QL->TinhLuong(pt);
+        if (tongluong < 0)
+            tongluong = 0;
+        int timework = pt->get_TimeWork();
+
+        string strBac = "Bậc " + to_string(pt->get_BacViTri());
+        string strGio = to_string(timework) + "h";
+        string strLuong = FormatSoTien((long long)tongluong);
+
+        // ----- HOVER + CHỌN DÒNG -----
+        Rectangle rowRect = {(float)startX, currentY - 5, (float)(GetScreenWidth() - startX - 20), 35};
+        bool isHover = canHover && CheckCollisionPointRec(mousePos, rowRect);
+        if (isHover && Clicked)
+        {
+            selectedMNV_PT = mnv;
+            selEmp = emp;
+        }
+        bool isSelected = (mnv == selectedMNV_PT);
+
+        if (isSelected)
+        {
+            DrawRectangleRec(rowRect, isHover ? Color{180, 195, 230, 255} : Color{200, 210, 235, 255});
+            selEmp = emp;
+        }
+        else if (isHover)
+        {
+            DrawRectangleRec(rowRect, Color{235, 235, 240, 255});
+        }
+
+        DrawTextEx(myFont, mnv.c_str(), {colX[0], currentY}, fontSize, 1, BLACK);
+        DrawTextEx(myFont, name.c_str(), {colX[1], currentY}, fontSize, 1, BLACK);
+        DrawTextEx(myFont, phong.c_str(), {colX[2], currentY}, fontSize, 1, BLACK);
+        DrawTextEx(myFont, cv.c_str(), {colX[3], currentY}, fontSize, 1, BLACK);
+        DrawTextEx(myFont, vitri.c_str(), {colX[4], currentY}, fontSize, 1, BLACK);
+        DrawTextEx(myFont, strGio.c_str(), {colX[5], currentY}, fontSize, 1, BLACK);
+        DrawTextEx(myFont, strLuong.c_str(), {colX[6], currentY}, fontSize, 1, BLACK);
+        DrawLine(startX, currentY + 30, GetScreenWidth() - 20, currentY + 30, Fade(LIGHTGRAY, 0.5f));
+        currentY += rowHeight;
+    }
+    EndScissorMode();
+
+    // =========== CHẶN SCROLL ===========
+    float totalListHeight = totalRows * rowHeight;
+    float maxScroll = listHeight - totalListHeight;
+    if (totalListHeight > listHeight && scrollY < maxScroll)
+        scrollY = maxScroll;
+    else if (totalListHeight <= listHeight)
+        scrollY = 0.0f;
+
+    // =========== VẼ LABEL + COMBO CHỨC VỤ ===========
+    DrawTextEx(myFont, "Chức Vụ", {350, 360}, 40, 1, BLACK);
+    int nCV = QL->get_DB()->get_ListCV()->get_size();
+    string dsCVFilter[nCV + 1];
+    dsCVFilter[0] = default_choice;
+    for (int i = 0; i < nCV; i++)
+        dsCVFilter[i + 1] = (*QL->get_DB()->get_ListCV())[i]->Data->get_TenChucVu();
+
+    VeDanhSachCombo(comboChucVu2, isChucVuOpen2, dsCVFilter, nCV + 1, mousePos, 35);
+    if (selectedChucVuIndex2 == 0)
+        DrawTextEx(myFont, default_choice.c_str(), {comboChucVu2.x + 15, comboChucVu2.y + 5}, 35, 1, DARKGRAY);
+    else
+        DrawTextEx(myFont, (*QL->get_DB()->get_ListCV())[selectedChucVuIndex2 - 1]->Data->get_TenChucVu().c_str(), {comboChucVu2.x + 15, comboChucVu2.y + 5}, 35, 1, DARKGRAY);
+
+    if (Clicked)
+        XuLyCombo(comboChucVu2, isChucVuOpen2, selectedChucVuIndex2, nCV + 1, mousePos, Clicked);
+
+    // =========== VẼ LABEL + COMBO PHÒNG BAN ===========
+    DrawTextEx(myFont, "Phòng Ban", {620, 360}, 40, 1, BLACK);
+    int nPB = QL->get_DB()->get_ListPB()->get_size();
+    string dsPBFilter[nPB + 1];
+    dsPBFilter[0] = default_choice;
+    for (int i = 0; i < nPB; i++)
+        dsPBFilter[i + 1] = (*QL->get_DB()->get_ListPB())[i]->Data->get_TenPhongBan();
+
+    VeDanhSachCombo(comboPhong2, isPhongOpen2, dsPBFilter, nPB + 1, mousePos, 35);
+    if (selectedPhongIndex2 == 0)
+        DrawTextEx(myFont, default_choice.c_str(), {comboPhong2.x + 15, comboPhong2.y + 5}, 35, 1, DARKGRAY);
+    else
+        DrawTextEx(myFont, (*QL->get_DB()->get_ListPB())[selectedPhongIndex2 - 1]->Data->get_TenPhongBan().c_str(), {comboPhong2.x + 15, comboPhong2.y + 5}, 35, 1, DARKGRAY);
+
+    if (Clicked)
+        XuLyCombo(comboPhong2, isPhongOpen2, selectedPhongIndex2, nPB + 1, mousePos, Clicked);
+
+    // =========== VẼ Ô TÌM KIẾM ===========
+    Typing(isHoTenActive2, hoTenInput2, letterCount2, mousePos, textHoTen2);
+    DrawTextEx(myFont, "Tìm kiếm", {890, 360}, 40, 1, BLACK);
+    DrawRectangleRounded(textHoTen2, 0.5f, 10, isHoTenActive2 ? LIGHTGRAY : WHITE);
+    DrawRectangleRoundedLinesEx(textHoTen2, 0.3f, 12, 3.0f, LIGHTGRAY);
+    DrawTextEx(myFont, hoTenInput2, {textHoTen2.x + 10, textHoTen2.y + 8}, 35, 1, BLACK);
+    if (isHoTenActive2 && ((int)(GetTime() * 2) % 2 == 0))
+    {
+        int textWidth = MeasureText(hoTenInput2, 35);
+        DrawTextEx(myFont, "_", {textHoTen2.x + 12 + textWidth, textHoTen2.y + 8}, 35, 1, MAROON);
+    }
+
+    // =========== VẼ COMBO SẮP XẾP LƯƠNG ===========
+    DrawTextEx(myFont, "Sắp xếp theo:", {1290, 360}, 40, 1, BLACK);
+    VeDanhSachCombo(comboSort2, isSortOpen2, dsSort, nSort + 1, mousePos, 35);
+    if (selectedSortIndex2 == 0)
+        DrawTextEx(myFont, dsSort[0].c_str(), {comboSort2.x + 15, comboSort2.y + 5}, 35, 1, DARKGRAY);
+    else
+        DrawTextEx(myFont, dsSort[selectedSortIndex2].c_str(), {comboSort2.x + 15, comboSort2.y + 5}, 35, 1, DARKGRAY);
+
+    if (Clicked && !isOpenChiTiet2)
+        XuLyCombo(comboSort2, isSortOpen2, selectedSortIndex2, nSort + 1, mousePos, Clicked);
+
+    // =========== NÚT CHI TIẾT GÓC DƯỚI BÊN PHẢI KHI CHỌN NHÂN VIÊN ===========
+    if (selEmp != nullptr && !selectedMNV_PT.empty())
+    {
+        Rectangle btnChiTiet = {1530, 940, 220, 48};
+        bool hoverChiTiet = CheckCollisionPointRec(mousePos, btnChiTiet);
+        DrawRectangleRounded(btnChiTiet, 0.25f, 8, hoverChiTiet ? Color{80, 50, 215, 255} : Color{98, 70, 234, 255});
+        DrawRectangleRoundedLinesEx(btnChiTiet, 0.25f, 8, 1.5f, Color{80, 60, 220, 255});
+
+        float tw = MeasureTextEx(tieude, "Chi tiết", 26, 1).x;
+        DrawTextEx(tieude, "Chi tiết", {btnChiTiet.x + (btnChiTiet.width - tw) / 2.0f, btnChiTiet.y + 11}, 26, 1, WHITE);
+
+        if (Clicked && !isOpenChiTiet2 && hoverChiTiet)
+        {
+            isOpenChiTiet2 = true;
+            openedThisFrame2 = true;
+        }
+    }
+
+    // =========== MODAL CHI TIẾT TÍNH LƯƠNG PARTTIME ===========
+    if (isOpenChiTiet2 && selEmp != nullptr)
+    {
+        PartTime *pt = dynamic_cast<PartTime *>(selEmp);
+        if (pt != nullptr)
+        {
+            float screenW = GetScreenWidth();
+            float screenH = GetScreenHeight();
+
+            // Overlay mờ che nền
+            DrawRectangle(0, 0, screenW, screenH, Fade(BLACK, 0.45f));
+
+            // Kích thước modal (được tăng to hơn rõ ràng, rộng rãi)
+            float modalW = 580.0f;
+            float modalH = 670.0f;
+            Rectangle modal = {(screenW - modalW) / 2.0f, (screenH - modalH) / 2.0f, modalW, modalH};
+
+            // Đổ bóng mờ nhẹ
+            DrawRectangleRounded({modal.x + 4, modal.y + 6, modal.width, modal.height}, 0.04f, 10, Fade(BLACK, 0.16f));
+            // Hộp trắng chính bo góc
+            DrawRectangleRounded(modal, 0.04f, 10, WHITE);
+            DrawRectangleRoundedLinesEx(modal, 0.04f, 10, 1.5f, Color{225, 220, 245, 255});
+
+            // Vạch điểm nhấn màu tím góc trái tiêu đề
+            DrawRectangleRounded({modal.x + 36, modal.y + 26, 7, 30}, 0.5f, 4, Color{110, 65, 240, 255});
+
+            // Tiêu đề
+            DrawTextEx(tieude, "Chi tiết tính lương", {modal.x + 54, modal.y + 24}, 30, 1, Color{50, 30, 140, 255});
+
+            // Tên và mã nhân viên nhỏ bên dưới tiêu đề
+            string infoNV = selEmp->get_name() + " (" + selEmp->get_mnv() + ") - PartTime";
+            DrawTextEx(myFont, infoNV.c_str(), {modal.x + 36, modal.y + 64}, 22, 1, Color{120, 130, 145, 255});
+
+            // Nút đóng [X]
+            Rectangle btnDong = {modal.x + modal.width - 54, modal.y + 22, 34, 34};
+            bool hoverX = CheckCollisionPointRec(mousePos, btnDong);
+            DrawRectangleRounded(btnDong, 0.3f, 6, hoverX ? Color{235, 240, 250, 255} : Color{245, 246, 250, 255});
+            DrawLineEx({btnDong.x + 10, btnDong.y + 10}, {btnDong.x + 24, btnDong.y + 24}, 2.0f, DARKGRAY);
+            DrawLineEx({btnDong.x + 24, btnDong.y + 10}, {btnDong.x + 10, btnDong.y + 24}, 2.0f, DARKGRAY);
+
+            // Đường gạch ngang phân cách
+            DrawLine(modal.x + 36, modal.y + 98, modal.x + modal.width - 36, modal.y + 98, Color{235, 240, 248, 255});
+
+            // Lấy các chỉ số tính lương PartTime
+            double lcb = QL->get_LuongCoBan(pt);
+            if (lcb < 0)
+                lcb = 0;
+            int bac = pt->get_BacViTri();
+            int timework = pt->get_TimeWork();
+            double phucap = (pt->get_ChucVu() != nullptr) ? pt->get_ChucVu()->get_PhuCap() : 0.0;
+            double thuong = pt->get_ThuongPhat();
+            double tongluong = QL->TinhLuong(pt);
+            if (tongluong < 0)
+                tongluong = 0;
+            double khautru = 0; // Khấu trừ
+            double thuclinh = tongluong - khautru;
+
+            float leftX = modal.x + 38;
+            float rightX = modal.x + modal.width - 38;
+            float rowY = modal.y + 118;
+            float rowSpacing = 46;
+            int labelSize = 24;
+            int valSize = 24;
+            Color labelColor = Color{45, 55, 72, 255};
+            Color valColor = Color{25, 30, 45, 255};
+
+            // 1. Lương theo giờ
+            DrawTextEx(myFont, "Lương theo giờ", {leftX, rowY}, labelSize, 1, labelColor);
+            string sLCB = FormatSoTien((long long)lcb) + " đ/h";
+            float wLCB = MeasureTextEx(myFont, sLCB.c_str(), valSize, 1).x;
+            DrawTextEx(myFont, sLCB.c_str(), {rightX - wLCB, rowY}, valSize, 1, valColor);
+            rowY += rowSpacing;
+
+            // 2. Bậc vị trí
+            DrawTextEx(myFont, "Bậc vị trí", {leftX, rowY}, labelSize, 1, labelColor);
+            string sBac = "Bậc " + to_string(bac);
+            float wBac = MeasureTextEx(myFont, sBac.c_str(), valSize, 1).x;
+            DrawTextEx(myFont, sBac.c_str(), {rightX - wBac, rowY}, valSize, 1, valColor);
+            rowY += rowSpacing;
+
+            // 3. Số giờ làm việc thực tế
+            DrawTextEx(myFont, "Số giờ làm việc", {leftX, rowY}, labelSize, 1, labelColor);
+            string sGio = to_string(timework) + " giờ" + (timework > 80 ? (" (OT: " + to_string(timework - 80) + "h)") : " / 80h");
+            float wGio = MeasureTextEx(myFont, sGio.c_str(), valSize, 1).x;
+            DrawTextEx(myFont, sGio.c_str(), {rightX - wGio, rowY}, valSize, 1, valColor);
+            rowY += rowSpacing;
+
+            // 4. Phụ cấp
+            DrawTextEx(myFont, "Phụ cấp", {leftX, rowY}, labelSize, 1, labelColor);
+            string sPC = FormatSoTien((long long)phucap) + " đ";
+            float wPC = MeasureTextEx(myFont, sPC.c_str(), valSize, 1).x;
+            DrawTextEx(myFont, sPC.c_str(), {rightX - wPC, rowY}, valSize, 1, valColor);
+            rowY += rowSpacing;
+
+            // 5. Thưởng (Có chức năng xem và chỉnh sửa trực tiếp)
+            DrawTextEx(myFont, "Thưởng", {leftX, rowY}, labelSize, 1, labelColor);
+
+            if (!isEditingThuong2)
+            {
+                // Nút "Sửa" nhỏ bên cạnh chữ Thưởng
+                Rectangle btnSuaThuong = {leftX + 85, rowY - 2, 54, 28};
+                bool hoverSua = CheckCollisionPointRec(mousePos, btnSuaThuong);
+                DrawRectangleRounded(btnSuaThuong, 0.3f, 6, hoverSua ? Color{225, 218, 255, 255} : Color{242, 238, 255, 255});
+                DrawRectangleRoundedLinesEx(btnSuaThuong, 0.3f, 6, 1.2f, Color{160, 140, 230, 255});
+                DrawTextEx(myFont, "Sửa", {btnSuaThuong.x + 12, btnSuaThuong.y + 3}, 18, 1, Color{98, 70, 234, 255});
+
+                string sThuong = FormatSoTien((long long)thuong) + " đ";
+                float wThuong = MeasureTextEx(myFont, sThuong.c_str(), valSize, 1).x;
+                Rectangle recThuongVal = {rightX - wThuong - 4, rowY - 2, wThuong + 8, 30};
+                bool hoverVal = CheckCollisionPointRec(mousePos, recThuongVal);
+
+                DrawTextEx(myFont, sThuong.c_str(), {rightX - wThuong, rowY}, valSize, 1, hoverVal ? Color{98, 70, 234, 255} : valColor);
+
+                if (Clicked && (hoverSua || hoverVal))
+                {
+                    isEditingThuong2 = true;
+                    isThuongActive2 = true;
+                    snprintf(thuongInput2, sizeof(thuongInput2), "%lld", (long long)thuong);
+                    thuongLetterCount2 = (int)strlen(thuongInput2);
+                }
+            }
+            else
+            {
+                Rectangle boxThuong = {rightX - 250, rowY - 4, 130, 34};
+                Rectangle btnLuuThuong = {rightX - 112, rowY - 4, 54, 34};
+                Rectangle btnHuyThuong = {rightX - 52, rowY - 4, 48, 34};
+
+                bool hoverLuu = CheckCollisionPointRec(mousePos, btnLuuThuong);
+                bool hoverHuy = CheckCollisionPointRec(mousePos, btnHuyThuong);
+
+                if (Clicked)
+                {
+                    if (CheckCollisionPointRec(mousePos, boxThuong))
+                        isThuongActive2 = true;
+                    else if (!hoverLuu && !hoverHuy)
+                        isThuongActive2 = false;
+                }
+
+                if (isThuongActive2)
+                {
+                    int key = GetCharPressed();
+                    while (key > 0)
+                    {
+                        if (key >= '0' && key <= '9' && thuongLetterCount2 < 11)
+                        {
+                            thuongInput2[thuongLetterCount2++] = (char)key;
+                            thuongInput2[thuongLetterCount2] = '\0';
+                        }
+                        key = GetCharPressed();
+                    }
+                    if (IsKeyPressed(KEY_BACKSPACE) || IsKeyPressedRepeat(KEY_BACKSPACE))
+                    {
+                        if (thuongLetterCount2 > 0)
+                        {
+                            thuongLetterCount2--;
+                            thuongInput2[thuongLetterCount2] = '\0';
+                        }
+                    }
+                }
+
+                // Vẽ ô nhập số tiền thưởng
+                DrawRectangleRounded(boxThuong, 0.25f, 6, isThuongActive2 ? WHITE : Color{245, 246, 250, 255});
+                DrawRectangleRoundedLinesEx(boxThuong, 0.25f, 6, 1.5f, isThuongActive2 ? Color{98, 70, 234, 255} : LIGHTGRAY);
+                DrawTextEx(myFont, thuongInput2, {boxThuong.x + 8, boxThuong.y + 6}, 20, 1, BLACK);
+
+                // Con trỏ nhấp nháy
+                if (isThuongActive2 && ((int)(GetTime() * 2) % 2 == 0))
+                {
+                    float tw = MeasureTextEx(myFont, thuongInput2, 20, 1).x;
+                    DrawLineEx({boxThuong.x + 8 + tw + 2, boxThuong.y + 6}, {boxThuong.x + 8 + tw + 2, boxThuong.y + 28}, 1.5f, Color{98, 70, 234, 255});
+                }
+
+                // Nút Lưu
+                DrawRectangleRounded(btnLuuThuong, 0.25f, 6, hoverLuu ? Color{80, 50, 215, 255} : Color{98, 70, 234, 255});
+                DrawTextEx(tieude, "Lưu", {btnLuuThuong.x + 12, btnLuuThuong.y + 8}, 18, 1, WHITE);
+
+                // Nút Hủy
+                DrawRectangleRounded(btnHuyThuong, 0.25f, 6, hoverHuy ? Color{225, 230, 238, 255} : Color{240, 242, 246, 255});
+                DrawRectangleRoundedLinesEx(btnHuyThuong, 0.25f, 6, 1.0f, Color{200, 205, 215, 255});
+                DrawTextEx(myFont, "Hủy", {btnHuyThuong.x + 11, btnHuyThuong.y + 8}, 18, 1, DARKGRAY);
+
+                // Xử lý Lưu: click Lưu hoặc nhấn Enter
+                bool doSave = (Clicked && hoverLuu) || (isThuongActive2 && (IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_KP_ENTER)));
+                if (doSave)
+                {
+                    int newT = 0;
+                    if (strlen(thuongInput2) > 0)
+                    {
+                        try
+                        {
+                            long long val = stoll(thuongInput2);
+                            if (val < 0)
+                                val = 0;
+                            if (val > 2000000000LL)
+                                val = 2000000000LL;
+                            newT = (int)val;
+                        }
+                        catch (...)
+                        {
+                            newT = 0;
+                        }
+                    }
+                    pt->set_ThuongPhat(newT);
+                    QL->get_DB()->SaveFileEmployee();
+                    tongluong = QL->TinhLuong(pt);
+                    if (tongluong < 0)
+                        tongluong = 0;
+                    thuclinh = tongluong - khautru;
+                    HienThongBao("Cập nhật tiền thưởng thành công!", false);
+                    isEditingThuong2 = false;
+                    isThuongActive2 = false;
+                }
+
+                // Xử lý Hủy: click Hủy hoặc nhấn Escape
+                if ((Clicked && hoverHuy) || IsKeyPressed(KEY_ESCAPE))
+                {
+                    isEditingThuong2 = false;
+                    isThuongActive2 = false;
+                }
+            }
+            rowY += rowSpacing + 10;
+
+            // 6. Box Tổng thu nhập (Hộp xanh nhạt bo góc với icon máy tính)
+            Rectangle boxTongThuNhap = {leftX, rowY, modal.width - 76, 58};
+            DrawRectangleRounded(boxTongThuNhap, 0.25f, 8, Color{242, 246, 255, 255});
+            DrawRectangleRoundedLinesEx(boxTongThuNhap, 0.25f, 8, 1.2f, Color{220, 230, 252, 255});
+
+            // Vẽ icon máy tính nhỏ
+            Rectangle iconCalc = {leftX + 16, rowY + 16, 22, 26};
+            DrawRectangleRounded(iconCalc, 0.2f, 4, Color{50, 90, 220, 255});
+            DrawRectangle(iconCalc.x + 3, iconCalc.y + 4, 16, 4, WHITE);
+            DrawCircle(iconCalc.x + 6, iconCalc.y + 13, 1.5f, WHITE);
+            DrawCircle(iconCalc.x + 11, iconCalc.y + 13, 1.5f, WHITE);
+            DrawCircle(iconCalc.x + 16, iconCalc.y + 13, 1.5f, WHITE);
+            DrawCircle(iconCalc.x + 6, iconCalc.y + 20, 1.5f, WHITE);
+            DrawCircle(iconCalc.x + 11, iconCalc.y + 20, 1.5f, WHITE);
+            DrawCircle(iconCalc.x + 16, iconCalc.y + 20, 1.5f, WHITE);
+
+            DrawTextEx(tieude, "Tổng thu nhập", {leftX + 50, rowY + 16}, 24, 1, Color{40, 75, 215, 255});
+            string sTong = FormatSoTien((long long)tongluong) + " đ";
+            float wTong = MeasureTextEx(tieude, sTong.c_str(), 26, 1).x;
+            DrawTextEx(tieude, sTong.c_str(), {rightX - wTong - 16, rowY + 15}, 26, 1, Color{30, 60, 200, 255});
+            rowY += 72;
+
+            // 7. Khấu trừ (Icon tròn đỏ có dấu trừ)
+            DrawCircle(leftX + 18, rowY + 13, 12, Color{245, 95, 85, 255});
+            DrawLineEx({leftX + 11, rowY + 13}, {leftX + 25, rowY + 13}, 2.2f, WHITE);
+            DrawTextEx(myFont, "Khấu trừ", {leftX + 44, rowY}, labelSize, 1, Color{100, 105, 115, 255});
+            string sKT = FormatSoTien((long long)khautru) + " đ";
+            float wKT = MeasureTextEx(myFont, sKT.c_str(), valSize, 1).x;
+            DrawTextEx(myFont, sKT.c_str(), {rightX - wKT, rowY}, valSize, 1, Color{100, 105, 115, 255});
+            rowY += 52;
+
+            // 8. Box Thực lĩnh (Hộp tím nhạt bo góc với icon checkmark tím)
+            Rectangle boxThucLinh = {leftX, rowY, modal.width - 76, 62};
+            DrawRectangleRounded(boxThucLinh, 0.25f, 8, Color{246, 242, 255, 255});
+            DrawRectangleRoundedLinesEx(boxThucLinh, 0.25f, 8, 1.2f, Color{225, 215, 250, 255});
+
+            // Icon tròn tím có dấu checkmark
+            DrawCircle(leftX + 20, rowY + 31, 13, Color{98, 70, 234, 255});
+            DrawLineEx({leftX + 14, rowY + 31}, {leftX + 19, rowY + 36}, 2.4f, WHITE);
+            DrawLineEx({leftX + 19, rowY + 36}, {leftX + 27, rowY + 24}, 2.4f, WHITE);
+
+            DrawTextEx(tieude, "Thực lĩnh", {leftX + 50, rowY + 18}, 26, 1, Color{98, 70, 234, 255});
+            string sTL = FormatSoTien((long long)thuclinh) + " đ";
+            float wTL = MeasureTextEx(tieude, sTL.c_str(), 28, 1).x;
+            DrawTextEx(tieude, sTL.c_str(), {rightX - wTL - 16, rowY + 17}, 28, 1, Color{98, 70, 234, 255});
+
+            // Xử lý đóng modal: click [X] hoặc click ra ngoài modal (chỉ khi không phải vừa mở ở frame này)
+            if (Clicked && !openedThisFrame2)
+            {
+                if (hoverX || !CheckCollisionPointRec(mousePos, modal))
+                {
+                    isOpenChiTiet2 = false;
+                    isEditingThuong2 = false;
+                    isThuongActive2 = false;
+                }
+            }
+        }
+    }
 }
 
 void Draw_Screen_Salary(QLNV *QL)
 {
+    static Texture2D a1;
+    static bool isLoaded = false;
+    if (!isLoaded)
+    {
+        a1 = LoadTexture("photo/anhto/Asset-3.png");
+        isLoaded = true;
+    }
+    Vector2 pa1 = {370.0f, 45.0f}; // Tọa độ (x, y) postion
+    float ra1 = 0.0f;              // Góc xoay (0 độ) rotation
+    float sa1 = 0.33f;
+    DrawTextureEx(a1, pa1, ra1, sa1, WHITE);
+    DrawTextEx(tieude, "Quản Lý Lương & Mức Lương", {pa1.x + 100, pa1.y}, 45, 1, WHITE);
+    DrawTextEx(myFont, "Bảng lương nhân sự và định mức lương theo bậc của công ty", {pa1.x + 100, pa1.y + 50}, 30, 1, WHITE);
+
+    static bool isOpenBL = true;
+    static bool isOpenML = false;
     Vector2 mousePos = GetMousePosition();
-    Rectangle Title = {300.0f, 0.0f, 1620.0f, 30.0f};
-    DrawRectangle(Title.x, Title.y, Title.width, Title.height, GRAY);
-    DrawText("Thong tin bang luong", Title.x, Title.y, 25, BLACK);
+    bool Clicked = IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
 
-    Rectangle btnBacLuong = {550.0f, 200.0f, 200.0f, 40.f};
-    DrawRectangleRounded(btnBacLuong, 0.3f, 4, Fade(BLUE, 0.2f));
-    DrawText("Bac luong", btnBacLuong.x - 120, btnBacLuong.y + 10, 20, BLACK);
+    float TabX = 330.0f;
+    float TabY = 160.0f;
+    float TabH = 90.0f;
+    Rectangle TabBL = {TabX, TabY, 300.0f, TabH};
+    Rectangle TabML = {TabX + 310.0f, TabY, 300.0f, TabH};
+    bool hoverPB = CheckCollisionPointRec(mousePos, TabBL);
+    bool hoverCV = CheckCollisionPointRec(mousePos, TabML);
+    Color CTabBL = isOpenBL == 1 ? BLUE : WHITE;
+    Color CTabVT = isOpenML == 1 ? BLUE : WHITE;
+    if (isOpenBL == true && hoverCV)
+        CTabVT = Fade(BLUE, 0.4);
+    if (isOpenML == true && hoverPB)
+        CTabBL = Fade(BLUE, 0.4);
+    DrawRectangleRounded(TabBL, 0.3f, 10, CTabBL);
+    DrawRectangleRoundedLinesEx(TabBL, 0.3f, 10, 1.5f, Color{225, 230, 240, 255});
+    DrawTextEx(myFont, "Bảng lương", {TabBL.x + 70.0f, TabBL.y + 15.0f}, 40, 1, BLACK);
 
-    Rectangle btnPhuCapKhac = {950.0f, 200.0f, 250.0f, 40.f};
-    DrawRectangleRounded(btnPhuCapKhac, 0.3f, 4, Fade(BLUE, 0.2f));
-    DrawText("Phu cap khac", btnPhuCapKhac.x - 150, btnPhuCapKhac.y + 10, 20, BLACK);
-    static bool isPhuCapKhacActive = false;  // Trạng thái: ô có đang được click vào không
-    static char PhucCapKhacInput[50] = "\0"; // Chuỗi lưu ký tự người dùng gõ
-    static int letterCount_PhucCapKhac = 0;
-    Typing(isPhuCapKhacActive, PhucCapKhacInput, letterCount_PhucCapKhac, mousePos, btnPhuCapKhac);
-    DrawText(PhucCapKhacInput, btnPhuCapKhac.x + 10, btnPhuCapKhac.y + 8, 20, BLACK);
-    if (isPhuCapKhacActive && ((int)(GetTime() * 2) % 2 == 0))
+    DrawRectangleRounded(TabML, 0.3f, 10, CTabVT);
+    DrawRectangleRoundedLinesEx(TabBL, 0.3f, 10, 1.5f, Color{225, 230, 240, 255});
+    DrawTextEx(myFont, "Mức lương", {TabML.x + 90.0f, TabML.y + 15.0f}, 40, 1, BLACK);
+
+    // Rectangle panelBang = {330, 230, 1450.0f, 690.0f};
+    // DrawRectangleRounded({panelBang.x + 3, panelBang.y + 4, panelBang.width, panelBang.height}, 0.03f, 10, Fade(BLACK, 0.08f));
+    // DrawRectangleRounded(panelBang, 0.03f, 10, WHITE);
+    // DrawRectangleRoundedLinesEx(panelBang, 0.03f, 10, 1.5f, Color{225, 230, 240, 255});
+
+    if (Clicked && CheckCollisionPointRec(mousePos, TabBL))
     {
-        int textWidth = MeasureText(PhucCapKhacInput, 20);
-        DrawText("_", btnPhuCapKhac.x + 14 + textWidth, btnPhuCapKhac.y + 11, 20, MAROON);
+        isOpenBL = true;
+        isOpenML = false;
+    }
+    else if (Clicked && CheckCollisionPointRec(mousePos, TabML))
+    {
+        isOpenML = true;
+        isOpenBL = false;
     }
 
-    Rectangle btnThuong = {550.0f, 300.0f, 250.0f, 40.f};
-    DrawRectangleRounded(btnThuong, 0.3f, 4, Fade(BLUE, 0.2f));
-    DrawText("Thuong", btnThuong.x - 100, btnThuong.y + 10, 20, BLACK);
-    static bool isThuongActive = false; // Trạng thái: ô có đang được click vào không
-    static char ThuongInput[50] = "\0"; // Chuỗi lưu ký tự người dùng gõ
-    static int letterCount_Thuong = 0;
-    Typing(isThuongActive, ThuongInput, letterCount_Thuong, mousePos, btnThuong);
-    DrawText(ThuongInput, btnThuong.x + 10, btnThuong.y + 8, 20, BLACK);
-    if (isThuongActive && ((int)(GetTime() * 2) % 2 == 0))
+    if (isOpenBL)
     {
-        int textWidth = MeasureText(ThuongInput, 20);
-        DrawText("_", btnThuong.x + 14 + textWidth, btnThuong.y + 11, 20, MAROON);
+        Draw_Screen_BangLuong(mousePos, Clicked, QL);
     }
-
-    Rectangle btnKhauTru = {950.0f, 300.0f, 250.0f, 40.f};
-    DrawRectangleRounded(btnKhauTru, 0.3f, 4, Fade(BLUE, 0.2f));
-    DrawText("Khau tru", btnKhauTru.x - 100, btnKhauTru.y + 10, 20, BLACK);
-    static bool isKhauTruActive = false; // Trạng thái: ô có đang được click vào không
-    static char KhauTruInput[50] = "\0"; // Chuỗi lưu ký tự người dùng gõ
-    static int letterCount_KhauTru = 0;
-    Typing(isKhauTruActive, KhauTruInput, letterCount_KhauTru, mousePos, btnKhauTru);
-    DrawText(KhauTruInput, btnKhauTru.x + 10, btnKhauTru.y + 8, 20, BLACK);
-    if (isKhauTruActive && ((int)(GetTime() * 2) % 2 == 0))
+    else if (isOpenML)
     {
-        int textWidth = MeasureText(KhauTruInput, 20);
-        DrawText("_", btnKhauTru.x + 14 + textWidth, btnKhauTru.y + 11, 20, MAROON);
+        Draw_Screen_MucLuong(mousePos, Clicked, QL);
     }
 }
-
+/*
 void Draw_Screen_Search(QLNV *QL)
 {
     Vector2 mousePos = GetMousePosition();
     Rectangle Title = {300.0f, 0.0f, 1620.0f, 30.0f};
     DrawRectangle(Title.x, Title.y, Title.width, Title.height, GRAY);
-    DrawText("Tim kiem thong tin", Title.x, Title.y + 5, 25, BLACK);
+    DrawTextEx(myFont,"Tim kiem thong tin", Title.x, Title.y + 5, 25, BLACK);
 
     Rectangle btnThongTin = {850.0f, 200.0f, 300.0f, 35.0f};
     DrawRectangleRounded(btnThongTin, 0.3f, 4, Fade(BLUE, 0.2f));
-    DrawText("Thong Tin", btnThongTin.x - 200, btnThongTin.y + 7, 25, BLACK);
+    DrawTextEx(myFont,"Thong Tin", btnThongTin.x - 200, btnThongTin.y + 7, 25, BLACK);
     static bool isTimKiemActive = false;
     static char TimKiemInput[50] = "\0";
     static int letterCount_TimKiem = 0;
     Typing(isTimKiemActive, TimKiemInput, letterCount_TimKiem, mousePos, btnThongTin);
-    DrawText(TimKiemInput, btnThongTin.x + 10, btnThongTin.y + 8, 20, BLACK);
+    DrawTextEx(myFont,TimKiemInput, btnThongTin.x + 10, btnThongTin.y + 8, 20, BLACK);
     if (isTimKiemActive && ((int)(GetTime() * 2) % 2 == 0))
     {
         int textWidth = MeasureText(TimKiemInput, 20);
-        DrawText("_", btnThongTin.x + 14 + textWidth, btnThongTin.y + 11, 20, MAROON);
+        DrawTextEx(myFont,"_", btnThongTin.x + 14 + textWidth, btnThongTin.y + 11, 20, MAROON);
     }
     // 1. Định nghĩa các thông số dùng chung
     // ==========================================
@@ -1681,7 +4910,7 @@ void Draw_Screen_Search(QLNV *QL)
         DrawCircle(circle1Center.x, circle1Center.y, 10 - 4, LIGHTGRAY);
     }
 
-    DrawText("Ma nhan vien", text1X, text1Y, 25, BLACK);
+    DrawTextEx(myFont,"Ma nhan vien", text1X, text1Y, 25, BLACK);
 
     // ==========================================
     // VẼ NÚT 2: HỌ VÀ TÊN
@@ -1697,6 +4926,6 @@ void Draw_Screen_Search(QLNV *QL)
         DrawCircle(circle2Center.x, circle2Center.y, 10 - 4, LIGHTGRAY);
     }
 
-    DrawText("Ho va ten", text2X, text2Y, 25, BLACK);
+    DrawTextEx(myFont,"Ho va ten", text2X, text2Y, 25, BLACK);
 }
 **/

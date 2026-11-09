@@ -1,4 +1,3 @@
-
 #pragma once
 #include "LinkedList.h"
 #include "Entity.h"

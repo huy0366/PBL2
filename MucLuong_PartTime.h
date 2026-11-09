@@ -12,6 +12,7 @@ public:
     MucLuong_PartTime(ViTriViecLam *, const int &, const double &);
     ~MucLuong_PartTime();
     double get_Luong();
+    void set_Luong(double luong) override { this->Luong_Gio = luong; }
     string get_Loai_NV() override;
     void Show() override;
 };

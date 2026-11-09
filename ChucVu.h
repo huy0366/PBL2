@@ -1,13 +1,16 @@
 #pragma once
 #include "Entity.h"
+#include "LinkedList.h"
 #include <iostream>
 #include <iomanip>
 using namespace std;
+class Employee;
 class ChucVu : public Entity
 {
 private:
     string MaChucVu, Name;
     double PhuCap;
+    List<Employee> *L;
 
 public:
     ChucVu();
@@ -21,7 +24,9 @@ public:
     void set_PhuCap(const double &);
     double get_PhuCap() const;
     void set_Luong_Base(long long phucap);
-
+    List<Employee> *get_ListNV();
+    bool ThemNV(Employee *);
+    bool XoaNV(Employee *);
     void Show();
     ~ChucVu();
 };
@@ -30,6 +35,7 @@ ChucVu::ChucVu() {}
 
 ChucVu::ChucVu(string ma, string ten, long long phucap) : MaChucVu(ma), Name(ten), PhuCap(phucap)
 {
+    this->L = new List<Employee>();
 }
 
 void ChucVu::set_MaChucVu(const string &ma)
@@ -60,6 +66,31 @@ double ChucVu::get_PhuCap() const
 void ChucVu::set_Luong_Base(long long phucap)
 {
     this->PhuCap = phucap;
+}
+List<Employee> *ChucVu::get_ListNV()
+{
+    return this->L;
+}
+bool ChucVu::ThemNV(Employee *e)
+{
+    if (e == nullptr)
+        return 0;
+    this->L->insert(e);
+    return 1;
+}
+bool ChucVu::XoaNV(Employee *e)
+{
+    Node<Employee> *p = this->L->get_header()->Next;
+    while (p != nullptr)
+    {
+        if (p->Data == e)
+        {
+            this->L->remove_item(p);
+            return 1;
+        }
+        p = p->Next;
+    }
+    return 0;
 }
 void ChucVu::Show()
 {
