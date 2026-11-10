@@ -194,6 +194,7 @@ Node<T> *List<T>::operator[](int index)
         p = p->Next;
     return p;
 }
+
 // template class List<PhongBan *>;
 // template class List<ChucVu *>;
 // template class List<ViTriViecLam *>;

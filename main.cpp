@@ -3778,29 +3778,30 @@ void Draw_Screen_FullTime(Vector2 mousePos, bool Clicked, QLNV *QL)
     DrawLine(startX, startY + 30, 1780, startY + 30, LIGHTGRAY);
 
     // =========== THU THẬP VÀ SẮP XẾP DANH SÁCH FULLTIME ===========
-    vector<FullTime *> listFT;
+    List<FullTime> *listFT = new List<FullTime>();
     Node<Employee> *cur = QL->get_ListEmployee()->get_header()->Next;
     while (cur != nullptr)
     {
         Employee *emp = cur->Data;
         FullTime *ft = dynamic_cast<FullTime *>(emp);
-        if (ft != nullptr && CheckEmployee(emp, tieuchi_CV, tieuchi_PB, hoTenInput1))
+        if (ft != nullptr)
         {
-            listFT.push_back(ft);
+            listFT->insert(ft);
         }
         cur = cur->Next;
     }
-
+    static QLNV *s_QL = nullptr;
+    s_QL = QL;
     // Sắp xếp lương theo yêu cầu (1: Tăng dần, 2: Giảm dần)
     if (selectedSortIndex1 == 1)
     {
-        sort(listFT.begin(), listFT.end(), [QL](FullTime *a, FullTime *b)
-             { return QL->TinhLuong(a) < QL->TinhLuong(b); });
+        listFT->sort([](FullTime *a, FullTime *b)
+                     { return s_QL->TinhLuong(a) > s_QL->TinhLuong(b); });
     }
     else if (selectedSortIndex1 == 2)
     {
-        sort(listFT.begin(), listFT.end(), [QL](FullTime *a, FullTime *b)
-             { return QL->TinhLuong(a) > QL->TinhLuong(b); });
+        listFT->sort([](FullTime *a, FullTime *b)
+                     { return s_QL->TinhLuong(a) < s_QL->TinhLuong(b); });
     }
 
     // =========== VẼ DANH SÁCH NHÂN VIÊN ===========
@@ -3811,15 +3812,16 @@ void Draw_Screen_FullTime(Vector2 mousePos, bool Clicked, QLNV *QL)
     bool canHover = !isOpenChiTiet && !isChucVuOpen1 && !isPhongOpen1 && !isSortOpen1 && CheckCollisionPointRec(mousePos, listArea);
 
     float currentY = listStartY + scrollY;
-    int totalRows = (int)listFT.size();
+    int totalRows = listFT->get_size();
     Employee *selEmp = nullptr;
     if (!selectedMNV_FT.empty())
         selEmp = QL->TimTheoMa(selectedMNV_FT);
 
     BeginScissorMode(startX, listStartY, GetScreenWidth() - startX, listHeight);
-    for (FullTime *ft : listFT)
+    Node<FullTime> *p = listFT->get_header()->Next;
+    while (p != nullptr)
     {
-        Employee *emp = ft;
+        Employee *emp = p->Data;
         string mnv = emp->get_mnv();
         string name = emp->get_name();
         string phong = emp->get_PhongBan() ? emp->get_PhongBan()->get_TenPhongBan() : "";
@@ -3827,11 +3829,11 @@ void Draw_Screen_FullTime(Vector2 mousePos, bool Clicked, QLNV *QL)
         string vitri = emp->get_ViTri() ? emp->get_ViTri()->get_TenVTVL() : "";
 
         ostringstream oss;
-        oss << ft->get_HeSo();
-        double tongluong = QL->TinhLuong(ft);
+        oss << p->Data->get_HeSo();
+        double tongluong = QL->TinhLuong(p->Data);
         if (tongluong < 0)
             tongluong = 0;
-        int ngaycong = ft->get_SoNgayCong();
+        int ngaycong = p->Data->get_SoNgayCong();
 
         string strHeSo = oss.str();
         string strNgayCong = to_string(ngaycong);
@@ -3867,6 +3869,7 @@ void Draw_Screen_FullTime(Vector2 mousePos, bool Clicked, QLNV *QL)
         DrawTextEx(myFont, strLuong.c_str(), {colX[7], currentY}, fontSize, 1, BLACK);
         DrawLine(startX, currentY + 30, GetScreenWidth() - 20, currentY + 30, Fade(LIGHTGRAY, 0.5f));
         currentY += rowHeight;
+        p = p->Next;
     }
     EndScissorMode();
 
@@ -4325,7 +4328,7 @@ void Draw_Screen_PartTime(Vector2 mousePos, bool Clicked, QLNV *QL)
     DrawLine(startX, startY + 30, 1780, startY + 30, LIGHTGRAY);
 
     // =========== THU THẬP VÀ SẮP XẾP DANH SÁCH PARTTIME ===========
-    vector<PartTime *> listPT;
+    List<PartTime> *listPT = new List<PartTime>();
     Node<Employee> *cur = QL->get_ListEmployee()->get_header()->Next;
     while (cur != nullptr)
     {
@@ -4333,21 +4336,22 @@ void Draw_Screen_PartTime(Vector2 mousePos, bool Clicked, QLNV *QL)
         PartTime *pt = dynamic_cast<PartTime *>(emp);
         if (pt != nullptr && CheckEmployee(emp, tieuchi_CV, tieuchi_PB, hoTenInput2))
         {
-            listPT.push_back(pt);
+            listPT->insert(pt);
         }
         cur = cur->Next;
     }
-
+    static QLNV *s_QL = nullptr;
+    s_QL = QL;
     // Sắp xếp lương theo yêu cầu (1: Tăng dần, 2: Giảm dần)
     if (selectedSortIndex2 == 1)
     {
-        sort(listPT.begin(), listPT.end(), [QL](PartTime *a, PartTime *b)
-             { return QL->TinhLuong(a) < QL->TinhLuong(b); });
+        listPT->sort([](PartTime *a, PartTime *b)
+                     { return s_QL->TinhLuong(a) > s_QL->TinhLuong(b); });
     }
     else if (selectedSortIndex2 == 2)
     {
-        sort(listPT.begin(), listPT.end(), [QL](PartTime *a, PartTime *b)
-             { return QL->TinhLuong(a) > QL->TinhLuong(b); });
+        listPT->sort([](PartTime *a, PartTime *b)
+                     { return s_QL->TinhLuong(a) < s_QL->TinhLuong(b); });
     }
 
     // =========== VẼ DANH SÁCH NHÂN VIÊN ===========
@@ -4358,27 +4362,28 @@ void Draw_Screen_PartTime(Vector2 mousePos, bool Clicked, QLNV *QL)
     bool canHover = !isOpenChiTiet2 && !isChucVuOpen2 && !isPhongOpen2 && !isSortOpen2 && CheckCollisionPointRec(mousePos, listArea);
 
     float currentY = listStartY + scrollY;
-    int totalRows = (int)listPT.size();
+    int totalRows = listPT->get_size();
     Employee *selEmp = nullptr;
     if (!selectedMNV_PT.empty())
         selEmp = QL->TimTheoMa(selectedMNV_PT);
 
     BeginScissorMode(startX, listStartY, GetScreenWidth() - startX, listHeight);
-    for (PartTime *pt : listPT)
+    Node<PartTime> *p = listPT->get_header()->Next;
+    while (p != nullptr)
     {
-        Employee *emp = pt;
+        Employee *emp = p->Data;
         string mnv = emp->get_mnv();
         string name = emp->get_name();
         string phong = emp->get_PhongBan() ? emp->get_PhongBan()->get_TenPhongBan() : "";
         string cv = emp->get_ChucVu() ? emp->get_ChucVu()->get_TenChucVu() : "";
         string vitri = emp->get_ViTri() ? emp->get_ViTri()->get_TenVTVL() : "";
 
-        double tongluong = QL->TinhLuong(pt);
+        double tongluong = QL->TinhLuong(p->Data);
         if (tongluong < 0)
             tongluong = 0;
-        int timework = pt->get_TimeWork();
+        int timework = p->Data->get_TimeWork();
 
-        string strBac = "Bậc " + to_string(pt->get_BacViTri());
+        string strBac = "Bậc " + to_string(p->Data->get_BacViTri());
         string strGio = to_string(timework) + "h";
         string strLuong = FormatSoTien((long long)tongluong);
 
@@ -4411,6 +4416,7 @@ void Draw_Screen_PartTime(Vector2 mousePos, bool Clicked, QLNV *QL)
         DrawTextEx(myFont, strLuong.c_str(), {colX[6], currentY}, fontSize, 1, BLACK);
         DrawLine(startX, currentY + 30, GetScreenWidth() - 20, currentY + 30, Fade(LIGHTGRAY, 0.5f));
         currentY += rowHeight;
+        p = p->Next;
     }
     EndScissorMode();
 

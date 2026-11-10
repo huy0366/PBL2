@@ -729,33 +729,3 @@ void QLNV::Show()
 {
     this->get_ListEmployee()->Show();
 }
-
-/* MÀN HÌNH EMPLOYEE
-get_ListEmployee() trả về list
-get_ListCV() trả về list
-get_ListPB() trả về list
-Timetheoma, Timtheoten, Timtheopb,timchucvu trả về lish để in ra tất cả những thứ tìm được (có thể gôm mớ này thày find)
-
-MÀN HÌNH SỬA EMPLOYEE (giữ nguyên mnv)
-2 cách
-C1: gọi các hàm sửa ở trên ...
-C2:(CHƯA VIẾT) tạo 1 employee mới để sẵn mnv rồi nhập lại employee đó, xóa nhân viên mã cũ, thêm lại nhân viên mã mới
-
-XÓA EMPLOYEE (giữ nguyên mnv)
-tạo 1 cái list gồm các nhân viên cần xóa (có thể tích vào ô bên cạnh tên nhân viên hay gì đó)
-bấm xóa thì Xoa...(con trỏ Employee, cv,pb,...)
-
-MÀN HÌNH THÊM EMPLOYEE
-tạo new Part or Full r bỏ dô :)
-
---------------------------------
-MÀN HÌNH PHÒNG BAN
-làm giống bên Employee đi
-cũng in list
-bên dưới có thêm, sửa, xóa :)
---------------------------------
-lương cũng vậy
------------------------------
-search ???
-kiểu in full thông tin mức lương các kiur hmmm ?
-*/
