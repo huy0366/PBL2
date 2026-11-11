@@ -9,7 +9,7 @@ class ChucVu : public Entity
 {
 private:
     string MaChucVu, Name;
-    double PhuCap;
+    long long PhuCap;
     List<Employee> *L;
 
 public:
@@ -21,8 +21,8 @@ public:
     void set_TenChucVu(const string &);
     string get_TenChucVu() const;
 
-    void set_PhuCap(const double &);
-    double get_PhuCap() const;
+    void set_PhuCap(const long long &);
+    long long get_PhuCap() const;
     void set_Luong_Base(long long phucap);
     List<Employee> *get_ListNV();
     bool ThemNV(Employee *);
@@ -55,11 +55,11 @@ string ChucVu::get_TenChucVu() const
 {
     return this->Name;
 }
-void ChucVu::set_PhuCap(const double &PC)
+void ChucVu::set_PhuCap(const long long &PC)
 {
     this->PhuCap = PC;
 }
-double ChucVu::get_PhuCap() const
+long long ChucVu::get_PhuCap() const
 {
     return this->PhuCap;
 }

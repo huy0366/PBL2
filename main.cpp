@@ -19,8 +19,8 @@ void Draw_Screen_Deparment(QLNV *QL);
 bool DrawCalendar(Vector2 pos, int &selDay, int &month, int &year, Rectangle &Calendar, bool &isOpenCalendar);
 void Draw_Screen_BangLuong(Vector2 mousePos, bool Clicked, QLNV *QL);
 void Draw_Screen_MucLuong(Vector2 mousePos, bool Clicked, QLNV *QL);
-void Draw_Screen_FullTime(Vector2 mousePos, bool Clicked, QLNV *QL);
-void Draw_Screen_PartTime(Vector2 mousePos, bool Clicked, QLNV *QL);
+void Draw_Screen_BL_FullTime(Vector2 mousePos, bool Clicked, QLNV *QL);
+void Draw_Screen_BL_PartTime(Vector2 mousePos, bool Clicked, QLNV *QL);
 void Draw_Screen_Salary(QLNV *QL); // 2 cái duyệt cho nhau
 // void Draw_Screen_Search(QLNV *QL);
 void HieuUngGo(bool &active, Rectangle &btn, char input[], int fSize = 28);
@@ -45,8 +45,8 @@ enum Screen
     SCREEN_EMPLOYEE,   // Nhân viên
     SCREEN_DEPARTMENT, // Bộ phận
     SCREEN_SALARY,     // Bảng lương
-    SCREEN_Search,     // Hệ thống
-    Exit,              // Thoát hệ thống
+    // SCREEN_Search,     // Hệ thống
+    Exit, // Thoát hệ thống
 };
 
 int main()
@@ -177,8 +177,8 @@ void DrawSidebar(int &currentScreen)
         iconmenu[1] = LoadTexture("photo/icon/Asset-7.png");
         iconmenu[2] = LoadTexture("photo/icon/Asset-8.png");
         iconmenu[3] = LoadTexture("photo/icon/Asset-9.png");
+        // iconmenu[4] = LoadTexture("photo/icon/Asset-10.png");
         iconmenu[4] = LoadTexture("photo/icon/Asset-10.png");
-        iconmenu[5] = LoadTexture("photo/icon/Asset-11.png");
         isLoaded = true; // Đánh dấu đã nạp xong
     }
     Vector2 panhmenu = {-80.0f, -47.0f}; // Tọa độ (x, y) postion
@@ -198,14 +198,14 @@ void DrawSidebar(int &currentScreen)
     DrawTextEx(tieude, "PBL2", {130.f, 65.f}, 35, 1, BLACK);
     DrawTextEx(myFont, "Quản lí nhân sự", {130.f, 100.f}, 25, 1, BLACK);
     DrawTextureEx(a2, pa2, ra2, sa2, WHITE);
-    const char *menu[] = {"HOME", "EMPLOYEE", "DEPARTMENT", "SALARY", "SEARCH", "Exit"};
+    const char *menu[] = {"HOME", "EMPLOYEE", "DEPARTMENT", "SALARY", "Exit"};
     int startX = 90;  // Vị trí X bắt đầu lề trái
     int startY = 220; // Vị trí Y của mục đầu tiên
     int spacing = 60;
     int sizeword = 30;
 
     Vector2 mousePos = GetMousePosition();
-    for (int i = 0; i < 6; i++)
+    for (int i = 0; i < 5; i++)
     {
         int currentY = startY + (i * spacing);
 
@@ -257,12 +257,13 @@ void DrawMainContent(int &currentScreen, Texture2D &BackGround, QLNV *QL)
     {
         Draw_Screen_Salary(QL);
     }
-    else if (currentScreen == 4)
+    /*else if (currentScreen == 4)
     {
         // Draw_Screen_Search(QL);
-    }
+    }*/
     else
     {
+        delete QL;
         WindowShouldClose();
     }
 }
@@ -450,6 +451,7 @@ bool DrawCalendar(Vector2 mousepos, int &selDay, int &month, int &year, Rectangl
     }
     return change;
 }
+
 void Typing(bool &isActive, char *Input, int &letterCount, Vector2 &mousePos, Rectangle vung_go)
 {
     // Kiểm tra click chuột
@@ -473,7 +475,7 @@ void Typing(bool &isActive, char *Input, int &letterCount, Vector2 &mousePos, Re
         // Bắt các ký tự (hỗ trợ bảng mã ASCII cơ bản)
         while (key > 0)
         {
-            if ((key >= 32) && (key <= 125) && (letterCount < 49))
+            if ((key >= 32) && (letterCount < 49))
             {
                 Input[letterCount] = (char)key;
                 Input[letterCount + 1] = '\0';
@@ -491,18 +493,20 @@ void Typing(bool &isActive, char *Input, int &letterCount, Vector2 &mousePos, Re
         }
     }
 }
+
+// trả về thường full
+string ToLower(string s)
+{
+    for (int i = 0; i < s.size(); i++)
+        s[i] = tolower((unsigned char)s[i]);
+    return s;
+}
 bool CheckName(const string &input, const string &name)
 {
-    for (int i = 0; i < input.size(); i++)
-    {
-        if (tolower(input[i]) != tolower(name[i]))
-        {
-            return false;
-        }
-    }
-    return true;
+    if (input.empty())
+        return true;
+    return ToLower(name).find(ToLower(input)) != string::npos;
 }
-
 // maCV / maPB rỗng = không lọc theo tiêu chí đó
 bool CheckEmployee(Employee *emp, const string &maCV, const string &maPB, const string &keyword)
 {
@@ -523,6 +527,19 @@ bool CheckEmployee(Employee *emp, const string &maCV, const string &maPB, const 
 void Draw_Screen_Home(Texture2D &BackGround)
 {
     // 1. Khung nguồn: Lấy toàn bộ kích thước gốc của file ảnh
+    static Texture2D a1;
+    static bool isLoaded = false;
+    if (!isLoaded)
+    {
+        a1 = LoadTexture("photo/icon/Asset-4.png");
+        isLoaded = true;
+    }
+    Vector2 pa1 = {370.0f, 45.0f}; // Tọa độ (x, y) postion
+    float ra1 = 0.0f;              // Góc xoay (0 độ) rotation
+    float sa1 = 0.33f;
+    DrawTextureEx(a1, pa1, ra1, sa1, WHITE);
+    DrawTextEx(tieude, "Trang chủ", {pa1.x + 100, pa1.y}, 45, 1, WHITE);
+    DrawTextEx(myFont, "", {pa1.x + 100, pa1.y + 50}, 30, 1, WHITE);
     Rectangle sourceRec = {
         0.0f,
         0.0f,
@@ -707,6 +724,7 @@ void Draw_Screen_NhanVien(Vector2 mousePos, bool Clicked, QLNV *QL)
     static bool isOpenDelete = false;
     static bool isOpenTable = false;
     static bool needFill = false;
+
     int n = QL->get_ListEmployee()->get_size();
     static int *dsXoa = new int[n]();
     static int sizeXoa = 0;
@@ -1971,10 +1989,10 @@ void Draw_Screen_Employee(QLNV *QL)
     float ra1 = 0.0f;              // Góc xoay (0 độ) rotation
     float sa1 = 0.33f;
     DrawTextureEx(a1, pa1, ra1, sa1, WHITE);
-    DrawTextEx(tieude, "Quản Lý Nhân Sự/Vị Trí Việc Làm", {pa1.x + 100, pa1.y}, 45, 1, WHITE);
-    DrawTextEx(myFont, "Danh sách và thông tin nhân sự/vị trí của công ty", {pa1.x + 100, pa1.y + 50}, 30, 1, WHITE);
-    static bool isOpenNV = false;
-    static bool isOpenVT = true;
+    DrawTextEx(tieude, "Quản Lý Nhân Sự & Vị Trí Việc Làm", {pa1.x + 100, pa1.y}, 45, 1, WHITE);
+    DrawTextEx(myFont, "Danh sách và thông tin nhân sự và vị trí của công ty", {pa1.x + 100, pa1.y + 50}, 30, 1, WHITE);
+    static bool isOpenNV = true;
+    static bool isOpenVT = false;
     Vector2 mousePos = GetMousePosition();
     bool Clicked = IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
 
@@ -2034,7 +2052,7 @@ void Draw_Screen_PhongBan(Vector2 mousePos, bool Clicked, QLNV *QL)
     static bool needfill = false;
     static set<string> dsXoaPB;
 
-    Rectangle panelBang1 = {330, 230, 1450.0f, 320.0f};
+    Rectangle panelBang1 = {330, 230, 1450.0f, 300.0f};
     DrawRectangleRounded({panelBang1.x + 3, panelBang1.y + 4, panelBang1.width, panelBang1.height}, 0.03f, 10, Fade(BLACK, 0.08f));
     DrawRectangleRounded(panelBang1, 0.03f, 10, WHITE);
     DrawRectangleRoundedLinesEx(panelBang1, 0.03f, 10, 1.5f, Color{225, 230, 240, 255});
@@ -2047,28 +2065,28 @@ void Draw_Screen_PhongBan(Vector2 mousePos, bool Clicked, QLNV *QL)
         a1 = LoadTexture("photo/anhto/pban.png");
         isLoaded = true;
     }
-    Vector2 pa1 = {360.0f, 320.0f}; // Tọa độ (x, y) postion
+    Vector2 pa1 = {360.0f, 310.0f}; // Tọa độ (x, y) postion
     float ra1 = 0.0f;               // Góc xoay (0 độ) rotation
     float sa1 = 0.6f;
     DrawTextureEx(a1, pa1, ra1, sa1, WHITE);
 
-    Rectangle textMaPhongBan = {930, 350, 300, 40};
+    Rectangle textMaPhongBan = {930, 330, 300, 40};
     static char MaPhongBanInput[50] = "\0"; // Chuỗi lưu ký tự người dùng gõ
     static int letterCount_Ma = 0;
-    DrawTextEx(myFont, "Mã Phòng Ban:", {700.0f, 350.0f}, 35, 1, BLACK);
+    DrawTextEx(myFont, "Mã Phòng Ban:", {700.0f, textMaPhongBan.y}, 35, 1, BLACK);
     DrawRectangleRounded(textMaPhongBan, 0.5f, 10, isMaPhongBanActive ? LIGHTGRAY : WHITE);
     DrawRectangleRoundedLinesEx(textMaPhongBan, 0.3f, 12, 3.0f, LIGHTGRAY);
 
-    Rectangle textTenPhongBan = {930, 420, 300, 40};
+    Rectangle textTenPhongBan = {textMaPhongBan.x, textMaPhongBan.y + 60, 300, 40};
     static char TenPhongBanInput[50] = "\0"; // Chuỗi lưu ký tự người dùng gõ
     static int letterCount_Ten = 0;
-    DrawTextEx(myFont, "Tên Phòng Ban:", {700.0f, 420.0f}, 35, 1, BLACK);
+    DrawTextEx(myFont, "Tên Phòng Ban:", {700.0f, textTenPhongBan.y}, 35, 1, BLACK);
     DrawRectangleRounded(textTenPhongBan, 0.5f, 10, isTenPhongBanActive ? LIGHTGRAY : WHITE);
     DrawRectangleRoundedLinesEx(textTenPhongBan, 0.3f, 12, 3.0f, LIGHTGRAY);
 
-    Rectangle textNgayThanhLap = {930, 490, 300, 40};
+    Rectangle textNgayThanhLap = {textTenPhongBan.x, textTenPhongBan.y + 60, 300, 40};
     static int day1 = day, month1 = month, year1 = year;
-    DrawTextEx(myFont, "Ngày thành lập:", {700, 490}, 35, 1, BLACK);
+    DrawTextEx(myFont, "Ngày thành lập:", {700, textNgayThanhLap.y}, 35, 1, BLACK);
     DrawRectangleRoundedLinesEx(textNgayThanhLap, 0.3f, 12, 3.0f, LIGHTGRAY);
     string textCalendar = to_string(day1) + '/' + to_string(month1) + '/' + to_string(year1);
     if (day1 < 10)
@@ -2252,7 +2270,7 @@ void Draw_Screen_PhongBan(Vector2 mousePos, bool Clicked, QLNV *QL)
     }
 
     // Bảng 2
-    Rectangle panelBang2 = {330, 580, 1450.0f, 350.0f};
+    Rectangle panelBang2 = {330, panelBang1.y + panelBang1.height + 30, 1450.0f, 370.0f};
     DrawRectangleRounded({panelBang2.x + 3, panelBang2.y + 4, panelBang2.width, panelBang2.height}, 0.03f, 10, Fade(BLACK, 0.08f));
     DrawRectangleRounded(panelBang2, 0.03f, 10, WHITE);
     DrawRectangleRoundedLinesEx(panelBang2, 0.03f, 10, 1.5f, Color{225, 230, 240, 255});
@@ -2270,10 +2288,10 @@ void Draw_Screen_PhongBan(Vector2 mousePos, bool Clicked, QLNV *QL)
     if (scrollY > 0.0f)
         scrollY = 0.0f;
     // Cấu hình khoảng cách và kích thước chữ
-    int startX = 350;   // Lề trái
-    int startY = 650;   // Lề trên
-    int rowHeight = 60; // Chiều cao mỗi dòng
-    int fontSize = 30;  // Kích thước chữ
+    int startX = panelBang2.x + 20; // Lề trái
+    int startY = panelBang2.y + 20; // Lề trên
+    int rowHeight = 60;             // Chiều cao mỗi dòng
+    int fontSize = 30;              // Kích thước chữ
 
     // Tọa độ X của từng cột (Bạn cần tinh chỉnh các số này cho vừa với màn hình)
     int colX[] = {350, 600, 900, 1250};
@@ -2508,7 +2526,7 @@ void Draw_Screen_ChucVu(Vector2 mousepos, bool Clicked, QLNV *QL)
     static bool needfill = false;
     static set<string> dsXoaCV;
 
-    Rectangle panelBang1 = {330, 230, 1450.0f, 320.0f};
+    Rectangle panelBang1 = {330, 230, 1450.0f, 300.0f};
     DrawRectangleRounded({panelBang1.x + 3, panelBang1.y + 4, panelBang1.width, panelBang1.height}, 0.03f, 10, Fade(BLACK, 0.08f));
     DrawRectangleRounded(panelBang1, 0.03f, 10, WHITE);
     DrawRectangleRoundedLinesEx(panelBang1, 0.03f, 10, 1.5f, Color{225, 230, 240, 255});
@@ -2521,29 +2539,29 @@ void Draw_Screen_ChucVu(Vector2 mousepos, bool Clicked, QLNV *QL)
         a1 = LoadTexture("photo/anhto/cvu.png");
         isLoaded = true;
     }
-    Vector2 pa1 = {360.0f, 320.0f}; // Tọa độ (x, y) postion
+    Vector2 pa1 = {360.0f, 310.0f}; // Tọa độ (x, y) postion
     float ra1 = 0.0f;               // Góc xoay (0 độ) rotation
     float sa1 = 0.6f;
     DrawTextureEx(a1, pa1, ra1, sa1, WHITE);
 
-    Rectangle MaChucVu = {930, 350, 300, 40};
+    Rectangle MaChucVu = {930, 330, 300, 40};
     static char MaChucVuInput[50] = "\0"; // Chuỗi lưu ký tự người dùng gõ
     static int letterCount_Ma = 0;
-    DrawTextEx(myFont, "Mã Chức Vụ:", {MaChucVu.x - 230, MaChucVu.y}, 35, 1, BLACK);
+    DrawTextEx(myFont, "Mã Chức Vụ:", {700.0f, MaChucVu.y}, 35, 1, BLACK);
     DrawRectangleRounded(MaChucVu, 0.5f, 10, isMaChucVuActive ? LIGHTGRAY : WHITE);
     DrawRectangleRoundedLinesEx(MaChucVu, 0.3f, 12, 3.0f, LIGHTGRAY);
 
-    Rectangle TenChucVu = {930, 420, 300, 40};
+    Rectangle TenChucVu = {MaChucVu.x, MaChucVu.y + 60, 300, 40};
     static char TenChucVuInput[50] = "\0";
     static int letterCount_Ten = 0;
-    DrawTextEx(myFont, "Tên Chức Vụ:", {TenChucVu.x - 230, TenChucVu.y}, 35, 1, BLACK);
+    DrawTextEx(myFont, "Tên Chức Vụ:", {700, TenChucVu.y}, 35, 1, BLACK);
     DrawRectangleRounded(TenChucVu, 0.5f, 10, isTenChucVuActive ? LIGHTGRAY : WHITE);
     DrawRectangleRoundedLinesEx(TenChucVu, 0.3f, 12, 3.0f, LIGHTGRAY);
 
-    Rectangle PhucCap = {930, 490, 300, 40};
+    Rectangle PhucCap = {TenChucVu.x, TenChucVu.y + 60, 300, 40};
     static char PhuCapInput[50] = "\0";
     static int letterCount_PhuCap = 0;
-    DrawTextEx(myFont, "Phụ Cấp:", {PhucCap.x - 230, PhucCap.y}, 35, 1, BLACK);
+    DrawTextEx(myFont, "Phụ Cấp:", {700, PhucCap.y}, 35, 1, BLACK);
     DrawRectangleRounded(PhucCap, 0.5f, 10, isPhucCapActive ? LIGHTGRAY : WHITE);
     DrawRectangleRoundedLinesEx(PhucCap, 0.3f, 12, 3.0f, LIGHTGRAY);
 
@@ -2718,7 +2736,7 @@ void Draw_Screen_ChucVu(Vector2 mousepos, bool Clicked, QLNV *QL)
         DrawTextEx(myFont, "   Xóa Chức Vụ", {btnXoa.x + 65, btnXoa.y + 10}, 30, 1, WHITE);
     }
 
-    Rectangle panelBang2 = {330, 580, 1450.0f, 350.0f};
+    Rectangle panelBang2 = {330, panelBang1.y + panelBang1.height + 30, 1450.0f, 370.0f};
     DrawRectangleRounded({panelBang2.x + 3, panelBang2.y + 4, panelBang2.width, panelBang2.height}, 0.03f, 10, Fade(BLACK, 0.08f));
     DrawRectangleRounded(panelBang2, 0.03f, 10, WHITE);
     DrawRectangleRoundedLinesEx(panelBang2, 0.03f, 10, 1.5f, Color{225, 230, 240, 255});
@@ -2737,10 +2755,10 @@ void Draw_Screen_ChucVu(Vector2 mousepos, bool Clicked, QLNV *QL)
     if (scrollY > 0.0f)
         scrollY = 0.0f;
     // Cấu hình khoảng cách và kích thước chữ
-    int startX = 350;   // Lề trái
-    int startY = 650;   // Lề trên
-    int rowHeight = 60; // Chiều cao mỗi dòng
-    int fontSize = 30;  // Kích thước chữ
+    int startX = panelBang2.x + 20; // Lề trái
+    int startY = panelBang2.y + 20; // Lề trên
+    int rowHeight = 60;             // Chiều cao mỗi dòng
+    int fontSize = 30;              // Kích thước chữ
 
     // Tọa độ X của từng cột (Bạn cần tinh chỉnh các số này cho vừa với màn hình)
     int colX[] = {350, 600, 900, 1250};
@@ -2779,7 +2797,7 @@ void Draw_Screen_ChucVu(Vector2 mousepos, bool Clicked, QLNV *QL)
     {
         string mcv = current->Data->get_MaChucVu();
         string name = current->Data->get_TenChucVu();
-        string pc = to_string(current->Data->get_PhuCap());
+        string pc = FormatSoTien(current->Data->get_PhuCap());
         int size = current->Data->get_ListNV()->get_size();
         string cv_size = to_string(size);
 
@@ -2999,10 +3017,10 @@ void Draw_Screen_Deparment(QLNV *QL)
     float ra1 = 0.0f;              // Góc xoay (0 độ) rotation
     float sa1 = 0.33f;
     DrawTextureEx(a1, pa1, ra1, sa1, WHITE);
-    DrawTextEx(tieude, "Quản Lý Phòng Ban/Chức Vụ", {pa1.x + 100, pa1.y}, 45, 1, WHITE);
-    DrawTextEx(myFont, "Danh sách và thông tin phòng ban/chức vụ của công ty", {pa1.x + 100, pa1.y + 50}, 30, 1, WHITE);
-    static bool isOpenPB = false;
-    static bool isOpenCV = true;
+    DrawTextEx(tieude, "Quản Lý Phòng Ban & Chức Vụ", {pa1.x + 100, pa1.y}, 45, 1, WHITE);
+    DrawTextEx(myFont, "Danh sách và thông tin phòng ban & chức vụ của công ty", {pa1.x + 100, pa1.y + 50}, 30, 1, WHITE);
+    static bool isOpenPB = true;
+    static bool isOpenCV = false;
     Vector2 mousePos = GetMousePosition();
     bool Clicked = IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
 
@@ -3121,11 +3139,11 @@ void Draw_Screen_BangLuong(Vector2 mousePos, bool Clicked, QLNV *QL)
 
     if (isOpenFT)
     {
-        Draw_Screen_FullTime(mousePos, Clicked, QL);
+        Draw_Screen_BL_FullTime(mousePos, Clicked, QL);
     }
     else if (isOpenPT)
     {
-        Draw_Screen_PartTime(mousePos, Clicked, QL);
+        Draw_Screen_BL_PartTime(mousePos, Clicked, QL);
     }
 }
 
@@ -3688,7 +3706,7 @@ void Draw_Screen_MucLuong(Vector2 mousePos, bool Clicked, QLNV *QL)
 }
 // Hàm format số có dấu chấm phân cách hàng nghìn (VD: 8450000 -> "8.450.000")
 
-void Draw_Screen_FullTime(Vector2 mousePos, bool Clicked, QLNV *QL)
+void Draw_Screen_BL_FullTime(Vector2 mousePos, bool Clicked, QLNV *QL)
 {
     Rectangle panelBang = {330, 345, 1450.0f, 640.0f};
     DrawRectangleRounded({panelBang.x + 3, panelBang.y + 4, panelBang.width, panelBang.height}, 0.03f, 10, Fade(BLACK, 0.08f));
@@ -3760,7 +3778,7 @@ void Draw_Screen_FullTime(Vector2 mousePos, bool Clicked, QLNV *QL)
         scrollY = 0.0f;
 
     int startX = 350;
-    int startY = 500;
+    int startY = 480;
     int rowHeight = 60;
     int fontSize = 30;
 
@@ -3778,97 +3796,86 @@ void Draw_Screen_FullTime(Vector2 mousePos, bool Clicked, QLNV *QL)
     DrawLine(startX, startY + 30, 1780, startY + 30, LIGHTGRAY);
 
     // =========== THU THẬP VÀ SẮP XẾP DANH SÁCH FULLTIME ===========
-    List<FullTime> *listFT = new List<FullTime>();
-    Node<Employee> *cur = QL->get_ListEmployee()->get_header()->Next;
-    while (cur != nullptr)
-    {
-        Employee *emp = cur->Data;
-        FullTime *ft = dynamic_cast<FullTime *>(emp);
-        if (ft != nullptr)
-        {
-            listFT->insert(ft);
-        }
-        cur = cur->Next;
-    }
-    static QLNV *s_QL = nullptr;
-    s_QL = QL;
+
     // Sắp xếp lương theo yêu cầu (1: Tăng dần, 2: Giảm dần)
     if (selectedSortIndex1 == 1)
     {
-        listFT->sort([](FullTime *a, FullTime *b)
-                     { return s_QL->TinhLuong(a) > s_QL->TinhLuong(b); });
+        QL->SapXep(TieuChiSapXep::LUONGFT_TANG);
     }
     else if (selectedSortIndex1 == 2)
     {
-        listFT->sort([](FullTime *a, FullTime *b)
-                     { return s_QL->TinhLuong(a) < s_QL->TinhLuong(b); });
+        QL->SapXep(TieuChiSapXep::LUONGFT_GIAM);
     }
 
     // =========== VẼ DANH SÁCH NHÂN VIÊN ===========
     int listStartY = startY + 35;
-    int listHeight = GetScreenHeight() - listStartY - 120;
+    int listHeight = GetScreenHeight() - listStartY - 90;
 
     Rectangle listArea = {(float)startX, (float)listStartY, (float)(GetScreenWidth() - startX), (float)listHeight};
     bool canHover = !isOpenChiTiet && !isChucVuOpen1 && !isPhongOpen1 && !isSortOpen1 && CheckCollisionPointRec(mousePos, listArea);
 
     float currentY = listStartY + scrollY;
-    int totalRows = listFT->get_size();
+    int totalRows = QL->get_soFT();
     Employee *selEmp = nullptr;
     if (!selectedMNV_FT.empty())
         selEmp = QL->TimTheoMa(selectedMNV_FT);
 
     BeginScissorMode(startX, listStartY, GetScreenWidth() - startX, listHeight);
-    Node<FullTime> *p = listFT->get_header()->Next;
+    Node<Employee> *p = QL->get_DB()->get_ListEmployee()->get_header()->Next;
     while (p != nullptr)
     {
-        Employee *emp = p->Data;
-        string mnv = emp->get_mnv();
-        string name = emp->get_name();
-        string phong = emp->get_PhongBan() ? emp->get_PhongBan()->get_TenPhongBan() : "";
-        string cv = emp->get_ChucVu() ? emp->get_ChucVu()->get_TenChucVu() : "";
-        string vitri = emp->get_ViTri() ? emp->get_ViTri()->get_TenVTVL() : "";
-
-        ostringstream oss;
-        oss << p->Data->get_HeSo();
-        double tongluong = QL->TinhLuong(p->Data);
-        if (tongluong < 0)
-            tongluong = 0;
-        int ngaycong = p->Data->get_SoNgayCong();
-
-        string strHeSo = oss.str();
-        string strNgayCong = to_string(ngaycong);
-        string strLuong = FormatSoTien((long long)tongluong);
-
-        // ----- HOVER + CHỌN DÒNG -----
-        Rectangle rowRect = {(float)startX, currentY - 5, (float)(GetScreenWidth() - startX - 20), 35};
-        bool isHover = canHover && CheckCollisionPointRec(mousePos, rowRect);
-        if (isHover && Clicked)
+        if (p->Data->get_LoaiNV() == "FullTime" && CheckEmployee(p->Data, tieuchi_CV, tieuchi_PB, hoTenInput1))
         {
-            selectedMNV_FT = mnv;
-            selEmp = emp;
-        }
-        bool isSelected = (mnv == selectedMNV_FT);
+            FullTime *ft = dynamic_cast<FullTime *>(p->Data);
+            string mnv = ft->get_mnv();
+            string name = ft->get_name();
+            string phong = ft->get_PhongBan() ? ft->get_PhongBan()->get_TenPhongBan() : "";
+            string cv = ft->get_ChucVu() ? ft->get_ChucVu()->get_TenChucVu() : "";
+            string vitri = ft->get_ViTri() ? ft->get_ViTri()->get_TenVTVL() : "";
 
-        if (isSelected)
-        {
-            DrawRectangleRec(rowRect, isHover ? Color{180, 195, 230, 255} : Color{200, 210, 235, 255});
-            selEmp = emp;
-        }
-        else if (isHover)
-        {
-            DrawRectangleRec(rowRect, Color{235, 235, 240, 255});
-        }
+            ostringstream oss;
 
-        DrawTextEx(myFont, mnv.c_str(), {colX[0], currentY}, fontSize, 1, BLACK);
-        DrawTextEx(myFont, name.c_str(), {colX[1], currentY}, fontSize, 1, BLACK);
-        DrawTextEx(myFont, phong.c_str(), {colX[2], currentY}, fontSize, 1, BLACK);
-        DrawTextEx(myFont, cv.c_str(), {colX[3], currentY}, fontSize, 1, BLACK);
-        DrawTextEx(myFont, vitri.c_str(), {colX[4], currentY}, fontSize, 1, BLACK);
-        DrawTextEx(myFont, strHeSo.c_str(), {colX[5], currentY}, fontSize, 1, BLACK);
-        DrawTextEx(myFont, (strNgayCong + "/26").c_str(), {colX[6], currentY}, fontSize, 1, BLACK);
-        DrawTextEx(myFont, strLuong.c_str(), {colX[7], currentY}, fontSize, 1, BLACK);
-        DrawLine(startX, currentY + 30, GetScreenWidth() - 20, currentY + 30, Fade(LIGHTGRAY, 0.5f));
-        currentY += rowHeight;
+            oss << ft->get_HeSo();
+            double tongluong = QL->TinhLuong(p->Data);
+            if (tongluong < 0)
+                tongluong = 0;
+            int ngaycong = ft->get_SoNgayCong();
+
+            string strHeSo = oss.str();
+            string strNgayCong = to_string(ngaycong);
+            string strLuong = FormatSoTien((long long)tongluong);
+
+            // ----- HOVER + CHỌN DÒNG -----
+            Rectangle rowRect = {(float)startX, currentY - 5, (float)(GetScreenWidth() - startX - 20), 35};
+            bool isHover = canHover && CheckCollisionPointRec(mousePos, rowRect);
+            if (isHover && Clicked)
+            {
+                selectedMNV_FT = mnv;
+                selEmp = ft;
+            }
+            bool isSelected = (mnv == selectedMNV_FT);
+
+            if (isSelected)
+            {
+                DrawRectangleRec(rowRect, isHover ? Color{180, 195, 230, 255} : Color{200, 210, 235, 255});
+                selEmp = ft;
+            }
+            else if (isHover)
+            {
+                DrawRectangleRec(rowRect, Color{235, 235, 240, 255});
+            }
+
+            DrawTextEx(myFont, mnv.c_str(), {colX[0], currentY}, fontSize, 1, BLACK);
+            DrawTextEx(myFont, name.c_str(), {colX[1], currentY}, fontSize, 1, BLACK);
+            DrawTextEx(myFont, phong.c_str(), {colX[2], currentY}, fontSize, 1, BLACK);
+            DrawTextEx(myFont, cv.c_str(), {colX[3], currentY}, fontSize, 1, BLACK);
+            DrawTextEx(myFont, vitri.c_str(), {colX[4], currentY}, fontSize, 1, BLACK);
+            DrawTextEx(myFont, strHeSo.c_str(), {colX[5], currentY}, fontSize, 1, BLACK);
+            DrawTextEx(myFont, (strNgayCong + "/26").c_str(), {colX[6], currentY}, fontSize, 1, BLACK);
+            DrawTextEx(myFont, strLuong.c_str(), {colX[7], currentY}, fontSize, 1, BLACK);
+            DrawLine(startX, currentY + 30, GetScreenWidth() - 20, currentY + 30, Fade(LIGHTGRAY, 0.5f));
+            currentY += rowHeight;
+        }
         p = p->Next;
     }
     EndScissorMode();
@@ -4000,6 +4007,10 @@ void Draw_Screen_FullTime(Vector2 mousePos, bool Clicked, QLNV *QL)
             DrawLine(modal.x + 36, modal.y + 98, modal.x + modal.width - 36, modal.y + 98, Color{235, 240, 248, 255});
 
             // Lấy các chỉ số tính lương
+            string pb = ft->get_PhongBan()->get_TenPhongBan();
+            string cv = ft->get_ChucVu()->get_TenChucVu();
+            string vt = ft->get_ViTri()->get_TenVTVL();
+            string bac = to_string(ft->get_BacViTri());
             double lcb = QL->get_LuongCoBan(ft);
             if (lcb < 0)
                 lcb = 0;
@@ -4007,21 +4018,38 @@ void Draw_Screen_FullTime(Vector2 mousePos, bool Clicked, QLNV *QL)
             int ngaycong = ft->get_SoNgayCong();
             double phucap = (ft->get_ChucVu() != nullptr) ? ft->get_ChucVu()->get_PhuCap() : 0.0;
             double thuong = ft->get_ThuongPhat();
-            double tongluong = QL->TinhLuong(ft);
-            if (tongluong < 0)
-                tongluong = 0;
-            double khautru = 0; // Khấu trừ
-            double thuclinh = tongluong - khautru;
+            double thuclinh = QL->TinhLuong(ft);
+            if (thuclinh < 0)
+                thuclinh = 0;
 
             float leftX = modal.x + 38;
             float rightX = modal.x + modal.width - 38;
             float rowY = modal.y + 118;
-            float rowSpacing = 46;
+            float rowSpacing = 50;
             int labelSize = 24;
-            int valSize = 24;
+            int valSize = 30;
             Color labelColor = Color{45, 55, 72, 255};
             Color valColor = Color{25, 30, 45, 255};
 
+            DrawTextEx(myFont, "Phòng Ban", {leftX, rowY}, labelSize, 1, labelColor);
+            float wpb = MeasureTextEx(myFont, pb.c_str(), valSize, 1).x;
+            DrawTextEx(myFont, pb.c_str(), {rightX - wpb, rowY}, valSize, 1, valColor);
+            rowY += rowSpacing;
+
+            DrawTextEx(myFont, "Chức Vụ", {leftX, rowY}, labelSize, 1, labelColor);
+            float wcv = MeasureTextEx(myFont, cv.c_str(), valSize, 1).x;
+            DrawTextEx(myFont, cv.c_str(), {rightX - wcv, rowY}, valSize, 1, valColor);
+            rowY += rowSpacing;
+
+            DrawTextEx(myFont, "Vị Trí Việc Làm", {leftX, rowY}, labelSize, 1, labelColor);
+            float wvt = MeasureTextEx(myFont, vt.c_str(), valSize, 1).x;
+            DrawTextEx(myFont, vt.c_str(), {rightX - wvt, rowY}, valSize, 1, valColor);
+            rowY += rowSpacing;
+
+            DrawTextEx(myFont, "Bậc vị trí", {leftX, rowY}, labelSize, 1, labelColor);
+            float wbac = MeasureTextEx(myFont, bac.c_str(), valSize, 1).x;
+            DrawTextEx(myFont, bac.c_str(), {rightX - wbac, rowY}, valSize, 1, valColor);
+            rowY += rowSpacing;
             // 1. Lương cơ bản
             DrawTextEx(myFont, "Lương cơ bản", {leftX, rowY}, labelSize, 1, labelColor);
             string sLCB = FormatSoTien((long long)lcb) + " đ";
@@ -4162,10 +4190,9 @@ void Draw_Screen_FullTime(Vector2 mousePos, bool Clicked, QLNV *QL)
                     }
                     ft->set_ThuongPhat(newT);
                     QL->get_DB()->SaveFileEmployee();
-                    tongluong = QL->TinhLuong(ft);
-                    if (tongluong < 0)
-                        tongluong = 0;
-                    thuclinh = tongluong - khautru;
+                    thuclinh = QL->TinhLuong(ft);
+                    if (thuclinh < 0)
+                        thuclinh = 0;
                     HienThongBao("Cập nhật tiền thưởng thành công!", false);
                     isEditingThuong = false;
                     isThuongActive = false;
@@ -4179,38 +4206,29 @@ void Draw_Screen_FullTime(Vector2 mousePos, bool Clicked, QLNV *QL)
                 }
             }
             rowY += rowSpacing + 10;
+            /*
+                        // 6. Box Tổng thu nhập (Hộp xanh nhạt bo góc với icon máy tính)
+                        Rectangle boxTongThuNhap = {leftX, rowY, modal.width - 76, 58};
+                        DrawRectangleRounded(boxTongThuNhap, 0.25f, 8, Color{242, 246, 255, 255});
+                        DrawRectangleRoundedLinesEx(boxTongThuNhap, 0.25f, 8, 1.2f, Color{220, 230, 252, 255});
 
-            // 6. Box Tổng thu nhập (Hộp xanh nhạt bo góc với icon máy tính)
-            Rectangle boxTongThuNhap = {leftX, rowY, modal.width - 76, 58};
-            DrawRectangleRounded(boxTongThuNhap, 0.25f, 8, Color{242, 246, 255, 255});
-            DrawRectangleRoundedLinesEx(boxTongThuNhap, 0.25f, 8, 1.2f, Color{220, 230, 252, 255});
+                        // Vẽ icon máy tính nhỏ
+                        Rectangle iconCalc = {leftX + 16, rowY + 16, 22, 26};
+                        DrawRectangleRounded(iconCalc, 0.2f, 4, Color{50, 90, 220, 255});
+                        DrawRectangle(iconCalc.x + 3, iconCalc.y + 4, 16, 4, WHITE);
+                        DrawCircle(iconCalc.x + 6, iconCalc.y + 13, 1.5f, WHITE);
+                        DrawCircle(iconCalc.x + 11, iconCalc.y + 13, 1.5f, WHITE);
+                        DrawCircle(iconCalc.x + 16, iconCalc.y + 13, 1.5f, WHITE);
+                        DrawCircle(iconCalc.x + 6, iconCalc.y + 20, 1.5f, WHITE);
+                        DrawCircle(iconCalc.x + 11, iconCalc.y + 20, 1.5f, WHITE);
+                        DrawCircle(iconCalc.x + 16, iconCalc.y + 20, 1.5f, WHITE);
 
-            // Vẽ icon máy tính nhỏ
-            Rectangle iconCalc = {leftX + 16, rowY + 16, 22, 26};
-            DrawRectangleRounded(iconCalc, 0.2f, 4, Color{50, 90, 220, 255});
-            DrawRectangle(iconCalc.x + 3, iconCalc.y + 4, 16, 4, WHITE);
-            DrawCircle(iconCalc.x + 6, iconCalc.y + 13, 1.5f, WHITE);
-            DrawCircle(iconCalc.x + 11, iconCalc.y + 13, 1.5f, WHITE);
-            DrawCircle(iconCalc.x + 16, iconCalc.y + 13, 1.5f, WHITE);
-            DrawCircle(iconCalc.x + 6, iconCalc.y + 20, 1.5f, WHITE);
-            DrawCircle(iconCalc.x + 11, iconCalc.y + 20, 1.5f, WHITE);
-            DrawCircle(iconCalc.x + 16, iconCalc.y + 20, 1.5f, WHITE);
-
-            DrawTextEx(tieude, "Tổng thu nhập", {leftX + 50, rowY + 16}, 24, 1, Color{40, 75, 215, 255});
-            string sTong = FormatSoTien((long long)tongluong) + " đ";
-            float wTong = MeasureTextEx(tieude, sTong.c_str(), 26, 1).x;
-            DrawTextEx(tieude, sTong.c_str(), {rightX - wTong - 16, rowY + 15}, 26, 1, Color{30, 60, 200, 255});
-            rowY += 72;
-
-            // 7. Khấu trừ (Icon tròn đỏ có dấu trừ)
-            DrawCircle(leftX + 18, rowY + 13, 12, Color{245, 95, 85, 255});
-            DrawLineEx({leftX + 11, rowY + 13}, {leftX + 25, rowY + 13}, 2.2f, WHITE);
-            DrawTextEx(myFont, "Khấu trừ", {leftX + 44, rowY}, labelSize, 1, Color{100, 105, 115, 255});
-            string sKT = FormatSoTien((long long)khautru) + " đ";
-            float wKT = MeasureTextEx(myFont, sKT.c_str(), valSize, 1).x;
-            DrawTextEx(myFont, sKT.c_str(), {rightX - wKT, rowY}, valSize, 1, Color{100, 105, 115, 255});
-            rowY += 52;
-
+                        DrawTextEx(tieude, "Tổng thu nhập", {leftX + 50, rowY + 16}, 24, 1, Color{40, 75, 215, 255});
+                        string sTong = FormatSoTien((long long)thuclinh) + " đ";
+                        float wTong = MeasureTextEx(tieude, sTong.c_str(), 26, 1).x;
+                        DrawTextEx(tieude, sTong.c_str(), {rightX - wTong - 16, rowY + 15}, 26, 1, Color{30, 60, 200, 255});
+                        rowY += 72;
+            */
             // 8. Box Thực lĩnh (Hộp tím nhạt bo góc với icon checkmark tím)
             Rectangle boxThucLinh = {leftX, rowY, modal.width - 76, 62};
             DrawRectangleRounded(boxThucLinh, 0.25f, 8, Color{246, 242, 255, 255});
@@ -4239,7 +4257,8 @@ void Draw_Screen_FullTime(Vector2 mousePos, bool Clicked, QLNV *QL)
         }
     }
 }
-void Draw_Screen_PartTime(Vector2 mousePos, bool Clicked, QLNV *QL)
+
+void Draw_Screen_BL_PartTime(Vector2 mousePos, bool Clicked, QLNV *QL)
 {
     Rectangle panelBang = {330, 345, 1450.0f, 640.0f};
     DrawRectangleRounded({panelBang.x + 3, panelBang.y + 4, panelBang.width, panelBang.height}, 0.03f, 10, Fade(BLACK, 0.08f));
@@ -4311,7 +4330,7 @@ void Draw_Screen_PartTime(Vector2 mousePos, bool Clicked, QLNV *QL)
         scrollY = 0.0f;
 
     int startX = 350;
-    int startY = 500;
+    int startY = 480;
     int rowHeight = 60;
     int fontSize = 30;
 
@@ -4328,30 +4347,15 @@ void Draw_Screen_PartTime(Vector2 mousePos, bool Clicked, QLNV *QL)
     DrawLine(startX, startY + 30, 1780, startY + 30, LIGHTGRAY);
 
     // =========== THU THẬP VÀ SẮP XẾP DANH SÁCH PARTTIME ===========
-    List<PartTime> *listPT = new List<PartTime>();
-    Node<Employee> *cur = QL->get_ListEmployee()->get_header()->Next;
-    while (cur != nullptr)
-    {
-        Employee *emp = cur->Data;
-        PartTime *pt = dynamic_cast<PartTime *>(emp);
-        if (pt != nullptr && CheckEmployee(emp, tieuchi_CV, tieuchi_PB, hoTenInput2))
-        {
-            listPT->insert(pt);
-        }
-        cur = cur->Next;
-    }
-    static QLNV *s_QL = nullptr;
-    s_QL = QL;
+
     // Sắp xếp lương theo yêu cầu (1: Tăng dần, 2: Giảm dần)
     if (selectedSortIndex2 == 1)
     {
-        listPT->sort([](PartTime *a, PartTime *b)
-                     { return s_QL->TinhLuong(a) > s_QL->TinhLuong(b); });
+        QL->SapXep(TieuChiSapXep::LUONGPT_TANG);
     }
     else if (selectedSortIndex2 == 2)
     {
-        listPT->sort([](PartTime *a, PartTime *b)
-                     { return s_QL->TinhLuong(a) < s_QL->TinhLuong(b); });
+        QL->SapXep(TieuChiSapXep::LUONGPT_GIAM);
     }
 
     // =========== VẼ DANH SÁCH NHÂN VIÊN ===========
@@ -4362,60 +4366,63 @@ void Draw_Screen_PartTime(Vector2 mousePos, bool Clicked, QLNV *QL)
     bool canHover = !isOpenChiTiet2 && !isChucVuOpen2 && !isPhongOpen2 && !isSortOpen2 && CheckCollisionPointRec(mousePos, listArea);
 
     float currentY = listStartY + scrollY;
-    int totalRows = listPT->get_size();
+    int totalRows = QL->get_soPT();
     Employee *selEmp = nullptr;
     if (!selectedMNV_PT.empty())
         selEmp = QL->TimTheoMa(selectedMNV_PT);
 
     BeginScissorMode(startX, listStartY, GetScreenWidth() - startX, listHeight);
-    Node<PartTime> *p = listPT->get_header()->Next;
+    Node<Employee> *p = QL->get_DB()->get_ListEmployee()->get_header()->Next;
     while (p != nullptr)
     {
-        Employee *emp = p->Data;
-        string mnv = emp->get_mnv();
-        string name = emp->get_name();
-        string phong = emp->get_PhongBan() ? emp->get_PhongBan()->get_TenPhongBan() : "";
-        string cv = emp->get_ChucVu() ? emp->get_ChucVu()->get_TenChucVu() : "";
-        string vitri = emp->get_ViTri() ? emp->get_ViTri()->get_TenVTVL() : "";
-
-        double tongluong = QL->TinhLuong(p->Data);
-        if (tongluong < 0)
-            tongluong = 0;
-        int timework = p->Data->get_TimeWork();
-
-        string strBac = "Bậc " + to_string(p->Data->get_BacViTri());
-        string strGio = to_string(timework) + "h";
-        string strLuong = FormatSoTien((long long)tongluong);
-
-        // ----- HOVER + CHỌN DÒNG -----
-        Rectangle rowRect = {(float)startX, currentY - 5, (float)(GetScreenWidth() - startX - 20), 35};
-        bool isHover = canHover && CheckCollisionPointRec(mousePos, rowRect);
-        if (isHover && Clicked)
+        if (p->Data->get_LoaiNV() == "PartTime" && CheckEmployee(p->Data, tieuchi_CV, tieuchi_PB, hoTenInput2))
         {
-            selectedMNV_PT = mnv;
-            selEmp = emp;
-        }
-        bool isSelected = (mnv == selectedMNV_PT);
+            PartTime *pt = dynamic_cast<PartTime *>(p->Data);
+            string mnv = pt->get_mnv();
+            string name = pt->get_name();
+            string phong = pt->get_PhongBan() ? pt->get_PhongBan()->get_TenPhongBan() : "";
+            string cv = pt->get_ChucVu() ? pt->get_ChucVu()->get_TenChucVu() : "";
+            string vitri = pt->get_ViTri() ? pt->get_ViTri()->get_TenVTVL() : "";
 
-        if (isSelected)
-        {
-            DrawRectangleRec(rowRect, isHover ? Color{180, 195, 230, 255} : Color{200, 210, 235, 255});
-            selEmp = emp;
-        }
-        else if (isHover)
-        {
-            DrawRectangleRec(rowRect, Color{235, 235, 240, 255});
-        }
+            double tongluong = QL->TinhLuong(p->Data);
+            if (tongluong < 0)
+                tongluong = 0;
+            int timework = pt->get_TimeWork();
 
-        DrawTextEx(myFont, mnv.c_str(), {colX[0], currentY}, fontSize, 1, BLACK);
-        DrawTextEx(myFont, name.c_str(), {colX[1], currentY}, fontSize, 1, BLACK);
-        DrawTextEx(myFont, phong.c_str(), {colX[2], currentY}, fontSize, 1, BLACK);
-        DrawTextEx(myFont, cv.c_str(), {colX[3], currentY}, fontSize, 1, BLACK);
-        DrawTextEx(myFont, vitri.c_str(), {colX[4], currentY}, fontSize, 1, BLACK);
-        DrawTextEx(myFont, strGio.c_str(), {colX[5], currentY}, fontSize, 1, BLACK);
-        DrawTextEx(myFont, strLuong.c_str(), {colX[6], currentY}, fontSize, 1, BLACK);
-        DrawLine(startX, currentY + 30, GetScreenWidth() - 20, currentY + 30, Fade(LIGHTGRAY, 0.5f));
-        currentY += rowHeight;
+            string strBac = "Bậc " + to_string(pt->get_BacViTri());
+            string strGio = to_string(timework) + "h";
+            string strLuong = FormatSoTien((long long)tongluong);
+
+            // ----- HOVER + CHỌN DÒNG -----
+            Rectangle rowRect = {(float)startX, currentY - 5, (float)(GetScreenWidth() - startX - 20), 35};
+            bool isHover = canHover && CheckCollisionPointRec(mousePos, rowRect);
+            if (isHover && Clicked)
+            {
+                selectedMNV_PT = mnv;
+                selEmp = pt;
+            }
+            bool isSelected = (mnv == selectedMNV_PT);
+
+            if (isSelected)
+            {
+                DrawRectangleRec(rowRect, isHover ? Color{180, 195, 230, 255} : Color{200, 210, 235, 255});
+                selEmp = pt;
+            }
+            else if (isHover)
+            {
+                DrawRectangleRec(rowRect, Color{235, 235, 240, 255});
+            }
+
+            DrawTextEx(myFont, mnv.c_str(), {colX[0], currentY}, fontSize, 1, BLACK);
+            DrawTextEx(myFont, name.c_str(), {colX[1], currentY}, fontSize, 1, BLACK);
+            DrawTextEx(myFont, phong.c_str(), {colX[2], currentY}, fontSize, 1, BLACK);
+            DrawTextEx(myFont, cv.c_str(), {colX[3], currentY}, fontSize, 1, BLACK);
+            DrawTextEx(myFont, vitri.c_str(), {colX[4], currentY}, fontSize, 1, BLACK);
+            DrawTextEx(myFont, strGio.c_str(), {colX[5], currentY}, fontSize, 1, BLACK);
+            DrawTextEx(myFont, strLuong.c_str(), {colX[6], currentY}, fontSize, 1, BLACK);
+            DrawLine(startX, currentY + 30, GetScreenWidth() - 20, currentY + 30, Fade(LIGHTGRAY, 0.5f));
+            currentY += rowHeight;
+        }
         p = p->Next;
     }
     EndScissorMode();
@@ -4547,40 +4554,54 @@ void Draw_Screen_PartTime(Vector2 mousePos, bool Clicked, QLNV *QL)
             DrawLine(modal.x + 36, modal.y + 98, modal.x + modal.width - 36, modal.y + 98, Color{235, 240, 248, 255});
 
             // Lấy các chỉ số tính lương PartTime
+            string pb = pt->get_PhongBan()->get_TenPhongBan();
+            string cv = pt->get_ChucVu()->get_TenChucVu();
+            string vt = pt->get_ViTri()->get_TenVTVL();
+            string bac = to_string(pt->get_BacViTri());
             double lcb = QL->get_LuongCoBan(pt);
             if (lcb < 0)
                 lcb = 0;
-            int bac = pt->get_BacViTri();
             int timework = pt->get_TimeWork();
             double phucap = (pt->get_ChucVu() != nullptr) ? pt->get_ChucVu()->get_PhuCap() : 0.0;
             double thuong = pt->get_ThuongPhat();
-            double tongluong = QL->TinhLuong(pt);
-            if (tongluong < 0)
-                tongluong = 0;
-            double khautru = 0; // Khấu trừ
-            double thuclinh = tongluong - khautru;
+            double thuclinh = QL->TinhLuong(pt);
+            if (thuclinh < 0)
+                thuclinh = 0;
 
             float leftX = modal.x + 38;
             float rightX = modal.x + modal.width - 38;
             float rowY = modal.y + 118;
-            float rowSpacing = 46;
+            float rowSpacing = 50;
             int labelSize = 24;
-            int valSize = 24;
+            int valSize = 30;
             Color labelColor = Color{45, 55, 72, 255};
             Color valColor = Color{25, 30, 45, 255};
+
+            DrawTextEx(myFont, "Phòng Ban", {leftX, rowY}, labelSize, 1, labelColor);
+            float wpb = MeasureTextEx(myFont, pb.c_str(), valSize, 1).x;
+            DrawTextEx(myFont, pb.c_str(), {rightX - wpb, rowY}, valSize, 1, valColor);
+            rowY += rowSpacing;
+
+            DrawTextEx(myFont, "Chức Vụ", {leftX, rowY}, labelSize, 1, labelColor);
+            float wcv = MeasureTextEx(myFont, cv.c_str(), valSize, 1).x;
+            DrawTextEx(myFont, cv.c_str(), {rightX - wcv, rowY}, valSize, 1, valColor);
+            rowY += rowSpacing;
+
+            DrawTextEx(myFont, "Vị Trí Việc Làm", {leftX, rowY}, labelSize, 1, labelColor);
+            float wvt = MeasureTextEx(myFont, vt.c_str(), valSize, 1).x;
+            DrawTextEx(myFont, vt.c_str(), {rightX - wvt, rowY}, valSize, 1, valColor);
+            rowY += rowSpacing;
+
+            DrawTextEx(myFont, "Bậc vị trí", {leftX, rowY}, labelSize, 1, labelColor);
+            float wbac = MeasureTextEx(myFont, bac.c_str(), valSize, 1).x;
+            DrawTextEx(myFont, bac.c_str(), {rightX - wbac, rowY}, valSize, 1, valColor);
+            rowY += rowSpacing;
 
             // 1. Lương theo giờ
             DrawTextEx(myFont, "Lương theo giờ", {leftX, rowY}, labelSize, 1, labelColor);
             string sLCB = FormatSoTien((long long)lcb) + " đ/h";
             float wLCB = MeasureTextEx(myFont, sLCB.c_str(), valSize, 1).x;
             DrawTextEx(myFont, sLCB.c_str(), {rightX - wLCB, rowY}, valSize, 1, valColor);
-            rowY += rowSpacing;
-
-            // 2. Bậc vị trí
-            DrawTextEx(myFont, "Bậc vị trí", {leftX, rowY}, labelSize, 1, labelColor);
-            string sBac = "Bậc " + to_string(bac);
-            float wBac = MeasureTextEx(myFont, sBac.c_str(), valSize, 1).x;
-            DrawTextEx(myFont, sBac.c_str(), {rightX - wBac, rowY}, valSize, 1, valColor);
             rowY += rowSpacing;
 
             // 3. Số giờ làm việc thực tế
@@ -4707,10 +4728,9 @@ void Draw_Screen_PartTime(Vector2 mousePos, bool Clicked, QLNV *QL)
                     }
                     pt->set_ThuongPhat(newT);
                     QL->get_DB()->SaveFileEmployee();
-                    tongluong = QL->TinhLuong(pt);
-                    if (tongluong < 0)
-                        tongluong = 0;
-                    thuclinh = tongluong - khautru;
+                    thuclinh = QL->TinhLuong(pt);
+                    if (thuclinh < 0)
+                        thuclinh = 0;
                     HienThongBao("Cập nhật tiền thưởng thành công!", false);
                     isEditingThuong2 = false;
                     isThuongActive2 = false;
@@ -4724,38 +4744,31 @@ void Draw_Screen_PartTime(Vector2 mousePos, bool Clicked, QLNV *QL)
                 }
             }
             rowY += rowSpacing + 10;
+            /*
+                        // 6. Box Tổng thu nhập (Hộp xanh nhạt bo góc với icon máy tính)
+                        Rectangle boxTongThuNhap = {leftX, rowY, modal.width - 76, 58};
+                        DrawRectangleRounded(boxTongThuNhap, 0.25f, 8, Color{242, 246, 255, 255});
+                        DrawRectangleRoundedLinesEx(boxTongThuNhap, 0.25f, 8, 1.2f, Color{220, 230, 252, 255});
 
-            // 6. Box Tổng thu nhập (Hộp xanh nhạt bo góc với icon máy tính)
-            Rectangle boxTongThuNhap = {leftX, rowY, modal.width - 76, 58};
-            DrawRectangleRounded(boxTongThuNhap, 0.25f, 8, Color{242, 246, 255, 255});
-            DrawRectangleRoundedLinesEx(boxTongThuNhap, 0.25f, 8, 1.2f, Color{220, 230, 252, 255});
+                        // Vẽ icon máy tính nhỏ
+                        Rectangle iconCalc = {leftX + 16, rowY + 16, 22, 26};
+                        DrawRectangleRounded(iconCalc, 0.2f, 4, Color{50, 90, 220, 255});
+                        DrawRectangle(iconCalc.x + 3, iconCalc.y + 4, 16, 4, WHITE);
+                        DrawCircle(iconCalc.x + 6, iconCalc.y + 13, 1.5f, WHITE);
+                        DrawCircle(iconCalc.x + 11, iconCalc.y + 13, 1.5f, WHITE);
+                        DrawCircle(iconCalc.x + 16, iconCalc.y + 13, 1.5f, WHITE);
+                        DrawCircle(iconCalc.x + 6, iconCalc.y + 20, 1.5f, WHITE);
+                        DrawCircle(iconCalc.x + 11, iconCalc.y + 20, 1.5f, WHITE);
+                        DrawCircle(iconCalc.x + 16, iconCalc.y + 20, 1.5f, WHITE);
 
-            // Vẽ icon máy tính nhỏ
-            Rectangle iconCalc = {leftX + 16, rowY + 16, 22, 26};
-            DrawRectangleRounded(iconCalc, 0.2f, 4, Color{50, 90, 220, 255});
-            DrawRectangle(iconCalc.x + 3, iconCalc.y + 4, 16, 4, WHITE);
-            DrawCircle(iconCalc.x + 6, iconCalc.y + 13, 1.5f, WHITE);
-            DrawCircle(iconCalc.x + 11, iconCalc.y + 13, 1.5f, WHITE);
-            DrawCircle(iconCalc.x + 16, iconCalc.y + 13, 1.5f, WHITE);
-            DrawCircle(iconCalc.x + 6, iconCalc.y + 20, 1.5f, WHITE);
-            DrawCircle(iconCalc.x + 11, iconCalc.y + 20, 1.5f, WHITE);
-            DrawCircle(iconCalc.x + 16, iconCalc.y + 20, 1.5f, WHITE);
+                        DrawTextEx(tieude, "Tổng thu nhập", {leftX + 50, rowY + 16}, 24, 1, Color{40, 75, 215, 255});
+                        string sTong = FormatSoTien((long long)thuclinh) + " đ";
+                        float wTong = MeasureTextEx(tieude, sTong.c_str(), 26, 1).x;
+                        DrawTextEx(tieude, sTong.c_str(), {rightX - wTong - 16, rowY + 15}, 26, 1, Color{30, 60, 200, 255});
+                        rowY += 72;
 
-            DrawTextEx(tieude, "Tổng thu nhập", {leftX + 50, rowY + 16}, 24, 1, Color{40, 75, 215, 255});
-            string sTong = FormatSoTien((long long)tongluong) + " đ";
-            float wTong = MeasureTextEx(tieude, sTong.c_str(), 26, 1).x;
-            DrawTextEx(tieude, sTong.c_str(), {rightX - wTong - 16, rowY + 15}, 26, 1, Color{30, 60, 200, 255});
-            rowY += 72;
-
-            // 7. Khấu trừ (Icon tròn đỏ có dấu trừ)
-            DrawCircle(leftX + 18, rowY + 13, 12, Color{245, 95, 85, 255});
-            DrawLineEx({leftX + 11, rowY + 13}, {leftX + 25, rowY + 13}, 2.2f, WHITE);
-            DrawTextEx(myFont, "Khấu trừ", {leftX + 44, rowY}, labelSize, 1, Color{100, 105, 115, 255});
-            string sKT = FormatSoTien((long long)khautru) + " đ";
-            float wKT = MeasureTextEx(myFont, sKT.c_str(), valSize, 1).x;
-            DrawTextEx(myFont, sKT.c_str(), {rightX - wKT, rowY}, valSize, 1, Color{100, 105, 115, 255});
-            rowY += 52;
-
+                        // 7. Khấu trừ (Icon tròn đỏ có dấu trừ)
+            */
             // 8. Box Thực lĩnh (Hộp tím nhạt bo góc với icon checkmark tím)
             Rectangle boxThucLinh = {leftX, rowY, modal.width - 76, 62};
             DrawRectangleRounded(boxThucLinh, 0.25f, 8, Color{246, 242, 255, 255});
@@ -4791,7 +4804,7 @@ void Draw_Screen_Salary(QLNV *QL)
     static bool isLoaded = false;
     if (!isLoaded)
     {
-        a1 = LoadTexture("photo/anhto/Asset-3.png");
+        a1 = LoadTexture("photo/icon/Asset-3.png");
         isLoaded = true;
     }
     Vector2 pa1 = {370.0f, 45.0f}; // Tọa độ (x, y) postion

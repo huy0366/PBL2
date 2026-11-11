@@ -27,10 +27,13 @@ private:
     List<MucLuong> *ListML;
     List<Employee> *ListEmployee;
     Hash *HashEmployee;
+    int soFT, soPT;
 
 public:
     DataBase();
     ~DataBase();
+    int get_soFT() const;
+    int get_soPT() const;
     // thêm
     void Insert(PhongBan *, Node<PhongBan> * = nullptr);
     void Insert(ChucVu *, Node<ChucVu> * = nullptr);
@@ -86,7 +89,7 @@ public:
     void SaveAll();
 };
 
-DataBase::DataBase()
+DataBase::DataBase() : soFT(0), soPT(0)
 {
     this->ListPB = new List<PhongBan>();
     this->ListCV = new List<ChucVu>();
@@ -104,6 +107,9 @@ DataBase::~DataBase()
     delete ListML;
     delete ListEmployee;
 }
+
+int DataBase::get_soFT() const { return soFT; }
+int DataBase::get_soPT() const { return soPT; }
 
 // p = null thì insert đầu
 void DataBase::Insert(PhongBan *pb, Node<PhongBan> *p)
@@ -147,6 +153,10 @@ void DataBase::Insert(Employee *e, Node<Employee> *p)
         else
             this->ListEmployee->insert(e, p);
         this->HashEmployee->insert(e->get_mnv(), e);
+        if (e->get_LoaiNV() == "FullTime")
+            ++soFT;
+        else if (e->get_LoaiNV() == "PartTime")
+            ++soPT;
         if (e->get_PhongBan() != nullptr)
             e->get_PhongBan()->ThemNV(e);
         if (e->get_ChucVu() != nullptr)
@@ -213,6 +223,10 @@ void DataBase::Remove(Employee *e)
     if (e == nullptr)
         return;
     this->HashEmployee->erase(e->get_mnv(), FindID);
+    if (e->get_LoaiNV() == "FullTime")
+        --soFT;
+    else if (e->get_LoaiNV() == "PartTime")
+        --soPT;
     Node<Employee> *p = this->ListEmployee->get_header()->Next;
     while (p != nullptr)
     {

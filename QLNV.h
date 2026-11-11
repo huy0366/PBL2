@@ -13,7 +13,11 @@ enum class TieuChiSapXep
     NGAYSINH_TANG,
     NGAYSINH_GIAM,
     THAM_NIEN_GIAM,
-    THAM_NIEN_TANG
+    THAM_NIEN_TANG,
+    LUONGFT_GIAM,
+    LUONGFT_TANG,
+    LUONGPT_GIAM,
+    LUONGPT_TANG
 };
 
 class QLNV : public Entity
@@ -48,7 +52,29 @@ private:
 
     static bool NgayLamIncrease(Employee *x, Employee *y) { return x->get_NgayLamViec() < y->get_NgayLamViec(); }
     static bool NgayLamDecrease(Employee *x, Employee *y) { return x->get_NgayLamViec() > y->get_NgayLamViec(); }
+    static QLNV *current;
+    static string loaiLoc; // "FullTime" hoặc "PartTime"
 
+    static bool LuongIncrease(Employee *x, Employee *y)
+    {
+        bool xOK = x->get_LoaiNV() == loaiLoc;
+        bool yOK = y->get_LoaiNV() == loaiLoc;
+        if (xOK != yOK)
+            return xOK;
+        if (!xOK)
+            return false;
+        return current->TinhLuong(x) < current->TinhLuong(y);
+    }
+    static bool LuongDecrease(Employee *x, Employee *y)
+    {
+        bool xOK = x->get_LoaiNV() == loaiLoc;
+        bool yOK = y->get_LoaiNV() == loaiLoc;
+        if (xOK != yOK)
+            return xOK;
+        if (!xOK)
+            return false;
+        return current->TinhLuong(x) > current->TinhLuong(y);
+    }
     bool CheckEmployee(Employee *); // có hợp lệ không, không thì throw (LƯU Ý: chưa check trùng)
     bool CheckPhongBan(PhongBan *);
     bool CheckChucVu(ChucVu *);
@@ -109,6 +135,8 @@ public:
     List<Employee> *get_ListEmployee() const;
     DataBase *get_DB() const;
     void SapXep(TieuChiSapXep);
+    int get_soFT() const;
+    int get_soPT() const;
     void Show() override;
     ~QLNV();
 };
@@ -145,7 +173,8 @@ double QLNV::lcb(Employee *e) const
         return -1; // thêm check này
     return ml->get_Luong();
 }
-
+inline QLNV *QLNV::current = nullptr;
+inline string QLNV::loaiLoc = "";
 bool QLNV::CheckEmployee(Employee *e)
 {
     if (e == nullptr)
@@ -188,6 +217,7 @@ bool QLNV::CheckPhongBan(PhongBan *pb)
         throw string("Chưa nhập tên phòng ban!");
     if (pb->get_NgayThanhLap() > Date::DateHienTai())
         throw string("Ngày thành lập lớn hơn ngày hiện tại!");
+
     return true;
 }
 bool QLNV::CheckChucVu(ChucVu *cv)
@@ -722,8 +752,31 @@ void QLNV::SapXep(TieuChiSapXep t)
     case TieuChiSapXep::THAM_NIEN_TANG:
         l->sort(NgayLamDecrease);
         break;
+    case TieuChiSapXep::LUONGFT_TANG:
+        current = this;
+        loaiLoc = "FullTime";
+        l->sort(LuongIncrease);
+        break;
+    case TieuChiSapXep::LUONGFT_GIAM:
+        current = this;
+        loaiLoc = "FullTime";
+        l->sort(LuongDecrease);
+        break;
+    case TieuChiSapXep::LUONGPT_TANG:
+        current = this;
+        loaiLoc = "PartTime";
+        l->sort(LuongIncrease);
+        break;
+    case TieuChiSapXep::LUONGPT_GIAM:
+        current = this;
+        loaiLoc = "PartTime";
+        l->sort(LuongDecrease);
+        break;
     }
 }
+
+int QLNV::get_soFT() const { return DB->get_soFT(); }
+int QLNV::get_soPT() const { return DB->get_soPT(); }
 
 void QLNV::Show()
 {
