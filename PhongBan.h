@@ -1,10 +1,9 @@
 #pragma once
 #include "LinkedList.h"
-#include "Entity.h"
 #include "Date.h"
 using namespace std;
 class Employee;
-class PhongBan : public Entity
+class PhongBan
 {
 private:
     string MaPhongBan, TenPhongBan;
@@ -28,8 +27,7 @@ public:
     // bool SuaNV(Employee *);
     int get_sizeNV();
     // Hàm so sánh kiểm tra Tên Chi Nhánh
-    static bool checkPhongBanName(Entity *entity, const string &name);
-    void Show() override;
+    // static bool checkPhongBanName(Entity *entity, const string &name);
 };
 
 PhongBan::PhongBan() : L(new List<Employee>()) {}
@@ -69,10 +67,6 @@ void PhongBan::set_NgayThanhLap(const Date &d)
 Date PhongBan::get_NgayThanhLap() const
 {
     return this->NgayThanhLap;
-}
-void PhongBan::Show()
-{
-    cout << this->MaPhongBan << this->TenPhongBan << endl;
 }
 List<Employee> *PhongBan::get_ListNV()
 {
@@ -118,8 +112,8 @@ int PhongBan::get_sizeNV()
     return this->L->get_size();
 }
 // Hàm so sánh kiểm tra Tên Chi Nhánh
-bool PhongBan::checkPhongBanName(Entity *entity, const string &name)
-{
-    PhongBan *b = dynamic_cast<PhongBan *>(entity);
-    return (b != nullptr) && (b->get_MaPhongBan() == name);
-}
+// bool PhongBan::checkPhongBanName(Entity *entity, const string &name)
+// {
+//     PhongBan *b = dynamic_cast<PhongBan *>(entity);
+//     return (b != nullptr) && (b->get_MaPhongBan() == name);
+// }

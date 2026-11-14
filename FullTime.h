@@ -7,7 +7,6 @@
 #include "MucLuong.h"
 
 using namespace std;
-class DataBase;
 class FullTime : public Employee
 {
 private:
@@ -22,9 +21,8 @@ public:
     int get_SoNgayCong();
     void set_SoNgayCong(const int &);
     double get_HeSo();
-    double get_ThucLinh(const double &) override;
+    long long get_ThucLinh(const long long &) override;
     string get_LoaiNV() override;
-    void Show() override;
     double tinhHS(const Date &);
     virtual ~FullTime();
 };
@@ -51,24 +49,11 @@ double FullTime::get_HeSo()
     return this->HeSo;
 }
 
-// double FullTime::get_ThucLinh(DataBase *bl)
-// {
-//     MucLuong *ml = bl->FindML(this->get_ViTri()->get_MaVTVL(), this->get_BacViTri(), "FullTime");
-//     return (ml->get_Luong() * this->SoNgayCong) / 26 * this->HeSo;
-// }
-
 string FullTime::get_LoaiNV()
 {
     return "FullTime";
 }
 
-void FullTime::Show()
-{
-    Employee::Show();
-    cout << setw(10) << get_LoaiNV()
-         << setw(10) << get_SoNgayCong()
-         << setw(10) << get_HeSo() << endl;
-}
 double FullTime::tinhHS(const Date &d)
 {
     int year = Date::DateHienTai().get_year() - d.get_year();

@@ -20,7 +20,7 @@ enum class TieuChiSapXep
     LUONGPT_TANG
 };
 
-class QLNV : public Entity
+class QLNV
 {
 private:
     DataBase *DB;
@@ -125,19 +125,13 @@ public:
     // void DanhSachTheoThamNien();
 
     MucLuong *get_MucLuong(Employee *e) const;
-    double get_LuongCoBan(Employee *e) const;
-    double TinhLuong(Employee *e) const;
+    long long get_LuongCoBan(Employee *e) const;
+    long long TinhLuong(Employee *e) const;
     // ================= Sắp xếp & hiển thị =================
-    List<PhongBan> *get_ListPB() const;
-    List<ChucVu> *get_ListCV() const;
-    List<ViTriViecLam> *get_ListVTVL() const;
-    List<MucLuong> *get_ListML() const;
-    List<Employee> *get_ListEmployee() const;
     DataBase *get_DB() const;
     void SapXep(TieuChiSapXep);
     int get_soFT() const;
     int get_soPT() const;
-    void Show() override;
     ~QLNV();
 };
 
@@ -217,7 +211,6 @@ bool QLNV::CheckPhongBan(PhongBan *pb)
         throw string("Chưa nhập tên phòng ban!");
     if (pb->get_NgayThanhLap() > Date::DateHienTai())
         throw string("Ngày thành lập lớn hơn ngày hiện tại!");
-
     return true;
 }
 bool QLNV::CheckChucVu(ChucVu *cv)
@@ -248,6 +241,10 @@ bool QLNV::CheckMucLuong(MucLuong *ml)
         throw string("Bậc lương không được nhỏ hơn 1!");
     if (ml->get_Luong() < 0)
         throw string("Mức lương không được là số âm!");
+    if (ml == nullptr)
+        throw string("Không tìm thấy mức lương!");
+    if (ml->get_Luong() <= 0)
+        throw string("Mức lương phải lớn hơn 0!");
     return true;
 }
 
@@ -426,7 +423,6 @@ bool QLNV::SuaChucVu(ChucVu *cv)
 }
 bool QLNV::SuaPhongBan(PhongBan *pb)
 {
-
     CheckPhongBan(pb);
     DB->Repair(pb);
     return 1;
@@ -686,38 +682,18 @@ MucLuong *QLNV::get_MucLuong(Employee *e) const
         e->get_BacViTri(),
         e->get_LoaiNV());
 }
-double QLNV::get_LuongCoBan(Employee *e) const
+long long QLNV::get_LuongCoBan(Employee *e) const
 {
     return this->lcb(e);
 }
-double QLNV::TinhLuong(Employee *e) const
+long long QLNV::TinhLuong(Employee *e) const
 {
-    double luongCB = this->lcb(e);
+    long long luongCB = this->lcb(e);
     if (luongCB < 0)
         return -1; // Không tìm thấy mức lương hợp lệ
     return e->get_ThucLinh(luongCB);
 }
 
-List<PhongBan> *QLNV::get_ListPB() const
-{
-    return DB ? DB->get_ListPB() : nullptr;
-}
-List<ChucVu> *QLNV::get_ListCV() const
-{
-    return DB ? DB->get_ListCV() : nullptr;
-}
-List<ViTriViecLam> *QLNV::get_ListVTVL() const
-{
-    return DB ? DB->get_ListVTVL() : nullptr;
-}
-List<MucLuong> *QLNV::get_ListML() const
-{
-    return DB ? DB->get_ListML() : nullptr;
-}
-List<Employee> *QLNV::get_ListEmployee() const
-{
-    return DB ? DB->get_ListEmployee() : nullptr;
-}
 DataBase *QLNV::get_DB() const
 {
     return DB;
@@ -777,8 +753,3 @@ void QLNV::SapXep(TieuChiSapXep t)
 
 int QLNV::get_soFT() const { return DB->get_soFT(); }
 int QLNV::get_soPT() const { return DB->get_soPT(); }
-
-void QLNV::Show()
-{
-    this->get_ListEmployee()->Show();
-}

@@ -6,12 +6,11 @@
 #include "ChucVu.h"
 #include "PhongBan.h"
 #include "ViTriViecLam.h"
-#include "Entity.h"
+// #include "Entity.h"
 #include "Date.h"
 
 using namespace std;
-class DataBase;
-class Employee : public Entity
+class Employee
 {
 protected:
     string mnv, name, sex;
@@ -21,7 +20,7 @@ protected:
     PhongBan *PB;
     Date NgayLamViec;
     int Bac_VTVL;
-    double ThuongPhat;
+    double Thuong;
 
 public:
     Employee(const string &, const string &, const Date &, const string &,
@@ -56,19 +55,18 @@ public:
     void set_BacViTri(const int &);
     int get_BacViTri() const;
 
-    void set_ThuongPhat(const int &);
-    int get_ThuongPhat() const;
+    void set_Thuong(const int &);
+    int get_Thuong() const;
 
     virtual string get_LoaiNV() = 0;
-    virtual double get_ThucLinh(const double &) = 0;
-    static bool checkEmpID(Entity *entity, const string &id);
-    void Show() override;
+    virtual long long get_ThucLinh(const long long &) = 0;
+    // static bool checkEmpID(Entity *entity, const string &id);
 };
 
 Employee::Employee(const string &mnv, const string &ten, const Date &ngay_sinh, const string &gioitinh,
                    ChucVu *cv, ViTriViecLam *vt, PhongBan *pb, const Date &ngay_lam, const int &bac, const double &thuong)
     : mnv(mnv), name(ten), NgaySinh(ngay_sinh), sex(gioitinh), CV(cv), VTVL(vt),
-      PB(pb), NgayLamViec(ngay_lam), Bac_VTVL(bac), ThuongPhat(thuong)
+      PB(pb), NgayLamViec(ngay_lam), Bac_VTVL(bac), Thuong(thuong)
 {
 }
 Employee::~Employee() {}
@@ -164,65 +162,46 @@ int Employee::get_BacViTri() const
 {
     return this->Bac_VTVL;
 }
-void Employee::set_ThuongPhat(const int &thuong)
+void Employee::set_Thuong(const int &thuong)
 {
-    this->ThuongPhat = thuong;
+    this->Thuong = thuong;
 }
-int Employee::get_ThuongPhat() const
+int Employee::get_Thuong() const
 {
-    return this->ThuongPhat;
+    return this->Thuong;
 }
-bool Employee::checkEmpID(Entity *entity, const string &id)
+// bool Employee::checkEmpID(Entity *entity, const string &id)
 
-{
-    Employee *emp = dynamic_cast<Employee *>(entity);
-    return (emp != nullptr) && (emp->get_mnv() == id);
-}
+// {
+//     Employee *emp = dynamic_cast<Employee *>(entity);
+//     return (emp != nullptr) && (emp->get_mnv() == id);
+// }
 
-void Employee::Show()
+bool FindID(Employee *e, const string &s)
 {
-    cout << left
-         << setw(10) << get_mnv()
-         << setw(20) << get_name()
-         << setw(10) << get_NgaySinh()
-         << setw(10) << get_sex()
-         << setw(10) << (get_ChucVu() ? get_ChucVu()->get_MaChucVu() : "N/A")
-         << setw(10) << (get_ViTri() ? get_ViTri()->get_TenVTVL() : "N/A")
-         << setw(15) << (get_PhongBan() ? get_PhongBan()->get_TenPhongBan() : "N/A")
-         << setw(10) << get_NgayLamViec()
-         << setw(10) << get_BacViTri();
+    return e != nullptr && e->get_mnv() == s;
 }
 
-bool FindID(Entity *e, const string &s)
-{
-    Employee *emp = static_cast<Employee *>(e);
-    if (e == NULL)
-    {
-        return false;
-    }
-    return emp->get_mnv() == s;
-}
+// bool FindName(Entity *e, const string &s)
+// {
+//     Employee *emp = static_cast<Employee *>(e);
+//     if (e == NULL)
+//     {
+//         return false;
+//     }
+//     return emp->get_name() == s;
+// }
 
-bool FindName(Entity *e, const string &s)
-{
-    Employee *emp = static_cast<Employee *>(e);
-    if (e == NULL)
-    {
-        return false;
-    }
-    return emp->get_name() == s;
-}
-
-bool FindDate(Entity *e, const Date &s)
-{
-    Employee *emp = static_cast<Employee *>(e);
-    if (e == NULL)
-    {
-        return false;
-    }
-    return emp->get_NgaySinh() == s;
-}
-// Các tiêu chí so sánh
-bool FindID(Entity *, const string &);
-bool FindName(Entity *, const string &);
-bool FindDate(Entity *, const Date &);
+// bool FindDate(Entity *e, const Date &s)
+// {
+//     Employee *emp = static_cast<Employee *>(e);
+//     if (e == NULL)
+//     {
+//         return false;
+//     }
+//     return emp->get_NgaySinh() == s;
+// }
+// // Các tiêu chí so sánh
+// bool FindID(Entity *, const string &);
+// bool FindName(Entity *, const string &);
+// bool FindDate(Entity *, const Date &);

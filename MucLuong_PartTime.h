@@ -14,7 +14,6 @@ public:
     double get_Luong();
     void set_Luong(double luong) override { this->Luong_Gio = luong; }
     string get_Loai_NV() override;
-    void Show() override;
 };
 
 MucLuong_PartTime::MucLuong_PartTime(ViTriViecLam *VTVL, const int &bac, const double &luong)
@@ -33,14 +32,4 @@ double MucLuong_PartTime::get_Luong()
 string MucLuong_PartTime::get_Loai_NV()
 {
     return "PartTime";
-}
-void MucLuong_PartTime::Show()
-{
-    cout << left
-         << setw(15) << this->get_Ma_VTVL()
-         << setw(20) << this->VTVL->get_TenVTVL()
-         << setw(10) << this->Bac_VTVL
-         << setw(15) << this->get_Loai_NV()
-         << setw(15) << fixed << setprecision(0) << this->Luong_Gio
-         << endl;
 }

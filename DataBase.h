@@ -14,10 +14,6 @@
 #include <sstream>
 #include <string>
 #include <fstream>
-class Employee;
-class FullTime;
-class PartTime;
-class MucLuong;
 class DataBase
 {
 private:
@@ -26,7 +22,7 @@ private:
     List<ViTriViecLam> *ListVTVL;
     List<MucLuong> *ListML;
     List<Employee> *ListEmployee;
-    Hash *HashEmployee;
+    Hash<Employee> *HashEmployee;
     int soFT, soPT;
 
 public:
@@ -96,7 +92,7 @@ DataBase::DataBase() : soFT(0), soPT(0)
     this->ListVTVL = new List<ViTriViecLam>();
     this->ListML = new List<MucLuong>();
     this->ListEmployee = new List<Employee>();
-    this->HashEmployee = new Hash(101);
+    this->HashEmployee = new Hash<Employee>(101);
 }
 
 DataBase::~DataBase()
@@ -294,14 +290,14 @@ MucLuong *DataBase::FindML(const string &maVT, const int &bac, const string &loa
     {
         if (p->Data != nullptr)
         {
-            MucLuong *ml = dynamic_cast<MucLuong *>(p->Data);
-            if (ml != nullptr)
+            // MucLuong *ml = dynamic_cast<MucLuong *>(p->Data);
+            if (p->Data != nullptr)
             {
-                if (ml->get_Ma_VTVL() == maVT &&
-                    ml->get_Bac_VTVL() == bac &&
-                    ml->get_Loai_NV() == loaiNV)
+                if (p->Data->get_Ma_VTVL() == maVT &&
+                    p->Data->get_Bac_VTVL() == bac &&
+                    p->Data->get_Loai_NV() == loaiNV)
                 {
-                    return ml;
+                    return p->Data;
                 }
             }
         }
@@ -311,8 +307,7 @@ MucLuong *DataBase::FindML(const string &maVT, const int &bac, const string &loa
 }
 Employee *DataBase::FindEmployee(const string &ma)
 {
-    Entity *e = this->HashEmployee->find(ma, FindID);
-    return static_cast<Employee *>(e);
+    return this->HashEmployee->find(ma, FindID);
 }
 
 void DataBase::Repair(PhongBan *pb)
@@ -342,7 +337,7 @@ void DataBase::Repair(MucLuong *ml)
     MucLuong *ml_old = this->FindML(ml->get_Ma_VTVL(), ml->get_Bac_VTVL(), ml->get_Loai_NV());
     if (ml_old == nullptr)
         return;
-    *ml_old = *ml;
+    ml_old->set_Luong(ml->get_Luong());
 }
 void DataBase::Repair(Employee *e)
 {
@@ -669,7 +664,7 @@ void DataBase::SaveFileEmployee(const string &filePath1, const string &filePath2
                 << ft->get_PhongBan()->get_MaPhongBan() << "\t"
                 << ft->get_NgayLamViec().ToString() << "\t"
                 << ft->get_BacViTri() << "\t"
-                << ft->get_ThuongPhat() << "\t"
+                << ft->get_Thuong() << "\t"
                 << ft->get_SoNgayCong() << "\t"
                 << ft->get_HeSo() << "\n";
         }
@@ -683,7 +678,7 @@ void DataBase::SaveFileEmployee(const string &filePath1, const string &filePath2
                   << pt->get_PhongBan()->get_MaPhongBan() << "\t"
                   << pt->get_NgayLamViec().ToString() << "\t"
                   << pt->get_BacViTri() << "\t"
-                  << pt->get_ThuongPhat() << "\t"
+                  << pt->get_Thuong() << "\t"
                   << pt->get_TimeWork() << "\n";
         }
         p = p->Next;
@@ -709,21 +704,21 @@ void DataBase::SaveAll()
     this->SaveFileEmployee();
 }
 
-inline double FullTime::get_ThucLinh(const double &lcb)
+inline long long FullTime::get_ThucLinh(const long long &lcb)
 {
-    double luongOT = 0.0; // lương làm thêm giờ
+    long long luongOT = 0.0; // lương làm thêm giờ
     int songaycong = 0;
     if (this->SoNgayCong > 26)
     {
         songaycong = this->SoNgayCong - 26;
         luongOT = (songaycong) * ((lcb / 26.0) * 2.0); // lương 1 ngày x2
     }
-    double luongHS = (lcb * this->SoNgayCong - songaycong) / 26 * this->HeSo + this->ThuongPhat + this->CV->get_PhuCap();
-    double luong = luongOT + luongHS;
+    long long luongHS = (lcb * this->SoNgayCong - songaycong) / 26 * this->HeSo + this->Thuong + this->CV->get_PhuCap();
+    long long luong = luongOT + luongHS;
     return luong;
 }
 
-inline double PartTime::get_ThucLinh(const double &luonggio)
+inline long long PartTime::get_ThucLinh(const long long &luonggio)
 {
     double luongOT = 0.0; // lương làm thêm giờ
     int timework = 0;
@@ -732,7 +727,7 @@ inline double PartTime::get_ThucLinh(const double &luonggio)
         timework = this->Time_Work - 80;
         luongOT = timework * luonggio * 1.5; // làm vượt thời gian x1.5
     }
-    double luongtheogio = (this->Time_Work - timework) * luonggio + this->ThuongPhat + this->CV->get_PhuCap();
+    double luongtheogio = (this->Time_Work - timework) * luonggio + this->Thuong + this->CV->get_PhuCap();
     double luong = luongOT + luongtheogio;
     return luong;
 }

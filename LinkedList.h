@@ -1,7 +1,6 @@
 #pragma once
 #include <iostream>
 #include <string>
-#include "Entity.h"
 using namespace std;
 template <typename T>
 struct Node
@@ -13,7 +12,7 @@ struct Node
     Node(T *x);
 };
 template <typename T>
-class List : public Entity
+class List
 {
 private:
     Node<T> *header, *tail; // đầu cuối
@@ -31,7 +30,6 @@ public:
     Node<T> *find(const string &, bool (*compare)(T *, const string &));
 
     int get_size();
-    void Show() override;
     Node<T> *get_header();
 
     void Quicksort(const int, const int, bool(cmp)(T *, T *));
@@ -123,20 +121,6 @@ template <typename T>
 int List<T>::get_size()
 {
     return this->size;
-}
-
-template <typename T>
-void List<T>::Show()
-{
-    Node<T> *p = header->Next;
-    while (p != nullptr)
-    {
-        if (p->Data != nullptr)
-        {
-            p->Data->Show();
-        }
-        p = p->Next;
-    }
 }
 
 template <typename T>

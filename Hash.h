@@ -2,36 +2,38 @@
 #include <string>
 #include "LinkedList.h"
 using namespace std;
-class Hash : public Entity
+template <typename T>
+class Hash
 {
 private:
     int M;
-    List<Entity> *L; // Mảng cList<Entity *> chứa Entity*
+    List<T> *L; // Mảng cList<Entity *> chứa Entity*
 
 public:
     Hash(int = 10);
     ~Hash();
 
     int hash_function(const string &s);
-    void insert(const string &s, Entity *X);
-    Entity *find(const string &key, bool (*cmp)(Entity *, const string &));
-    bool erase(const string &key, bool (*cmp)(Entity *, const string &));
-    List<Entity> *get_list();
-    void Show() override;
+    void insert(const string &s, T *X);
+    T *find(const string &key, bool (*cmp)(T *, const string &));
+    bool erase(const string &key, bool (*cmp)(T *, const string &));
 };
 
-Hash::Hash(int size)
+template <typename T>
+Hash<T>::Hash(int size)
 {
     this->M = size;
-    this->L = new List<Entity>[this->M];
+    this->L = new List<T>[this->M];
 }
 
-Hash::~Hash()
+template <typename T>
+Hash<T>::~Hash()
 {
     delete[] L;
 }
 
-int Hash::hash_function(const string &s)
+template <typename T>
+int Hash<T>::hash_function(const string &s)
 {
     long long hash = 0;
     for (unsigned char c : s)
@@ -41,37 +43,27 @@ int Hash::hash_function(const string &s)
     return hash;
 }
 
-void Hash::insert(const string &s, Entity *X)
+template <typename T>
+void Hash<T>::insert(const string &s, T *X)
 {
     int key = hash_function(s);
     this->L[key].insert(X); ///////////////////////////////////////?????????????????????????????????????????????????????????????????????????
 }
 
-Entity *Hash::find(const string &key, bool (*cmp)(Entity *, const string &))
+template <typename T>
+T *Hash<T>::find(const string &key, bool (*cmp)(T *, const string &))
 {
-    Node<Entity> *p = this->L[hash_function(key)].find(key, cmp);
+    Node<T> *p = this->L[hash_function(key)].find(key, cmp);
     return (p == nullptr) ? nullptr : p->Data;
 }
 
-bool Hash::erase(const string &key, bool (*cmp)(Entity *, const string &))
+template <typename T>
+bool Hash<T>::erase(const string &key, bool (*cmp)(T *, const string &))
 {
-    List<Entity> &bucket = this->L[hash_function(key)];
-    Node<Entity> *p = bucket.find(key, cmp);
+    List<T> &bucket = this->L[hash_function(key)];
+    Node<T> *p = bucket.find(key, cmp);
     if (p == nullptr)
         return false;
     bucket.remove_item(p);
     return true;
-}
-
-List<Entity> *Hash::get_list()
-{
-    return this->L;
-}
-
-void Hash::Show()
-{
-    for (int i = 0; i < this->M; i++)
-    {
-        this->L[i].Show();
-    }
 }

@@ -1,9 +1,7 @@
 #pragma once
 #include <iostream>
-#include <iomanip>
-#include "Entity.h"
 using namespace std;
-class ViTriViecLam : public Entity
+class ViTriViecLam
 {
 private:
     string MaVTVL, TenVTVL;
@@ -19,7 +17,6 @@ public:
     List<Employee> *get_ListNV();
     bool ThemNV(Employee *);
     bool XoaNV(Employee *);
-    void Show() override;
 };
 
 ViTriViecLam::ViTriViecLam(const string &ma, const string &ten) : MaVTVL(ma), TenVTVL(ten)
@@ -70,11 +67,4 @@ bool ViTriViecLam::XoaNV(Employee *e)
         p = p->Next;
     }
     return 0;
-}
-void ViTriViecLam::Show()
-{
-    cout << left
-         << setw(15) << this->MaVTVL
-         << setw(30) << this->TenVTVL
-         << endl;
 }

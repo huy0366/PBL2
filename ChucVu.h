@@ -1,11 +1,10 @@
 #pragma once
-#include "Entity.h"
+// #include "Entity.h"
 #include "LinkedList.h"
 #include <iostream>
-#include <iomanip>
 using namespace std;
 class Employee;
-class ChucVu : public Entity
+class ChucVu
 {
 private:
     string MaChucVu, Name;
@@ -23,11 +22,9 @@ public:
 
     void set_PhuCap(const long long &);
     long long get_PhuCap() const;
-    void set_Luong_Base(long long phucap);
     List<Employee> *get_ListNV();
     bool ThemNV(Employee *);
     bool XoaNV(Employee *);
-    void Show();
     ~ChucVu();
 };
 
@@ -63,10 +60,6 @@ long long ChucVu::get_PhuCap() const
 {
     return this->PhuCap;
 }
-void ChucVu::set_Luong_Base(long long phucap)
-{
-    this->PhuCap = phucap;
-}
 List<Employee> *ChucVu::get_ListNV()
 {
     return this->L;
@@ -91,11 +84,5 @@ bool ChucVu::XoaNV(Employee *e)
         p = p->Next;
     }
     return 0;
-}
-void ChucVu::Show()
-{
-    cout << setw(10) << this->MaChucVu
-         << setw(10) << this->Name
-         << setw(10) << fixed << setprecision(0) << this->PhuCap << endl;
 }
 ChucVu::~ChucVu() {}

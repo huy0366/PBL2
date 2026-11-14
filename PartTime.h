@@ -16,9 +16,8 @@ public:
              const Date & = Date(), const int & = 1, const int & = 0, const int & = 80);
     int get_TimeWork();
     void set_TimeWork(const int &);
-    double get_ThucLinh(const double &) override;
+    long long get_ThucLinh(const long long &) override;
     string get_LoaiNV() override;
-    void Show() override;
     virtual ~PartTime();
 };
 
@@ -46,12 +45,6 @@ void PartTime::set_TimeWork(const int &time)
 string PartTime::get_LoaiNV()
 {
     return "PartTime";
-}
-void PartTime::Show()
-{
-    Employee::Show();
-    cout << setw(10) << get_LoaiNV()
-         << setw(15) << get_TimeWork() << endl;
 }
 PartTime::~PartTime()
 {
