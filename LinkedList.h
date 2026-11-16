@@ -28,6 +28,7 @@ public:
 
     // Bổ sung hàm find dùng con trỏ hàm so sánh
     Node<T> *find(const string &, bool (*compare)(T *, const string &));
+    Node<T> *find_ptr(T *);
 
     int get_size();
     Node<T> *get_header();
@@ -115,6 +116,15 @@ Node<T> *List<T>::find(const string &s, bool (*compare)(T *, const string &))
         p = p->Next;
     }
     return nullptr; // Không tìm thấy
+}
+
+template <typename T>
+Node<T> *List<T>::find_ptr(T *x)
+{
+    for (Node<T> *p = header->Next; p != nullptr; p = p->Next)
+        if (p->Data == x)
+            return p;
+    return nullptr;
 }
 
 template <typename T>

@@ -11,7 +11,7 @@ void HienThongBao(const string &noiDung, bool laLoi = true);
 void VeThongBao();
 void DrawSidebar(int &currentScreen);
 void DrawMainContent(int &currentScreen, Texture2D &BackGround, QLNV *QL);
-void Draw_Screen_Home(Texture2D &BackGround);
+void Draw_Screen_Home(Texture2D &BackGround, QLNV *QL);
 void Draw_Screen_NhanVien(Vector2 mousePos, bool Clicked, QLNV *QL);
 void Draw_Screen_VTVL(Vector2 mousePos, bool Clicked, QLNV *QL);
 void Draw_Screen_Employee(QLNV *QL);
@@ -248,7 +248,7 @@ void DrawMainContent(int &currentScreen, Texture2D &BackGround, QLNV *QL)
 
     if (currentScreen == 0)
     {
-        Draw_Screen_Home(BackGround);
+        Draw_Screen_Home(BackGround, QL);
     }
     else if (currentScreen == 1)
     {
@@ -529,7 +529,7 @@ bool CheckEmployee(Employee *emp, const string &maCV, const string &maPB, const 
 
     return true;
 }
-void Draw_Screen_Home(Texture2D &BackGround)
+void Draw_Screen_Home(Texture2D &BackGround, QLNV *QL)
 {
     // 1. Khung nguồn: Lấy toàn bộ kích thước gốc của file ảnh
     static Texture2D a1;
@@ -544,12 +544,8 @@ void Draw_Screen_Home(Texture2D &BackGround)
     float sa1 = 0.33f;
     DrawTextureEx(a1, pa1, ra1, sa1, WHITE);
     DrawTextEx(tieude, "Trang chủ", {pa1.x + 100, pa1.y}, 45, 1, WHITE);
-    DrawTextEx(myFont, "", {pa1.x + 100, pa1.y + 50}, 30, 1, WHITE);
-    Rectangle sourceRec = {
-        0.0f,
-        0.0f,
-        (float)BackGround.width,
-        (float)BackGround.height};
+    DrawTextEx(myFont, "Tổng quan hệ thống", {pa1.x + 100, pa1.y + 50}, 30, 1, WHITE);
+    Rectangle sourceRec = {0.0f, 0.0f, (float)BackGround.width, (float)BackGround.height};
 
     // 2. Khung đích: Tọa độ và kích thước hiển thị trên màn hình
     // - x = 220.0f  (Nằm ngay sau thanh Sidebar)
@@ -558,17 +554,338 @@ void Draw_Screen_Home(Texture2D &BackGround)
     // - height = GetScreenHeight()     (Toàn bộ chiều cao)
     float sidebarWidth = 250.0f;
 
-    Rectangle destRec = {
-        sidebarWidth,
-        0.0f,
-        (float)GetScreenWidth() - sidebarWidth,
-        (float)GetScreenHeight()};
+    Rectangle destRec = {sidebarWidth, 0.0f, (float)GetScreenWidth() - sidebarWidth, (float)GetScreenHeight()};
 
     // 3. Tâm xoay
     Vector2 origin = {0.0f, 0.0f};
 
     // 4. Vẽ ảnh co giãn vừa vặn vào khung destRec
     DrawTexturePro(BackGround, sourceRec, destRec, origin, 0.0f, WHITE);
+
+    int screenW = GetScreenWidth();
+
+    int startX = 330;
+    int startY = 170;
+
+    int contentW = screenW - startX - 35;
+
+    // =====================================================
+    // TIÊU ĐỀ
+    // =====================================================
+
+    DrawTextEx(myFont, "Quản lý thông tin nhân sự", {startX + 20, startY}, 35, 1, BLACK);
+
+    // =====================================================
+    // 4 CARD THỐNG KÊ
+    // =====================================================
+
+    int gap = 18;
+    int cardW = (contentW - gap * 3) / 4;
+    int cardH = 105;
+    int cardY = startY + 50;
+
+    // ---------- CARD NHÂN VIÊN ----------
+    DrawRectangleRounded({(float)startX, (float)cardY, (float)cardW, (float)cardH}, 0.15f, 10, WHITE);
+
+    DrawCircle(startX + 48, cardY + cardH / 2, 28, Color{235, 240, 255, 255});
+
+    DrawTextEx(myFont, "N", {startX + 38, cardY + cardH / 2 - 15}, 30, 1, Color{70, 105, 220, 255});
+
+    DrawTextEx(myFont, "Nhân viên", {startX + 92, cardY + 18}, 26, 1, Color{110, 110, 120, 255});
+
+    DrawTextEx(myFont, TextFormat("%d", QL->get_DB()->get_ListEmployee()->get_size()), {startX + 92, cardY + 50}, 35, 1, Color{40, 50, 75, 255});
+
+    // ---------- CARD PHÒNG BAN ----------
+
+    int x2 = startX + cardW + gap;
+
+    DrawRectangleRounded({(float)x2, (float)cardY, (float)cardW, (float)cardH}, 0.15f, 10, WHITE);
+
+    DrawCircle(x2 + 48, cardY + cardH / 2, 28, Color{235, 240, 255, 255});
+
+    DrawTextEx(myFont, "P", {x2 + 38, cardY + cardH / 2 - 15}, 30, 1, Color{70, 105, 220, 255});
+
+    DrawTextEx(myFont, "Phòng ban", {x2 + 92, cardY + 26}, 26, 1, Color{110, 110, 120, 255});
+
+    DrawTextEx(myFont, TextFormat("%d", QL->get_DB()->get_ListPB()->get_size()), {x2 + 92, cardY + 50}, 35, 1, Color{40, 50, 75, 255});
+
+    // ---------- CARD CHỨC VỤ ----------
+
+    int x3 = startX + (cardW + gap) * 2;
+
+    DrawRectangleRounded({(float)x3, (float)cardY, (float)cardW, (float)cardH}, 0.15f, 10, WHITE);
+
+    DrawCircle(x3 + 48, cardY + cardH / 2, 28, Color{235, 240, 255, 255});
+
+    DrawTextEx(myFont, "C", {x3 + 38, cardY + cardH / 2 - 15}, 30, 1, Color{70, 105, 220, 255});
+
+    DrawTextEx(myFont, "Chức vụ", {x3 + 92, cardY + 18}, 26, 1, Color{110, 110, 120, 255});
+
+    DrawTextEx(myFont, TextFormat("%d", QL->get_DB()->get_ListCV()->get_size()), {x3 + 92, cardY + 50}, 35, 1, Color{40, 50, 75, 255});
+
+    // ---------- CARD VỊ TRÍ ----------
+
+    int x4 = startX + (cardW + gap) * 3;
+
+    DrawRectangleRounded({(float)x4, (float)cardY, (float)cardW, (float)cardH}, 0.15f, 10, WHITE);
+
+    DrawCircle(x4 + 48, cardY + cardH / 2, 28, Color{235, 240, 255, 255});
+
+    DrawTextEx(myFont, "V", {x4 + 38, cardY + cardH / 2 - 15}, 30, 1, Color{70, 105, 220, 255});
+
+    DrawTextEx(myFont, "Vị trí", {x4 + 92, cardY + 18}, 26, 1, Color{110, 110, 120, 255});
+
+    DrawTextEx(myFont, TextFormat("%d", QL->get_DB()->get_ListVTVL()->get_size()), {x4 + 92, cardY + 50}, 35, 1, Color{40, 50, 75, 255});
+
+    // =====================================================
+    // KHUNG NHÂN VIÊN THEO PHÒNG BAN
+    // =====================================================
+
+    int boxY = cardY + cardH + 25;
+    int boxH = 310;
+
+    DrawRectangleRounded({(float)startX, (float)boxY, (float)contentW, (float)boxH}, 0.05f, 10, WHITE);
+
+    DrawTextEx(myFont, "PHÂN BỐ NHÂN VIÊN THEO PHÒNG BAN", {startX + 20, boxY + 10}, 30, 1, Color{45, 55, 80, 255});
+    DrawTextEx(myFont, "Số lượng nhân viên của từng phòng ban", {startX + 20, boxY + 48}, 25, 1, Color{145, 145, 155, 255});
+
+    // =========================================================
+    // SCROLL PHÒNG BAN
+    // =========================================================
+
+    static int scrollPB = 0;
+    Rectangle khuVucPB = {(float)startX, (float)boxY + 75, (float)contentW, (float)boxH - 75};
+
+    if (CheckCollisionPointRec(GetMousePosition(), khuVucPB))
+    {
+        scrollPB -= GetMouseWheelMove() * 35;
+    }
+
+    // =========================================================
+    // TÍNH CHIỀU CAO NỘI DUNG
+    // =========================================================
+
+    int soPB = 0;
+
+    if (QL != nullptr && QL->get_DB()->get_ListPB() != nullptr)
+        soPB = QL->get_DB()->get_ListPB()->get_size();
+
+    int contentH_PB = soPB * 50 + 15;
+
+    // Giới hạn scroll
+    int visibleH_PB = boxH - 75;
+    int maxScrollPB = contentH_PB - visibleH_PB;
+
+    if (maxScrollPB < 0)
+        maxScrollPB = 0;
+
+    if (scrollPB < 0)
+        scrollPB = 0;
+
+    if (scrollPB > maxScrollPB)
+        scrollPB = maxScrollPB;
+
+    // =========================================================
+    // CLIP NỘI DUNG TRONG KHUNG
+    // =========================================================
+
+    BeginScissorMode(startX, boxY + 75, contentW, boxH - 75);
+
+    // =========================================================
+    // DUYỆT FULL PHÒNG BAN
+    // =========================================================
+
+    if (QL != nullptr && QL->get_DB()->get_ListPB() != nullptr)
+    {
+        List<PhongBan> *listPB = QL->get_DB()->get_ListPB();
+
+        Node<PhongBan> *p = listPB->get_header()->Next;
+
+        int y = boxY + 90 - scrollPB;
+
+        int maxNV = 1;
+        float maxTenW = 0; // tính độ dài của tên để vẽ gạch ngang
+
+        Node<PhongBan> *temp = listPB->get_header()->Next;
+
+        while (temp != nullptr)
+        {
+            if (temp->Data != nullptr)
+            {
+                int soNV = QL->DemNVThamChieuPB(temp->Data);
+
+                if (soNV > maxNV)
+                    maxNV = soNV;
+                string ten = temp->Data->get_TenPhongBan();
+                float w = MeasureTextEx(myFont, ten.c_str(), 30, 1).x;
+                if (w > maxTenW)
+                    maxTenW = w;
+            }
+
+            temp = temp->Next;
+        }
+
+        while (p != nullptr)
+        {
+            if (p->Data != nullptr)
+            {
+                string tenPB = p->Data->get_TenPhongBan();
+
+                int soNV = QL->DemNVThamChieuPB(p->Data);
+
+                DrawTextEx(myFont, tenPB.c_str(), {startX + 20, y}, 30, 1, Color{60, 65, 80, 255});
+
+                int barX = startX + 20 + (int)maxTenW + 20;
+                int barW = startX + contentW - 80 - barX;
+                if (barW < 50)
+                    barW = 50;
+                DrawRectangleRounded({(float)barX, (float)y + 3, (float)barW, 15}, 0.5f, 10, Color{230, 235, 248, 255});
+
+                float percent = (float)soNV / maxNV;
+
+                DrawRectangleRounded({(float)barX, (float)y + 3, barW * percent, 15}, 0.5f, 10, Color{90, 125, 235, 255});
+
+                DrawTextEx(myFont, TextFormat("%d", soNV), {startX + contentW - 60, y}, 25, 1, Color{70, 80, 100, 255});
+
+                y += 50;
+            }
+
+            p = p->Next;
+        }
+    }
+    EndScissorMode();
+
+    // =========================================================
+    // KHUNG PHÂN BỔ VỊ TRÍ VIỆC LÀM
+    // =========================================================
+
+    int vtBoxY = boxY + boxH + 25;
+    int vtBoxH = 310;
+
+    DrawRectangleRounded({(float)startX, (float)vtBoxY, (float)contentW, (float)vtBoxH}, 0.05f, 10, WHITE);
+
+    DrawTextEx(myFont, "PHÂN BỐ VỊ TRÍ VIỆC LÀM", {startX + 20, vtBoxY + 10}, 30, 1, Color{45, 55, 80, 255});
+    DrawTextEx(myFont, "Số lượng nhân viên đang đảm nhận từng vị trí", {startX + 20, vtBoxY + 48}, 25, 1, Color{145, 145, 155, 255});
+
+    // =========================================================
+    // SCROLL VỊ TRÍ VIỆC LÀM
+    // =========================================================
+    static int scrollVT = 0;
+    Rectangle khuVucVT = {(float)startX, (float)vtBoxY + 75, (float)contentW, (float)vtBoxH - 75};
+
+    if (CheckCollisionPointRec(GetMousePosition(), khuVucVT))
+    {
+        scrollVT -= GetMouseWheelMove() * 35;
+    }
+
+    // =========================================================
+    // TÍNH SỐ VỊ TRÍ
+    // =========================================================
+
+    int soVT = 0;
+
+    if (QL != nullptr && QL->get_DB()->get_ListVTVL() != nullptr)
+        soVT = QL->get_DB()->get_ListVTVL()->get_size();
+
+    // =========================================================
+    // GIỚI HẠN SCROLL
+    // =========================================================
+
+    int contentH_VT = soVT * 50 + 15;
+
+    int visibleH_VT = vtBoxH - 75;
+
+    int maxScrollVT = contentH_VT - visibleH_VT;
+
+    if (maxScrollVT < 0)
+        maxScrollVT = 0;
+
+    if (scrollVT < 0)
+        scrollVT = 0;
+
+    if (scrollVT > maxScrollVT)
+        scrollVT = maxScrollVT;
+
+    // =========================================================
+    // CLIP NỘI DUNG
+    // =========================================================
+
+    BeginScissorMode(startX, vtBoxY + 75, contentW, vtBoxH - 75);
+
+    // =========================================================
+    // TÌM SỐ NHÂN VIÊN LỚN NHẤT
+    // =========================================================
+
+    int maxNV_VT = 1;
+    float maxTenW = 0;
+    if (QL != nullptr && QL->get_DB()->get_ListVTVL() != nullptr)
+    {
+
+        Node<ViTriViecLam> *tempVT = QL->get_DB()->get_ListVTVL()->get_header()->Next;
+        while (tempVT != nullptr)
+        {
+            if (tempVT->Data != nullptr)
+            {
+                int soNV = QL->DemNVThamChieuVT(tempVT->Data);
+
+                if (soNV > maxNV_VT)
+                    maxNV_VT = soNV;
+                string ten = tempVT->Data->get_TenVTVL();
+                float w = MeasureTextEx(myFont, ten.c_str(), 30, 1).x;
+                if (w > maxTenW)
+                    maxTenW = w;
+            }
+
+            tempVT = tempVT->Next;
+        }
+    }
+
+    // =========================================================
+    // DUYỆT TOÀN BỘ VỊ TRÍ VIỆC LÀM
+    // =========================================================
+
+    if (QL != nullptr && QL->get_DB()->get_ListVTVL() != nullptr)
+    {
+        List<ViTriViecLam> *listVT = QL->get_DB()->get_ListVTVL();
+
+        Node<ViTriViecLam> *pVT = listVT->get_header()->Next;
+
+        int y = vtBoxY + 90 - scrollVT;
+
+        while (pVT != nullptr)
+        {
+            if (pVT->Data != nullptr)
+            {
+                string tenVT = pVT->Data->get_TenVTVL();
+
+                int soNV = QL->DemNVThamChieuVT(pVT->Data);
+
+                // Tên vị trí
+                DrawTextEx(myFont, tenVT.c_str(), {startX + 20, y}, 30, 1, Color{60, 65, 80, 255});
+
+                // Thanh nền
+                int barX = startX + 20 + (int)maxTenW + 20;
+                int barW = startX + contentW - 80 - barX;
+                if (barW < 50)
+                    barW = 50;
+                DrawRectangleRounded({(float)barX, (float)y + 3, (float)barW, 15}, 0.5f, 10, Color{230, 235, 248, 255});
+
+                // Thanh số lượng
+                float percent = (float)soNV / maxNV_VT;
+
+                DrawRectangleRounded({(float)barX, (float)y + 3, barW * percent, 15}, 0.5f, 10, Color{90, 125, 235, 255});
+
+                // Số nhân viên
+                DrawTextEx(myFont, TextFormat("%d", soNV), {startX + contentW - 60, y}, 25, 1, Color{70, 80, 100, 255});
+
+                y += 50;
+            }
+
+            pVT = pVT->Next;
+        }
+    }
+
+    EndScissorMode();
 }
 // Xử lý click (giống đoạn if (Clicked) {...} của bạn)
 // Trả về true nếu click này đã được combo x    ử lý
@@ -724,22 +1041,21 @@ void VeODate(Rectangle r, const char *text, bool open, Vector2 mousePos, const c
 
 void Draw_Screen_NhanVien(Vector2 mousePos, bool Clicked, QLNV *QL)
 {
+    // ============ 1. KHAI BÁO BIẾN STATIC ============
     static bool clickThem = false;
     static bool clickSua = false;
     static bool isOpenDelete = false;
     static bool isOpenTable = false;
     static bool needFill = false;
 
-    int n = QL->get_DB()->get_ListEmployee()->get_size();
-    static int *dsXoa = new int[n]();
-    static int sizeXoa = 0;
+    static List<Employee> *dsXoa = nullptr;
     static string selectedMNV = "";
+    string default_choice = "Tất cả";
     // MeNu
 
     Rectangle comboChucVu = {350, 290, 250, 45};
     static bool isChucVuOpen = false;
     static int selectedChucVuIndex = 0;
-    string default_choice = "Tất cả";
 
     Rectangle comboPhong = {620, 290, 250, 45};
     static bool isPhongOpen = false;
@@ -751,12 +1067,23 @@ void Draw_Screen_NhanVien(Vector2 mousePos, bool Clicked, QLNV *QL)
     static char hoTenInput[50] = "\0"; // Chuỗi lưu ký tự người dùng gõ
     static int letterCount = 0;
 
+    static int lastSortIdx = 0, lastSortTTIdx = 0;
+    static bool needSort = false;
+    Rectangle comboSort = {1290, 290, 250, 45};
+    static bool isSortOpen = false;
+    static int selectedSortIndex = 0;
+    string dsSort[] = {"...", "Mã NV", "Họ và Tên", "Ngày Sinh"};
+    int nSort = 3;
+
     Rectangle comboSortTT = {1560, 290, 200, 45}; // thứ tự (a->z, z->a, tuổi ...)
     static bool isSortTTOpen = false;
     static int selectedSortTTIndex = 0;
+    string dsSortTT[] = {"...", "tăng dần", "giảm dần"};
+    int nSortTT = 2;
 
-    // 1. TẠO BIẾN CUỘN (Dùng 'static' để giữ nguyên giá trị qua mỗi khung hình)
-    static float scrollY = 0.0f;
+    static float scrollY = 0.0f; // 1. TẠO BIẾN CUỘN (Dùng 'static' để giữ nguyên giá trị qua mỗi khung hình)
+
+    // ============ 2. TÍNH TOÁN (chưa vẽ gì) ============
     float scrollSpeed = 30.0f; // Tốc độ cuộn mỗi nấc chuột
 
     // Lấy thao tác lăn chuột và cộng dồn vào scrollY
@@ -777,42 +1104,23 @@ void Draw_Screen_NhanVien(Vector2 mousePos, bool Clicked, QLNV *QL)
 
     // Tọa độ X của từng cột (Bạn cần tinh chỉnh các số này cho vừa với màn hình)
     float colX[] = {350.f, 470.f, 790.f, 930.f, 1055.f, 1290.f, 1490.f, 1700.f};
-
-    // 1. VẼ TIÊU ĐỀ CỘT (Header)
-
-    float lech = isOpenDelete ? 30.f : 0.f;
-    DrawTextEx(myFont, "Mã NV", {colX[0] + lech, startY}, fontSize, 1, DARKGRAY);
-    DrawTextEx(myFont, "Họ và tên", {colX[1] + lech, startY}, fontSize, 1, DARKGRAY);
-    DrawTextEx(myFont, "Ngày sinh", {colX[2] + lech, startY}, fontSize, 1, DARKGRAY);
-    DrawTextEx(myFont, "Giới tính", {colX[3] + lech, startY}, fontSize, 1, DARKGRAY);
-    DrawTextEx(myFont, "Phòng ban", {colX[4] + lech, startY}, fontSize, 1, DARKGRAY);
-    DrawTextEx(myFont, "Chức vụ", {colX[5] + lech, startY}, fontSize, 1, DARKGRAY);
-    DrawTextEx(myFont, "Vị trí", {colX[6] + lech, startY}, fontSize, 1, DARKGRAY);
-    DrawTextEx(myFont, "Bậc", {colX[7] + lech, startY}, fontSize, 1, DARKGRAY);
-    // ... (Thêm các tiêu đề khác tương tự)
-
-    // Kẻ đường gạch ngang dưới tiêu đề
-    DrawLine(startX, startY + 30, 1900, startY + 30, LIGHTGRAY);
-
-    // 4. KHU VỰC VẼ DANH SÁCH BỊ CẮT (Scissor Mode)
-    int listStartY = startY + 60;                         // Điểm bắt đầu vẽ dữ liệu (ngay dưới đường kẻ)
-    int listHeight = GetScreenHeight() - listStartY - 80; // Chiều cao khu vực hiển thị dữ liệu
-
-    // Bật chế độ Scissor: Bất cứ thứ gì vẽ bên ngoài hình chữ nhật này sẽ bị ẩn đi
-
-    Rectangle listArea = {(float)startX, (float)listStartY, (float)(GetScreenWidth() - startX), (float)listHeight};
-    // Chỉ hover khi bảng thông tin đóng, không có combo lọc đang mở, và chuột nằm trong vùng danh sách
-    bool canHover = !isOpenTable && !isChucVuOpen && !isPhongOpen && CheckCollisionPointRec(mousePos, listArea);
-
-    // Tọa độ Y hiện tại bắt đầu = Tọa độ gốc + Độ lệch cuộn
-    float currentY = listStartY + scrollY;
-
-    Node<Employee> *current = QL->get_DB()->get_ListEmployee()->get_header()->Next;
-
-    // Đếm tổng số lượng dòng để chặn cuộn quá đà xuống dưới (tùy chọn nâng cao)
-    int totalRows = 0;
-
     // lấy tiêu chí so sánh khi in
+
+    int nPB = QL->get_DB()->get_ListPB()->get_size();
+    string dsPBFilter[nPB + 1];
+    dsPBFilter[0] = default_choice; // Mục đầu tiên: "Tất cả"
+    for (int i = 0; i < nPB; i++)
+    {
+        dsPBFilter[i + 1] = (*QL->get_DB()->get_ListPB())[i]->Data->get_TenPhongBan();
+    }
+    int nCV = QL->get_DB()->get_ListCV()->get_size();
+    string dsCVFilter[nCV + 1];
+    dsCVFilter[0] = default_choice; // Mục đầu tiên: "Tất cả"
+    for (int i = 0; i < nCV; i++)
+    {
+        dsCVFilter[i + 1] = (*QL->get_DB()->get_ListCV())[i]->Data->get_TenChucVu();
+    }
+
     static string tieuchi1 = "";
     static string tieuchi2 = "";
     if (selectedChucVuIndex != 0)
@@ -832,9 +1140,62 @@ void Draw_Screen_NhanVien(Vector2 mousePos, bool Clicked, QLNV *QL)
     {
         tieuchi2 = "";
     }
+
+    if (needSort)
+    {
+        needSort = false;
+        if (selectedSortIndex == 1)
+            if (selectedSortTTIndex == 1)
+                QL->SapXep(TieuChiSapXep::MNV_TANG);
+            else
+                QL->SapXep(TieuChiSapXep::MNV_GIAM);
+        else if (selectedSortIndex == 2)
+            if (selectedSortTTIndex == 1)
+                QL->SapXep(TieuChiSapXep::TEN_TANG);
+            else
+                QL->SapXep(TieuChiSapXep::TEN_GIAM);
+        else if (selectedSortIndex == 3)
+            if (selectedSortTTIndex == 1)
+                QL->SapXep(TieuChiSapXep::NGAYSINH_TANG);
+            else
+                QL->SapXep(TieuChiSapXep::NGAYSINH_GIAM);
+    }
+
+    // 1. VẼ TIÊU ĐỀ CỘT (Header)
+
+    // ============ 3. VẼ BẢNG DANH SÁCH ============
+    float lech = isOpenDelete ? 30.f : 0.f;
+    DrawTextEx(myFont, "Mã NV", {colX[0] + lech, startY}, fontSize, 1, DARKGRAY);
+    DrawTextEx(myFont, "Họ và tên", {colX[1] + lech, startY}, fontSize, 1, DARKGRAY);
+    DrawTextEx(myFont, "Ngày sinh", {colX[2] + lech, startY}, fontSize, 1, DARKGRAY);
+    DrawTextEx(myFont, "Giới tính", {colX[3] + lech, startY}, fontSize, 1, DARKGRAY);
+    DrawTextEx(myFont, "Phòng ban", {colX[4] + lech, startY}, fontSize, 1, DARKGRAY);
+    DrawTextEx(myFont, "Chức vụ", {colX[5] + lech, startY}, fontSize, 1, DARKGRAY);
+    DrawTextEx(myFont, "Vị trí", {colX[6] + lech, startY}, fontSize, 1, DARKGRAY);
+    DrawTextEx(myFont, "Bậc", {colX[7] + lech, startY}, fontSize, 1, DARKGRAY);
+
+    // Kẻ đường gạch ngang dưới tiêu đề
+    DrawLine(startX, startY + 30, 1900, startY + 30, LIGHTGRAY);
+
+    // 4. KHU VỰC VẼ DANH SÁCH BỊ CẮT (Scissor Mode)
+    int listStartY = startY + 60;                         // Điểm bắt đầu vẽ dữ liệu (ngay dưới đường kẻ)
+    int listHeight = GetScreenHeight() - listStartY - 80; // Chiều cao khu vực hiển thị dữ liệu
+
+    // Bật chế độ Scissor: Bất cứ thứ gì vẽ bên ngoài hình chữ nhật này sẽ bị ẩn đi
+
+    Rectangle listArea = {(float)startX, (float)listStartY, (float)(GetScreenWidth() - startX), (float)listHeight};
+    // Chỉ hover khi bảng thông tin đóng, không có combo lọc đang mở, và chuột nằm trong vùng danh sách
+    bool canHover = !isOpenTable && !isChucVuOpen && !isPhongOpen && CheckCollisionPointRec(mousePos, listArea);
+
+    // Tọa độ Y hiện tại bắt đầu = Tọa độ gốc + Độ lệch cuộn
+    float currentY = listStartY + scrollY;
+
+    // Đếm tổng số lượng dòng để chặn cuộn quá đà xuống dưới (tùy chọn nâng cao)
+    int totalRows = 0;
+
     Employee *selEmp = nullptr;
-    int idx = 0;
     BeginScissorMode(startX, listStartY, GetScreenWidth() - startX, listHeight);
+    Node<Employee> *current = QL->get_DB()->get_ListEmployee()->get_header()->Next;
     while (current != nullptr)
     {
         if (CheckEmployee(current->Data, tieuchi1, tieuchi2, hoTenInput))
@@ -847,6 +1208,7 @@ void Draw_Screen_NhanVien(Vector2 mousePos, bool Clicked, QLNV *QL)
             string chucvu = current->Data->get_ChucVu()->get_TenChucVu();
             string vitri = current->Data->get_ViTri()->get_TenVTVL();
             string bac = to_string(current->Data->get_BacViTri());
+
             // ----- HOVER + CHỌN DÒNG -----
             Rectangle rowRect = {(float)startX, currentY - 5, (float)(GetScreenWidth() - startX - 20), 35};
             bool isHover = canHover && CheckCollisionPointRec(mousePos, rowRect);
@@ -854,7 +1216,11 @@ void Draw_Screen_NhanVien(Vector2 mousePos, bool Clicked, QLNV *QL)
             {
                 if (isOpenDelete)
                 {
-                    dsXoa[idx] = !dsXoa[idx];
+                    Node<Employee> *nd = dsXoa->find_ptr(current->Data);
+                    if (nd != nullptr)
+                        dsXoa->remove_item(nd);
+                    else
+                        dsXoa->insert(current->Data);
                 }
                 else
                 {
@@ -865,7 +1231,7 @@ void Draw_Screen_NhanVien(Vector2 mousePos, bool Clicked, QLNV *QL)
 
             if (isOpenDelete)
             {
-                if (dsXoa[idx] == 1)
+                if (dsXoa->find_ptr(current->Data))
                 {
                     DrawRectangleRec(rowRect, Color{255, 230, 230, 255});
                 }
@@ -877,7 +1243,7 @@ void Draw_Screen_NhanVien(Vector2 mousePos, bool Clicked, QLNV *QL)
                 Rectangle box = {(float)colX[0] + 2, currentY + 4, 20, 20};
                 DrawRectangleRec(box, WHITE);
                 DrawRectangleLinesEx(box, 2, DARKGRAY);
-                if (dsXoa[idx] == 1)
+                if (dsXoa->find_ptr(current->Data))
                 {
                     DrawRectangleRec({box.x + 4, box.y + 4, box.width - 8, box.height - 8}, DARKGREEN);
                 }
@@ -910,18 +1276,13 @@ void Draw_Screen_NhanVien(Vector2 mousePos, bool Clicked, QLNV *QL)
             totalRows++;
         }
         current = current->Next;
-        idx++;
     }
     EndScissorMode();
     DrawTextEx(myFont, "Chức Vụ", {350, 240}, 40, 1, BLACK);
 
-    int nCV = QL->get_DB()->get_ListCV()->get_size();
-    string dsCVFilter[nCV + 1];
-    dsCVFilter[0] = default_choice; // Mục đầu tiên: "Tất cả"
-    for (int i = 0; i < nCV; i++)
-    {
-        dsCVFilter[i + 1] = (*QL->get_DB()->get_ListCV())[i]->Data->get_TenChucVu();
-    }
+    // ============ 4. VẼ TÌM KIẾM/ COMBO / SẮP XẾP ============
+
+    // combo cv và pb
     VeDanhSachCombo(comboChucVu, isChucVuOpen, dsCVFilter, nCV + 1, mousePos, 35);
     if (selectedChucVuIndex == 0)
     {
@@ -938,13 +1299,6 @@ void Draw_Screen_NhanVien(Vector2 mousePos, bool Clicked, QLNV *QL)
     }
     DrawTextEx(myFont, "Phòng Ban", {620, 240}, 40, 1, BLACK);
 
-    int nPB = QL->get_DB()->get_ListPB()->get_size();
-    string dsPBFilter[nPB + 1];
-    dsPBFilter[0] = default_choice; // Mục đầu tiên: "Tất cả"
-    for (int i = 0; i < nPB; i++)
-    {
-        dsPBFilter[i + 1] = (*QL->get_DB()->get_ListPB())[i]->Data->get_TenPhongBan();
-    }
     VeDanhSachCombo(comboPhong, isPhongOpen, dsPBFilter, nPB + 1, mousePos, 35);
     if (selectedPhongIndex == 0)
     {
@@ -958,40 +1312,39 @@ void Draw_Screen_NhanVien(Vector2 mousePos, bool Clicked, QLNV *QL)
     {
         XuLyCombo(comboPhong, isPhongOpen, selectedPhongIndex, nPB + 1, mousePos, Clicked);
     }
-    Typing(isHoTenActive, hoTenInput, letterCount, mousePos, textHoTen);
 
     // if (CheckCollisionPointRec(mousePos, btnLoc))
     // {
     //     // TODO: Viết code lọc danh sách nhân viên ở đây
     // }
     // 3. Cụm "Họ Tên"
+
+    // vẽ tìm kiếm
     DrawTextEx(myFont, "Tìm kiếm", {890, 240}, 40, 1, BLACK);
     // Vẽ khung trắng bo góc cho ô nhập liệu, nếu đang active thì viền xám nhẹ
     DrawRectangleRounded(textHoTen, 0.5f, 10, isHoTenActive ? LIGHTGRAY : WHITE);
     DrawRectangleRoundedLinesEx(textHoTen, 0.3f, 12, 3.0f, LIGHTGRAY);
     // In chữ người dùng đã gõ ra màn hình
     DrawTextEx(myFont, hoTenInput, {textHoTen.x + 10, textHoTen.y + 8}, 35, 1, BLACK);
-
-    // Nhấp nháy con trỏ chuột mô phỏng (dấu gạch dưới)
-    if (isHoTenActive && ((int)(GetTime() * 2) % 2 == 0))
+    if (!isOpenTable)
     {
-        int textWidth = MeasureText(hoTenInput, 35);
-        DrawTextEx(myFont, "_", {textHoTen.x + 12 + textWidth, textHoTen.y + 8}, 35, 1, MAROON);
+        Typing(isHoTenActive, hoTenInput, letterCount, mousePos, textHoTen);
+        // Nhấp nháy con trỏ chuột mô phỏng (dấu gạch dưới)
+        if (isHoTenActive && ((int)(GetTime() * 2) % 2 == 0))
+        {
+            Vector2 textSize = MeasureTextEx(myFont, hoTenInput, 35, 1);
+            float cursorX = textHoTen.x + 10 + textSize.x + 2;
+
+            // Chỉ vẽ khi con trỏ chưa vượt quá mép phải của ô tìm kiếm
+            if (cursorX < textHoTen.x + textHoTen.width - 15)
+            {
+                DrawTextEx(myFont, "_", {cursorX, textHoTen.y + 8}, 35, 1, MAROON);
+            }
+        }
     }
 
-    // 4. Nút bấm Lọc (Nút gradient/màu nổi)
-    // Do Raylib không hỗ trợ sẵn gradient cho hình bo góc, ta dùng màu tím đậm tạm thời
-
-    Rectangle comboSort = {1290, 290, 250, 45};
-    static bool isSortOpen = false;
-    static int selectedSortIndex = 0;
-    string dsSort[] = {"...", "Mã NV", "Họ và Tên", "Ngày Sinh"};
-    int nSort = 3;
-
+    // vẽ sort
     DrawTextEx(myFont, "Sắp xếp theo:", {1290, 240}, 40, 1, BLACK);
-    // Vẽ đường gạch dưới
-    // DrawLine(comboSort.x, comboSort.y + 30, comboSort.x + comboSort.width, comboSort.y + 30, GRAY);
-    // Vẽ box
     VeDanhSachCombo(comboSort, isSortOpen, dsSort, nSort + 1, mousePos, 35);
     if (selectedSortIndex == 0)
     {
@@ -1001,14 +1354,13 @@ void Draw_Screen_NhanVien(Vector2 mousePos, bool Clicked, QLNV *QL)
     {
         DrawTextEx(myFont, dsSort[selectedSortIndex].c_str(), {comboSort.x + 15, comboSort.y + 5}, 35, 1, DARKGRAY);
     }
-
     if (Clicked)
     {
         // Thay toàn bộ khối if (Clicked) cũ bằng:)
         XuLyCombo(comboSort, isSortOpen, selectedSortIndex, nSort + 1, mousePos, Clicked);
     }
-    string dsSortTT[] = {"...", "tăng dần", "giảm dần"};
-    int nSortTT = 2;
+
+    // sort theo gì đó ...
     VeDanhSachCombo(comboSortTT, isSortTTOpen, dsSortTT, nSortTT + 1, mousePos, 35);
     if (selectedSortTTIndex == 0)
     {
@@ -1023,21 +1375,15 @@ void Draw_Screen_NhanVien(Vector2 mousePos, bool Clicked, QLNV *QL)
         // Thay toàn bộ khối if (Clicked) cũ bằng:
         XuLyCombo(comboSortTT, isSortTTOpen, selectedSortTTIndex, nSort + 1, mousePos, Clicked);
     }
-    if (selectedSortIndex == 1)
-        if (selectedSortTTIndex == 1)
-            QL->SapXep(TieuChiSapXep::MNV_TANG);
-        else
-            QL->SapXep(TieuChiSapXep::MNV_GIAM);
-    else if (selectedSortIndex == 2)
-        if (selectedSortTTIndex == 1)
-            QL->SapXep(TieuChiSapXep::TEN_TANG);
-        else
-            QL->SapXep(TieuChiSapXep::TEN_GIAM);
-    else if (selectedSortIndex == 3)
-        if (selectedSortTTIndex == 1)
-            QL->SapXep(TieuChiSapXep::NGAYSINH_TANG);
-        else
-            QL->SapXep(TieuChiSapXep::NGAYSINH_GIAM);
+    if (selectedSortIndex != 0 && selectedSortTTIndex != 0 &&
+        (selectedSortIndex != lastSortIdx || selectedSortTTIndex != lastSortTTIdx))
+    {
+        needSort = true;
+        lastSortIdx = selectedSortIndex;
+        lastSortTTIdx = selectedSortTTIndex;
+    }
+
+    //???
     // Tính toán chiều cao tổng của danh sách để chặn cuộn quá đáy
     float totalListHeight = totalRows * rowHeight;
     float maxScroll = listHeight - totalListHeight;
@@ -1054,6 +1400,7 @@ void Draw_Screen_NhanVien(Vector2 mousePos, bool Clicked, QLNV *QL)
 
     // Tắt chế độ Scissor để các phần vẽ sau (nếu có) không bị ảnh hưởng
 
+    // ============ 5. VẼ NÚT CHỨC NĂNG ============
     if (!isOpenDelete)
     {
         Rectangle btnThemNhanSu = {350, 940, 230, 50};
@@ -1071,19 +1418,20 @@ void Draw_Screen_NhanVien(Vector2 mousePos, bool Clicked, QLNV *QL)
         if (Clicked && !isOpenTable && CheckCollisionPointRec(mousePos, btnThemNhanSu))
         {
             clickThem = true;
+            isHoTenActive = false; // Ngắt focus ô tìm kiếm
         }
 
         if (Clicked && !isOpenTable && CheckCollisionPointRec(mousePos, btnSuaNhanSu))
         {
             clickSua = true;
             needFill = true;
-        }
+            isHoTenActive = false;
+        } // Ngắt focus ô tìm kiếm}
 
         if (Clicked && !isOpenTable && CheckCollisionPointRec(mousePos, btnXoaNhanSu))
         {
             isOpenDelete = true;
-            for (int i = 0; i < QL->get_DB()->get_ListEmployee()->get_size(); i++)
-                dsXoa[i] = 0;
+            dsXoa = new List<Employee>;
         }
 
         if (clickSua || clickThem)
@@ -1112,6 +1460,7 @@ void Draw_Screen_NhanVien(Vector2 mousePos, bool Clicked, QLNV *QL)
         static int selPB = -1;
         static int selCV = -1;
         static int selLoai = -1;
+        static int loaiGoc = -1;
         static int selVT = -1;
 
         // Trạng thái và dữ liệu của 2 bảng Lịch (Ngày sinh & Ngày vào làm)
@@ -1125,6 +1474,7 @@ void Draw_Screen_NhanVien(Vector2 mousePos, bool Clicked, QLNV *QL)
         static bool daSinhMa = false;
         static string thongBaoLoi = "";
         bool dongBang = false; // Cờ đánh dấu khi cần đóng và reset bảng
+        bool hienLoai = clickThem || (clickSua && loaiGoc == 1);
 
         // ================= 2. LẤY DỮ LIỆU TỪ DATABASE CHO COMBOBOX =================
         int nCV = QL->get_DB()->get_ListCV()->get_size();
@@ -1174,6 +1524,7 @@ void Draw_Screen_NhanVien(Vector2 mousePos, bool Clicked, QLNV *QL)
         if (needFill)
         {
             needFill = false;
+
             if (selEmp != nullptr)
             {
                 strcpy(MaNhanVienInput, selEmp->get_mnv().c_str());
@@ -1185,7 +1536,7 @@ void Draw_Screen_NhanVien(Vector2 mousePos, bool Clicked, QLNV *QL)
                 selGT = TimIndex(dsGT, 2, selEmp->get_sex());
                 selVT = TimIndex(dsVT, nVT, selEmp->get_ViTri()->get_TenVTVL());
                 selLoai = (dynamic_cast<FullTime *>(selEmp) != nullptr) ? 0 : 1;
-
+                loaiGoc = selLoai;
                 sscanf(selEmp->get_NgaySinh().ToString().c_str(), "%d/%d/%d", &dayNS, &monthNS, &yearNS);
                 changeNS = true;
 
@@ -1241,10 +1592,10 @@ void Draw_Screen_NhanVien(Vector2 mousePos, bool Clicked, QLNV *QL)
         Rectangle fPB = {col1X, row3Y, boxW, boxH};
         Rectangle fCV = {col2X, row3Y, boxW, boxH};
 
-        Rectangle fLoai = {col1X, row4Y, boxW, boxH};
-        Rectangle fVT = {col2X, row4Y, boxW, boxH};
+        Rectangle fVT = {col1X, row4Y, boxW, boxH};
 
-        Rectangle fNVL = {col1X, row5Y, boxW, boxH};
+        Rectangle fNVL = {col2X, row4Y, boxW, boxH};
+        Rectangle fLoai = {col1X, row5Y, boxW, boxH};
 
         // ================= 6. VẼ NHÃN (LABEL) VÀ CÁC Ô TRÊN FORM =================
         Color labelColor = Color{50, 60, 75, 255};
@@ -1280,21 +1631,24 @@ void Draw_Screen_NhanVien(Vector2 mousePos, bool Clicked, QLNV *QL)
         DrawTextEx(myFont, (selCV == -1) ? "Chọn chức vụ" : dsCV[selCV].c_str(),
                    {fCV.x + 16, fCV.y + 11}, 24, 1, (selCV == -1) ? placeColor : textColor);
 
-        // --- HÀNG 4: Loại nhân viên & Vị trí việc làm ---
-        DrawTextEx(tieude, "Loại nhân viên", {fLoai.x, fLoai.y - 26}, 20, 1, labelColor);
-        VeDanhSachCombo(fLoai, false, dsLoai, 2, mousePos, 24);
-        DrawTextEx(myFont, (selLoai == -1) ? "Chọn loại nhân viên" : dsLoai[selLoai].c_str(),
-                   {fLoai.x + 16, fLoai.y + 11}, 24, 1, (selLoai == -1) ? placeColor : textColor);
+        // --- HÀNG 4:  Ngày làm việc & Vị trí việc làm ---
 
         DrawTextEx(tieude, "Vị trí việc làm", {fVT.x, fVT.y - 26}, 20, 1, labelColor);
         VeDanhSachCombo(fVT, false, dsVT, nVT, mousePos, 24);
         DrawTextEx(myFont, (selVT == -1) ? "Chọn vị trí" : dsVT[selVT].c_str(),
                    {fVT.x + 16, fVT.y + 11}, 24, 1, (selVT == -1) ? placeColor : textColor);
-
-        // --- HÀNG 5: Ngày vào làm & Bậc lương ---
         DrawTextEx(tieude, "Ngày vào làm", {fNVL.x, fNVL.y - 26}, 20, 1, labelColor);
         string txtNVL = changeNVL ? TextFormat("%02d/%02d/%04d", dayNVL, monthNVL, yearNVL) : "";
         VeODate(fNVL, txtNVL.c_str(), isOpenCalendarNVL, mousePos, "mm/dd/yyyy");
+        // --- HÀNG 5: Loại nhân viên ---
+
+        if (hienLoai)
+        {
+            DrawTextEx(tieude, "Loại nhân viên", {fLoai.x, fLoai.y - 26}, 20, 1, labelColor);
+            VeDanhSachCombo(fLoai, false, dsLoai, 2, mousePos, 24);
+            DrawTextEx(myFont, (selLoai == -1) ? "Chọn loại nhân viên" : dsLoai[selLoai].c_str(),
+                       {fLoai.x + 16, fLoai.y + 11}, 24, 1, (selLoai == -1) ? placeColor : textColor);
+        }
 
         // ================= 7. VẼ NÚT "HỦY" VÀ NÚT "THÊM / SỬA" =================
         DrawLine(Table.x + 36, Table.y + 575, Table.x + Table.width - 36, Table.y + 575, Color{235, 240, 245, 255});
@@ -1369,7 +1723,7 @@ void Draw_Screen_NhanVien(Vector2 mousePos, bool Clicked, QLNV *QL)
                 openPB = true;
             else if (CheckCollisionPointRec(mousePos, fCV))
                 openCV = true;
-            else if (CheckCollisionPointRec(mousePos, fLoai))
+            else if (hienLoai && CheckCollisionPointRec(mousePos, fLoai))
                 openLoai = true;
             else if (CheckCollisionPointRec(mousePos, fVT))
                 openVT = true;
@@ -1412,43 +1766,95 @@ void Draw_Screen_NhanVien(Vector2 mousePos, bool Clicked, QLNV *QL)
                     PhongBan *pb = (*QL->get_DB()->get_ListPB())[selPB]->Data;
                     ViTriViecLam *vt = (*QL->get_DB()->get_ListVTVL())[selVT]->Data;
 
+                    // Employee *oldEmp = QL->TimTheoMa(mnv);
+                    // int oldThuong = (oldEmp != nullptr) ? oldEmp->get_Thuong() : 0;
+                    // int oldSNC = 0;
+                    // if (oldEmp != nullptr)
+                    // {
+                    //     FullTime *oldFT = dynamic_cast<FullTime *>(oldEmp);
+                    //     if (oldFT != nullptr)
+                    //         oldSNC = oldFT->get_SoNgayCong();
+                    // }
+
+                    // if (selLoai == 0)
+                    //     nv = new FullTime(mnv, ten, ngaySinh, gioiTinh, cv, vt, pb, ngayVaoLam, 1, oldThuong, oldSNC);
+                    // else
+                    // {
+                    //     int oldTime = 80;
+                    //     if (oldEmp != nullptr)
+                    //     {
+                    //         PartTime *oldPT = dynamic_cast<PartTime *>(oldEmp);
+                    //         if (oldPT != nullptr)
+                    //             oldTime = oldPT->get_TimeWork();
+                    //     }
+                    //     nv = new PartTime(mnv, ten, ngaySinh, gioiTinh, cv, vt, pb, ngayVaoLam, 1, oldThuong, oldTime);
+                    // }
+
+                    // if (clickThem)
+                    // {
+                    //     QL->ThemEmployee(nv);
+                    //     HienThongBao("Thêm nhân viên mới thành công!", false); // false = Màu xanh
+                    // }
+                    // else
+                    // {
+                    //     QL->SuaEmployee(nv);
+                    //     delete nv;
+                    //     nv = nullptr;
+                    //     HienThongBao("Cập nhật thông tin thành công!", false); // false = Màu xanh
+                    // }
+
+                    // dongBang = true;
                     Employee *oldEmp = QL->TimTheoMa(mnv);
+                    if (clickSua && oldEmp == nullptr)
+                        throw string("Không tìm thấy nhân viên cần sửa!");
+
+                    bool oldLaFT = (dynamic_cast<FullTime *>(oldEmp) != nullptr);
+                    if (clickSua && oldLaFT && selLoai == 1)
+                        throw string("Không thể chuyển FullTime xuống PartTime!");
+
                     int oldThuong = (oldEmp != nullptr) ? oldEmp->get_Thuong() : 0;
-                    int oldSNC = 0;
-                    if (oldEmp != nullptr)
-                    {
-                        FullTime *oldFT = dynamic_cast<FullTime *>(oldEmp);
-                        if (oldFT != nullptr)
-                            oldSNC = oldFT->get_SoNgayCong();
-                    }
+                    int oldBac = (oldEmp != nullptr) ? oldEmp->get_BacViTri() : 1;
+                    int oldSNC = 0, oldTime = 80;
+                    if (FullTime *f = dynamic_cast<FullTime *>(oldEmp))
+                        oldSNC = f->get_SoNgayCong();
+                    else if (PartTime *p = dynamic_cast<PartTime *>(oldEmp))
+                        oldTime = p->get_TimeWork();
 
                     if (selLoai == 0)
-                        nv = new FullTime(mnv, ten, ngaySinh, gioiTinh, cv, vt, pb, ngayVaoLam, 1, oldThuong, oldSNC);
+                        nv = new FullTime(mnv, ten, ngaySinh, gioiTinh, cv, vt, pb, ngayVaoLam, oldBac, oldThuong, oldSNC);
                     else
-                    {
-                        int oldTime = 80;
-                        if (oldEmp != nullptr)
-                        {
-                            PartTime *oldPT = dynamic_cast<PartTime *>(oldEmp);
-                            if (oldPT != nullptr)
-                                oldTime = oldPT->get_TimeWork();
-                        }
-                        nv = new PartTime(mnv, ten, ngaySinh, gioiTinh, cv, vt, pb, ngayVaoLam, 1, oldThuong, oldTime);
-                    }
+                        nv = new PartTime(mnv, ten, ngaySinh, gioiTinh, cv, vt, pb, ngayVaoLam, oldBac, oldThuong, oldTime);
 
                     if (clickThem)
                     {
                         QL->ThemEmployee(nv);
-                        HienThongBao("Thêm nhân viên mới thành công!", false); // false = Màu xanh
+                        HienThongBao("Thêm nhân viên mới thành công!", false);
                     }
                     else
                     {
-                        QL->SuaEmployee(nv);
-                        delete nv;
-                        nv = nullptr;
-                        HienThongBao("Cập nhật thông tin thành công!", false); // false = Màu xanh
-                    }
+                        bool doiLoai = (!oldLaFT && selLoai == 0); // PartTime -> FullTime
+                        if (doiLoai)
+                        {
+                            int tuoi = yearNVL - yearNS;
+                            if (year - yearNS < 18 || year - yearNS > 60)
+                                throw string("Tuổi nhân viên không hợp lệ!");
+                            if (tuoi < 18)
+                                throw string("Tuổi tính đến ngày vào làm chưa đủ 18!");
+                            if (ngayVaoLam > Date::DateHienTai())
+                                throw string("Ngày vào làm không được lớn hơn ngày hiện tại!");
 
+                            QL->XoaEmployee(oldEmp);
+                            QL->ThemEmployee(nv); // KHÔNG delete nv
+                        }
+                        else
+                        {
+                            QL->SuaEmployee(nv);
+                            delete nv;
+                        }
+                        nv = nullptr;
+                        QL->get_DB()->SaveFileEmployee();
+                        HienThongBao("Cập nhật thông tin thành công!", false);
+                    }
                     dongBang = true;
                 }
                 catch (const string &loi)
@@ -1502,38 +1908,27 @@ void Draw_Screen_NhanVien(Vector2 mousePos, bool Clicked, QLNV *QL)
 
         if (Clicked && CheckCollisionPointRec(mousePos, btnHuyXoa))
         {
-            for (int i = 0; i < QL->get_DB()->get_ListEmployee()->get_size(); i++)
-                dsXoa[i] = 0;
+            delete dsXoa;
             isOpenDelete = false;
         }
 
         if (Clicked && CheckCollisionPointRec(mousePos, btnXacNhanXoa))
         {
-            List<Employee> *ds = QL->get_DB()->get_ListEmployee();
-            int n = ds->get_size();
-
-            Employee **canXoa = new Employee *[n]; // gom con trỏ trước //* là mảng * con trỏ
-            int dem = 0;
-            for (int i = 0; i < n; i++)
-                if (dsXoa[i] == 1)
-                    canXoa[dem++] = (*ds)[i]->Data;
-
+            int dem = dsXoa->get_size();
             if (dem == 0)
             {
                 HienThongBao("Chưa chọn nhân viên nào để xóa!", true);
-                delete[] canXoa;
             }
             else
             {
-                for (int i = 0; i < dem; i++) // rồi mới xóa
-                    QL->XoaEmployee(canXoa[i]);
-                delete[] canXoa;
+                for (Node<Employee> *p = dsXoa->get_header()->Next; p != nullptr; p = p->Next)
+                    QL->XoaEmployee(p->Data);
+
+                while (dsXoa->get_size() > 0)
+                    dsXoa->remove_item(dsXoa->get_header()->Next);
 
                 QL->get_DB()->SaveFileEmployee();
                 HienThongBao("Đã xóa " + to_string(dem) + " nhân viên thành công!", false);
-
-                for (int i = 0; i < QL->get_DB()->get_ListEmployee()->get_size(); i++)
-                    dsXoa[i] = 0;
                 isOpenDelete = false;
                 selectedMNV = "";
             }
@@ -1544,12 +1939,10 @@ void Draw_Screen_NhanVien(Vector2 mousePos, bool Clicked, QLNV *QL)
 
 void Draw_Screen_VTVL(Vector2 mousePos, bool Clicked, QLNV *QL)
 {
-    // bảng đầu
     static bool isMaVTActive = false;  // Trạng thái: ô có đang được click vào không
     static bool isTenVTActive = false; // Trạng thái: ô có đang được click vào không
     static bool needfill = false;
-    int n = QL->get_DB()->get_ListVTVL()->get_size();
-    static int *dsXoaVTVL = new int[n]();
+    static List<ViTriViecLam> *dsXoa = nullptr;
 
     Rectangle panelBang1 = {330, 230, 1450.0f, 280.0f};
     DrawRectangleRounded({panelBang1.x + 3, panelBang1.y + 4, panelBang1.width, panelBang1.height}, 0.03f, 10, Fade(BLACK, 0.08f));
@@ -1620,36 +2013,25 @@ void Draw_Screen_VTVL(Vector2 mousePos, bool Clicked, QLNV *QL)
         {
             if (CheckCollisionPointRec(mousePos, btnHuyXoa))
             {
-                for (int i = 0; i < QL->get_DB()->get_ListVTVL()->get_size(); i++)
-                    dsXoaVTVL[i] = 0;
+                delete dsXoa;
                 OpenXoa = false;
             }
             else if (CheckCollisionPointRec(mousePos, btnXacNhanXoa))
             {
-                List<ViTriViecLam> *ds = QL->get_DB()->get_ListVTVL();
-                int n = ds->get_size();
-                ViTriViecLam **canXoa = new ViTriViecLam *[n];
-                int soCanXoa = 0;
-                for (int i = 0; i < n; i++)
-                {
-                    if (dsXoaVTVL[i] == 1)
-                        canXoa[soCanXoa++] = (*ds)[i]->Data;
-                }
-
-                if (soCanXoa == 0)
+                int tongChon = dsXoa->get_size();
+                if (tongChon == 0)
                 {
                     HienThongBao("Chưa chọn vị trí nào để xóa!", true);
-                    delete[] canXoa;
                 }
                 else
                 {
                     int dem = 0;
                     string loiCuoi = "";
-                    for (int i = 0; i < soCanXoa; i++)
+                    for (Node<ViTriViecLam> *p = dsXoa->get_header()->Next; p != nullptr; p = p->Next)
                     {
                         try
                         {
-                            QL->XoaViTri(canXoa[i]);
+                            QL->XoaViTri(p->Data);
                             dem++;
                         }
                         catch (const string &loi)
@@ -1657,26 +2039,20 @@ void Draw_Screen_VTVL(Vector2 mousePos, bool Clicked, QLNV *QL)
                             loiCuoi = loi;
                         }
                     }
-                    delete[] canXoa;
 
                     if (dem > 0)
                     {
                         if (loiCuoi.empty())
-                        {
                             HienThongBao("Đã xóa " + to_string(dem) + " vị trí thành công!", false);
-                        }
                         else
-                        {
                             HienThongBao("Đã xóa " + to_string(dem) + " vị trí. " + loiCuoi, true);
-                        }
                     }
                     else
                     {
                         HienThongBao(loiCuoi.empty() ? "Xóa không thành công!" : loiCuoi, true);
                     }
 
-                    for (int i = 0; i < QL->get_DB()->get_ListVTVL()->get_size(); i++)
-                        dsXoaVTVL[i] = 0;
+                    delete dsXoa;
                     OpenXoa = false;
                     MaVTInput[0] = '\0';
                     TenVTInput[0] = '\0';
@@ -1715,8 +2091,7 @@ void Draw_Screen_VTVL(Vector2 mousePos, bool Clicked, QLNV *QL)
             else if (CheckCollisionPointRec(mousePos, btnXoaViTri))
             {
                 OpenXoa = true;
-                for (int i = 0; i < QL->get_DB()->get_ListVTVL()->get_size(); i++)
-                    dsXoaVTVL[i] = 0;
+                dsXoa = new List<ViTriViecLam>;
             }
         }
     }
@@ -1767,13 +2142,13 @@ void Draw_Screen_VTVL(Vector2 mousePos, bool Clicked, QLNV *QL)
     if (scrollY > 0.0f)
         scrollY = 0.0f;
     // Cấu hình khoảng cách và kích thước chữ
-    int startX = 350;   // Lề trái
-    int startY = 600;   // Lề trên
-    int rowHeight = 60; // Chiều cao mỗi dòng
-    int fontSize = 30;  // Kích thước chữ
+    int startX = panelBang2.x + 20; // Lề trái
+    int startY = panelBang2.y + 20; // Lề trên
+    int rowHeight = 60;             // Chiều cao mỗi dòng
+    int fontSize = 30;              // Kích thước chữ
 
     // Tọa độ X của từng cột (Bạn cần tinh chỉnh các số này cho vừa với màn hình)
-    int colX[] = {350, 600, 900, 950, 860, 1000, 1200, 1460};
+    int colX[] = {350, 600, 900};
 
     // 1. VẼ TIÊU ĐỀ CỘT (Header)
     float lech = OpenXoa ? 30.f : 0.f;
@@ -1804,7 +2179,6 @@ void Draw_Screen_VTVL(Vector2 mousePos, bool Clicked, QLNV *QL)
 
     ViTriViecLam *selVT = nullptr;
     static string selectedPhongBan = "";
-    int idxVTVL = 0;
     while (current != nullptr)
     {
         string mpb = current->Data->get_MaVTVL();
@@ -1819,7 +2193,11 @@ void Draw_Screen_VTVL(Vector2 mousePos, bool Clicked, QLNV *QL)
         {
             if (OpenXoa)
             {
-                dsXoaVTVL[idxVTVL] = !dsXoaVTVL[idxVTVL];
+                Node<ViTriViecLam> *nd = dsXoa->find_ptr(current->Data);
+                if (nd != nullptr)
+                    dsXoa->remove_item(nd);
+                else
+                    dsXoa->insert(current->Data);
             }
             else
             {
@@ -1831,7 +2209,7 @@ void Draw_Screen_VTVL(Vector2 mousePos, bool Clicked, QLNV *QL)
 
         if (OpenXoa)
         {
-            if (dsXoaVTVL[idxVTVL] == 1)
+            if (dsXoa->find_ptr(current->Data))
             {
                 DrawRectangleRec(rowRect, Color{255, 230, 230, 255});
             }
@@ -1843,7 +2221,7 @@ void Draw_Screen_VTVL(Vector2 mousePos, bool Clicked, QLNV *QL)
             Rectangle box = {(float)colX[0] + 2, currentY + 4, 20, 20};
             DrawRectangleRec(box, WHITE);
             DrawRectangleLinesEx(box, 2, DARKGRAY);
-            if (dsXoaVTVL[idxVTVL] == 1)
+            if (dsXoa->find_ptr(current->Data))
             {
                 DrawRectangleRec({box.x + 4, box.y + 4, box.width - 8, box.height - 8}, DARKGREEN);
             }
@@ -1868,7 +2246,6 @@ void Draw_Screen_VTVL(Vector2 mousePos, bool Clicked, QLNV *QL)
 
         currentY += rowHeight;
         totalRows++;
-        idxVTVL++;
 
         current = current->Next;
     }
@@ -2052,8 +2429,7 @@ void Draw_Screen_PhongBan(Vector2 mousePos, bool Clicked, QLNV *QL)
     static bool isTenPhongBanActive = false; // Trạng thái: ô có đang được click vào không
     static bool isOpenCalendar = false;
     static bool needfill = false;
-    int n = QL->get_DB()->get_ListPB()->get_size();
-    static int *dsXoaPB = new int[n]();
+    static List<PhongBan> *dsXoa = nullptr;
 
     Rectangle panelBang1 = {330, 230, 1450.0f, 300.0f};
     DrawRectangleRounded({panelBang1.x + 3, panelBang1.y + 4, panelBang1.width, panelBang1.height}, 0.03f, 10, Fade(BLACK, 0.08f));
@@ -2146,36 +2522,25 @@ void Draw_Screen_PhongBan(Vector2 mousePos, bool Clicked, QLNV *QL)
         {
             if (CheckCollisionPointRec(mousePos, btnHuyXoa))
             {
-                for (int i = 0; i < QL->get_DB()->get_ListPB()->get_size(); i++)
-                    dsXoaPB[i] = 0;
+                delete dsXoa;
                 OpenXoa = false;
             }
             else if (CheckCollisionPointRec(mousePos, btnXacNhanXoa))
             {
-                List<PhongBan> *ds = QL->get_DB()->get_ListPB();
-                int n = ds->get_size();
-                PhongBan **canXoa = new PhongBan *[n];
-                int soCanXoa = 0;
-                for (int i = 0; i < n; i++)
-                {
-                    if (dsXoaPB[i] == 1)
-                        canXoa[soCanXoa++] = (*ds)[i]->Data;
-                }
-
-                if (soCanXoa == 0)
+                int tongChon = dsXoa->get_size();
+                if (tongChon == 0)
                 {
                     HienThongBao("Chưa chọn phòng ban nào để xóa!", true);
-                    delete[] canXoa;
                 }
                 else
                 {
                     int dem = 0;
                     string loiCuoi = "";
-                    for (int i = 0; i < soCanXoa; i++)
+                    for (Node<PhongBan> *p = dsXoa->get_header()->Next; p != nullptr; p = p->Next)
                     {
                         try
                         {
-                            QL->XoaPhongBan(canXoa[i]);
+                            QL->XoaPhongBan(p->Data);
                             dem++;
                         }
                         catch (const string &loi)
@@ -2183,27 +2548,19 @@ void Draw_Screen_PhongBan(Vector2 mousePos, bool Clicked, QLNV *QL)
                             loiCuoi = loi;
                         }
                     }
-                    delete[] canXoa;
 
                     if (dem > 0)
                     {
-                        QL->get_DB()->SaveFilePB();
                         if (loiCuoi.empty())
-                        {
                             HienThongBao("Đã xóa " + to_string(dem) + " phòng ban thành công!", false);
-                        }
                         else
-                        {
                             HienThongBao("Đã xóa " + to_string(dem) + " phòng ban. " + loiCuoi, true);
-                        }
                     }
                     else
                     {
                         HienThongBao(loiCuoi.empty() ? "Xóa không thành công!" : loiCuoi, true);
                     }
-
-                    for (int i = 0; i < QL->get_DB()->get_ListPB()->get_size(); i++)
-                        dsXoaPB[i] = 0;
+                    delete dsXoa;
                     OpenXoa = false;
                     MaPhongBanInput[0] = '\0';
                     TenPhongBanInput[0] = '\0';
@@ -2243,8 +2600,7 @@ void Draw_Screen_PhongBan(Vector2 mousePos, bool Clicked, QLNV *QL)
             else if (CheckCollisionPointRec(mousePos, btnXoaPhongBan))
             {
                 OpenXoa = true;
-                for (int i = 0; i < QL->get_DB()->get_ListPB()->get_size(); i++)
-                    dsXoaPB[i] = 0;
+                dsXoa = new List<PhongBan>;
             }
         }
     }
@@ -2349,7 +2705,11 @@ void Draw_Screen_PhongBan(Vector2 mousePos, bool Clicked, QLNV *QL)
         {
             if (OpenXoa)
             {
-                dsXoaPB[idxPB] = !dsXoaPB[idxPB];
+                Node<PhongBan> *nd = dsXoa->find_ptr(current->Data);
+                if (nd != nullptr)
+                    dsXoa->remove_item(nd);
+                else
+                    dsXoa->insert(current->Data);
             }
             else
             {
@@ -2361,7 +2721,7 @@ void Draw_Screen_PhongBan(Vector2 mousePos, bool Clicked, QLNV *QL)
 
         if (OpenXoa)
         {
-            if (dsXoaPB[idxPB] == 1)
+            if (dsXoa->find_ptr(current->Data))
             {
                 DrawRectangleRec(rowRect, Color{255, 230, 230, 255});
             }
@@ -2373,7 +2733,7 @@ void Draw_Screen_PhongBan(Vector2 mousePos, bool Clicked, QLNV *QL)
             Rectangle box = {(float)colX[0] + 2, currentY + 4, 20, 20};
             DrawRectangleRec(box, WHITE);
             DrawRectangleLinesEx(box, 2, DARKGRAY);
-            if (dsXoaPB[idxPB] == 1)
+            if (dsXoa->find_ptr(current->Data))
             {
                 DrawRectangleRec({box.x + 4, box.y + 4, box.width - 8, box.height - 8}, DARKGREEN);
             }
@@ -2529,8 +2889,7 @@ void Draw_Screen_ChucVu(Vector2 mousepos, bool Clicked, QLNV *QL)
     static bool isTenChucVuActive = false;
     static bool isPhucCapActive = false;
     static bool needfill = false;
-    int n = QL->get_DB()->get_ListCV()->get_size();
-    static int *dsXoaCV = new int[n]();
+    static List<ChucVu> *dsXoa = nullptr;
 
     Rectangle panelBang1 = {330, 230, 1450.0f, 300.0f};
     DrawRectangleRounded({panelBang1.x + 3, panelBang1.y + 4, panelBang1.width, panelBang1.height}, 0.03f, 10, Fade(BLACK, 0.08f));
@@ -2613,36 +2972,25 @@ void Draw_Screen_ChucVu(Vector2 mousepos, bool Clicked, QLNV *QL)
         {
             if (CheckCollisionPointRec(mousepos, btnHuyXoa))
             {
-                for (int i = 0; i < QL->get_DB()->get_ListCV()->get_size(); i++)
-                    dsXoaCV[i] = 0;
+                delete dsXoa;
                 OpenXoa = false;
             }
             else if (CheckCollisionPointRec(mousepos, btnXacNhanXoa))
             {
-                List<ChucVu> *ds = QL->get_DB()->get_ListCV();
-                int n = ds->get_size();
-                ChucVu **canXoa = new ChucVu *[n];
-                int soCanXoa = 0;
-                for (int i = 0; i < n; i++)
+                int tongChon = dsXoa->get_size();
+                if (tongChon == 0)
                 {
-                    if (dsXoaCV[i] == 1)
-                        canXoa[soCanXoa++] = (*ds)[i]->Data;
-                }
-
-                if (soCanXoa == 0)
-                {
-                    HienThongBao("Chưa chọn chức vụ nào để xóa!", true);
-                    delete[] canXoa;
+                    HienThongBao("Chưa chọn vị trí nào để xóa!", true);
                 }
                 else
                 {
                     int dem = 0;
                     string loiCuoi = "";
-                    for (int i = 0; i < soCanXoa; i++)
+                    for (Node<ChucVu> *p = dsXoa->get_header()->Next; p != nullptr; p = p->Next)
                     {
                         try
                         {
-                            QL->XoaChucVu(canXoa[i]);
+                            QL->XoaChucVu(p->Data);
                             dem++;
                         }
                         catch (const string &loi)
@@ -2650,27 +2998,19 @@ void Draw_Screen_ChucVu(Vector2 mousepos, bool Clicked, QLNV *QL)
                             loiCuoi = loi;
                         }
                     }
-                    delete[] canXoa;
-
                     if (dem > 0)
                     {
-                        QL->get_DB()->SaveFileCV();
                         if (loiCuoi.empty())
-                        {
                             HienThongBao("Đã xóa " + to_string(dem) + " chức vụ thành công!", false);
-                        }
                         else
-                        {
                             HienThongBao("Đã xóa " + to_string(dem) + " chức vụ. " + loiCuoi, true);
-                        }
                     }
                     else
                     {
                         HienThongBao(loiCuoi.empty() ? "Xóa không thành công!" : loiCuoi, true);
                     }
 
-                    for (int i = 0; i < QL->get_DB()->get_ListCV()->get_size(); i++)
-                        dsXoaCV[i] = 0;
+                    delete dsXoa;
                     OpenXoa = false;
                     MaChucVuInput[0] = '\0';
                     TenChucVuInput[0] = '\0';
@@ -2711,8 +3051,7 @@ void Draw_Screen_ChucVu(Vector2 mousepos, bool Clicked, QLNV *QL)
             else if (CheckCollisionPointRec(mousepos, btnXoa))
             {
                 OpenXoa = true;
-                for (int i = 0; i < QL->get_DB()->get_ListCV()->get_size(); i++)
-                    dsXoaCV[i] = 0;
+                dsXoa = new List<ChucVu>;
             }
         }
     }
@@ -2803,7 +3142,6 @@ void Draw_Screen_ChucVu(Vector2 mousepos, bool Clicked, QLNV *QL)
 
     ChucVu *selCV = nullptr;
     static string selectedMCV = "";
-    int idxCV = 0;
     while (current != nullptr)
     {
         string mcv = current->Data->get_MaChucVu();
@@ -2819,7 +3157,11 @@ void Draw_Screen_ChucVu(Vector2 mousepos, bool Clicked, QLNV *QL)
         {
             if (OpenXoa)
             {
-                dsXoaCV[idxCV] = !dsXoaCV[idxCV];
+                Node<ChucVu> *nd = dsXoa->find_ptr(current->Data);
+                if (nd != nullptr)
+                    dsXoa->remove_item(nd);
+                else
+                    dsXoa->insert(current->Data);
             }
             else
             {
@@ -2831,7 +3173,7 @@ void Draw_Screen_ChucVu(Vector2 mousepos, bool Clicked, QLNV *QL)
 
         if (OpenXoa)
         {
-            if (dsXoaCV[idxCV] == 1)
+            if (dsXoa->find_ptr(current->Data))
             {
                 DrawRectangleRec(rowRect, Color{255, 230, 230, 255});
             }
@@ -2843,7 +3185,7 @@ void Draw_Screen_ChucVu(Vector2 mousepos, bool Clicked, QLNV *QL)
             Rectangle box = {(float)colX[0] + 2, currentY + 4, 20, 20};
             DrawRectangleRec(box, WHITE);
             DrawRectangleLinesEx(box, 2, DARKGRAY);
-            if (dsXoaCV[idxCV] == 1)
+            if (dsXoa->find_ptr(current->Data))
             {
                 DrawRectangleRec({box.x + 4, box.y + 4, box.width - 8, box.height - 8}, DARKGREEN);
             }
@@ -2869,7 +3211,6 @@ void Draw_Screen_ChucVu(Vector2 mousepos, bool Clicked, QLNV *QL)
 
         currentY += rowHeight;
         totalRows++;
-        idxCV++;
 
         current = current->Next;
     }
@@ -2947,6 +3288,7 @@ void Draw_Screen_ChucVu(Vector2 mousepos, bool Clicked, QLNV *QL)
             }
             catch (...)
             {
+                HienThongBao("Nhập sai loại kí tự không phải số", true);
                 pc = 0.0;
             }
             ChucVu *CVnew = new ChucVu(MaChucVuInput, TenChucVuInput, pc);
@@ -3230,8 +3572,7 @@ void Draw_Screen_ML_FullTime(Vector2 mousePos, bool Clicked, QLNV *QL)
     static bool isBacActive = false;
     static bool isLuongActive = false;
     static bool needfill = false;
-    int n = QL->get_DB()->get_ListML()->get_size();
-    static int *dsXoaML = new int[n]();
+    static List<MucLuong> *dsXoa = nullptr;
     static string selectedMLKey = "";
 
     static char MaVTInput[50] = "\0";
@@ -3365,7 +3706,6 @@ void Draw_Screen_ML_FullTime(Vector2 mousePos, bool Clicked, QLNV *QL)
 
     Node<MucLuong> *current = QL->get_DB()->get_ListML()->get_header()->Next;
     int totalRows = 0;
-    int idxML = 0;
     MucLuong *selML = nullptr;
 
     while (current != nullptr)
@@ -3373,7 +3713,7 @@ void Draw_Screen_ML_FullTime(Vector2 mousePos, bool Clicked, QLNV *QL)
         if (current->Data && current->Data->get_Loai_NV() == "FullTime")
         {
             MucLuong *ml = current->Data;
-            string mvt = ml->get_Ma_VTVL();
+            string mvt = ml->get_VTVL() ? ml->get_Ma_VTVL() : "N/A";
             string tenVT = ml->get_VTVL() ? ml->get_VTVL()->get_TenVTVL() : "";
             int bac = ml->get_Bac_VTVL();
             long long luong = (long long)ml->get_Luong();
@@ -3386,7 +3726,11 @@ void Draw_Screen_ML_FullTime(Vector2 mousePos, bool Clicked, QLNV *QL)
             {
                 if (OpenXoa)
                 {
-                    dsXoaML[idxML] = !dsXoaML[idxML];
+                    Node<MucLuong> *nd = dsXoa->find_ptr(current->Data);
+                    if (nd != nullptr)
+                        dsXoa->remove_item(nd);
+                    else
+                        dsXoa->insert(current->Data);
                 }
                 else
                 {
@@ -3399,7 +3743,7 @@ void Draw_Screen_ML_FullTime(Vector2 mousePos, bool Clicked, QLNV *QL)
 
             if (OpenXoa)
             {
-                if (dsXoaML[idxML] == 1)
+                if (dsXoa->find_ptr(current->Data))
                 {
                     DrawRectangleRec(rowRect, Color{255, 230, 230, 255});
                 }
@@ -3411,7 +3755,7 @@ void Draw_Screen_ML_FullTime(Vector2 mousePos, bool Clicked, QLNV *QL)
                 Rectangle box = {(float)colX[0] + 2, currentY + 4, 20, 20};
                 DrawRectangleRec(box, WHITE);
                 DrawRectangleLinesEx(box, 2, DARKGRAY);
-                if (dsXoaML[idxML] == 1)
+                if (dsXoa->find_ptr(current->Data))
                 {
                     DrawRectangleRec({box.x + 4, box.y + 4, box.width - 8, box.height - 8}, DARKGREEN);
                 }
@@ -3437,7 +3781,6 @@ void Draw_Screen_ML_FullTime(Vector2 mousePos, bool Clicked, QLNV *QL)
 
             currentY += rowHeight;
             totalRows++;
-            idxML++;
         }
         current = current->Next;
     }
@@ -3514,45 +3857,25 @@ void Draw_Screen_ML_FullTime(Vector2 mousePos, bool Clicked, QLNV *QL)
         {
             if (CheckCollisionPointRec(mousePos, btnHuyXoa))
             {
-                for (int i = 0; i < QL->get_DB()->get_ListML()->get_size(); i++)
-                    dsXoaML[i] = 0;
+                delete dsXoa;
                 OpenXoa = false;
             }
             else if (CheckCollisionPointRec(mousePos, btnXacNhanXoa))
             {
-                List<MucLuong> *ds = QL->get_DB()->get_ListML();
-                int n = ds->get_size();
-                MucLuong **canXoa = new MucLuong *[n];
-                int soCanXoa = 0;
-                int curIdx = 0;
-                Node<MucLuong> *p = ds->get_header()->Next;
-                while (p != nullptr)
+                int tongChon = dsXoa->get_size();
+                if (tongChon == 0)
                 {
-                    if (p->Data && p->Data->get_Loai_NV() == "FullTime")
-                    {
-                        if (dsXoaML[curIdx] == 1)
-                        {
-                            canXoa[soCanXoa++] = p->Data;
-                        }
-                        curIdx++;
-                    }
-                    p = p->Next;
-                }
-
-                if (soCanXoa == 0)
-                {
-                    HienThongBao("Chưa chọn mức lương nào để xóa!", true);
-                    delete[] canXoa;
+                    HienThongBao("Chưa chọn phòng ban nào để xóa!", true);
                 }
                 else
                 {
                     int dem = 0;
                     string loiCuoi = "";
-                    for (int i = 0; i < soCanXoa; i++)
+                    for (Node<MucLuong> *p = dsXoa->get_header()->Next; p != nullptr; p = p->Next)
                     {
                         try
                         {
-                            QL->XoaMucLuong(canXoa[i]);
+                            QL->XoaMucLuong(p->Data);
                             dem++;
                         }
                         catch (const string &loi)
@@ -3560,27 +3883,19 @@ void Draw_Screen_ML_FullTime(Vector2 mousePos, bool Clicked, QLNV *QL)
                             loiCuoi = loi;
                         }
                     }
-                    delete[] canXoa;
 
                     if (dem > 0)
                     {
-                        QL->get_DB()->SaveFileML();
                         if (loiCuoi.empty())
-                        {
-                            HienThongBao("Đã xóa " + to_string(dem) + " mức lương thành công!", false);
-                        }
+                            HienThongBao("Đã xóa " + to_string(dem) + " phòng ban thành công!", false);
                         else
-                        {
-                            HienThongBao("Đã xóa " + to_string(dem) + " mức lương. " + loiCuoi, true);
-                        }
+                            HienThongBao("Đã xóa " + to_string(dem) + " phòng ban. " + loiCuoi, true);
                     }
                     else
                     {
                         HienThongBao(loiCuoi.empty() ? "Xóa không thành công!" : loiCuoi, true);
                     }
-
-                    for (int i = 0; i < QL->get_DB()->get_ListML()->get_size(); i++)
-                        dsXoaML[i] = 0;
+                    delete dsXoa;
                     OpenXoa = false;
                     selectedMLKey = "";
                     MaVTInput[0] = BacInput[0] = LuongInput[0] = '\0';
@@ -3689,8 +4004,7 @@ void Draw_Screen_ML_FullTime(Vector2 mousePos, bool Clicked, QLNV *QL)
             else if (CheckCollisionPointRec(mousePos, btnXoaMucLuong))
             {
                 OpenXoa = true;
-                for (int i = 0; i < QL->get_DB()->get_ListML()->get_size(); i++)
-                    dsXoaML[i] = 0;
+                dsXoa = new List<MucLuong>;
             }
         }
     }
@@ -3733,8 +4047,7 @@ void Draw_Screen_ML_PartTime(Vector2 mousePos, bool Clicked, QLNV *QL)
     static bool isBacActive = false;
     static bool isLuongActive = false;
     static bool needfill = false;
-    int n = QL->get_DB()->get_ListML()->get_size();
-    static int *dsXoaML = new int[n]();
+    static List<MucLuong> *dsXoa = nullptr;
     static string selectedMLKey = "";
 
     static char MaVTInput[50] = "\0";
@@ -3868,7 +4181,6 @@ void Draw_Screen_ML_PartTime(Vector2 mousePos, bool Clicked, QLNV *QL)
 
     Node<MucLuong> *current = QL->get_DB()->get_ListML()->get_header()->Next;
     int totalRows = 0;
-    int idxML = 0;
     MucLuong *selML = nullptr;
 
     while (current != nullptr)
@@ -3876,7 +4188,7 @@ void Draw_Screen_ML_PartTime(Vector2 mousePos, bool Clicked, QLNV *QL)
         if (current->Data && current->Data->get_Loai_NV() == "PartTime")
         {
             MucLuong *ml = current->Data;
-            string mvt = ml->get_Ma_VTVL();
+            string mvt = ml->get_VTVL() ? ml->get_Ma_VTVL() : "N/A";
             string tenVT = ml->get_VTVL() ? ml->get_VTVL()->get_TenVTVL() : "";
             int bac = ml->get_Bac_VTVL();
             long long luong = (long long)ml->get_Luong();
@@ -3889,7 +4201,11 @@ void Draw_Screen_ML_PartTime(Vector2 mousePos, bool Clicked, QLNV *QL)
             {
                 if (OpenXoa)
                 {
-                    dsXoaML[idxML] = !dsXoaML[idxML];
+                    Node<MucLuong> *nd = dsXoa->find_ptr(current->Data);
+                    if (nd != nullptr)
+                        dsXoa->remove_item(nd);
+                    else
+                        dsXoa->insert(current->Data);
                 }
                 else
                 {
@@ -3902,7 +4218,7 @@ void Draw_Screen_ML_PartTime(Vector2 mousePos, bool Clicked, QLNV *QL)
 
             if (OpenXoa)
             {
-                if (dsXoaML[idxML] == 1)
+                if (dsXoa->find_ptr(current->Data))
                 {
                     DrawRectangleRec(rowRect, Color{255, 230, 230, 255});
                 }
@@ -3914,7 +4230,7 @@ void Draw_Screen_ML_PartTime(Vector2 mousePos, bool Clicked, QLNV *QL)
                 Rectangle box = {(float)colX[0] + 2, currentY + 4, 20, 20};
                 DrawRectangleRec(box, WHITE);
                 DrawRectangleLinesEx(box, 2, DARKGRAY);
-                if (dsXoaML[idxML] == 1)
+                if (dsXoa->find_ptr(current->Data))
                 {
                     DrawRectangleRec({box.x + 4, box.y + 4, box.width - 8, box.height - 8}, DARKGREEN);
                 }
@@ -3940,7 +4256,6 @@ void Draw_Screen_ML_PartTime(Vector2 mousePos, bool Clicked, QLNV *QL)
 
             currentY += rowHeight;
             totalRows++;
-            idxML++;
         }
         current = current->Next;
     }
@@ -4017,45 +4332,25 @@ void Draw_Screen_ML_PartTime(Vector2 mousePos, bool Clicked, QLNV *QL)
         {
             if (CheckCollisionPointRec(mousePos, btnHuyXoa))
             {
-                for (int i = 0; i < QL->get_DB()->get_ListML()->get_size(); i++)
-                    dsXoaML[i] = 0;
+                delete dsXoa;
                 OpenXoa = false;
             }
             else if (CheckCollisionPointRec(mousePos, btnXacNhanXoa))
             {
-                List<MucLuong> *ds = QL->get_DB()->get_ListML();
-                int n = ds->get_size();
-                MucLuong **canXoa = new MucLuong *[n];
-                int soCanXoa = 0;
-                int curIdx = 0;
-                Node<MucLuong> *p = ds->get_header()->Next;
-                while (p != nullptr)
+                int tongChon = dsXoa->get_size();
+                if (tongChon == 0)
                 {
-                    if (p->Data && p->Data->get_Loai_NV() == "PartTime")
-                    {
-                        if (dsXoaML[curIdx] == 1)
-                        {
-                            canXoa[soCanXoa++] = p->Data;
-                        }
-                        curIdx++;
-                    }
-                    p = p->Next;
-                }
-
-                if (soCanXoa == 0)
-                {
-                    HienThongBao("Chưa chọn mức lương nào để xóa!", true);
-                    delete[] canXoa;
+                    HienThongBao("Chưa chọn phòng ban nào để xóa!", true);
                 }
                 else
                 {
                     int dem = 0;
                     string loiCuoi = "";
-                    for (int i = 0; i < soCanXoa; i++)
+                    for (Node<MucLuong> *p = dsXoa->get_header()->Next; p != nullptr; p = p->Next)
                     {
                         try
                         {
-                            QL->XoaMucLuong(canXoa[i]);
+                            QL->XoaMucLuong(p->Data);
                             dem++;
                         }
                         catch (const string &loi)
@@ -4063,8 +4358,6 @@ void Draw_Screen_ML_PartTime(Vector2 mousePos, bool Clicked, QLNV *QL)
                             loiCuoi = loi;
                         }
                     }
-                    delete[] canXoa;
-
                     if (dem > 0)
                     {
                         QL->get_DB()->SaveFileML();
@@ -4081,9 +4374,7 @@ void Draw_Screen_ML_PartTime(Vector2 mousePos, bool Clicked, QLNV *QL)
                     {
                         HienThongBao(loiCuoi.empty() ? "Xóa không thành công!" : loiCuoi, true);
                     }
-
-                    for (int i = 0; i < QL->get_DB()->get_ListML()->get_size(); i++)
-                        dsXoaML[i] = 0;
+                    delete dsXoa;
                     OpenXoa = false;
                     selectedMLKey = "";
                     MaVTInput[0] = BacInput[0] = LuongInput[0] = '\0';
@@ -4191,8 +4482,7 @@ void Draw_Screen_ML_PartTime(Vector2 mousePos, bool Clicked, QLNV *QL)
             else if (CheckCollisionPointRec(mousePos, btnXoaMucLuong))
             {
                 OpenXoa = true;
-                for (int i = 0; i < QL->get_DB()->get_ListML()->get_size(); i++)
-                    dsXoaML[i] = 0;
+                dsXoa = new List<MucLuong>;
             }
         }
     }
@@ -4354,8 +4644,9 @@ void Draw_Screen_BL_FullTime(Vector2 mousePos, bool Clicked, QLNV *QL)
     bool canHover = !isOpenChiTiet && !isChucVuOpen1 && !isPhongOpen1 && !isSortOpen1 && CheckCollisionPointRec(mousePos, listArea);
 
     float currentY = listStartY + scrollY;
-    int totalRows = QL->get_soFT();
+    int totalRows = 0;
     Employee *selEmp = nullptr;
+
     if (!selectedMNV_FT.empty())
         selEmp = QL->TimTheoMa(selectedMNV_FT);
 
@@ -4414,6 +4705,7 @@ void Draw_Screen_BL_FullTime(Vector2 mousePos, bool Clicked, QLNV *QL)
             DrawTextEx(myFont, strLuong.c_str(), {colX[7], currentY}, fontSize, 1, BLACK);
             DrawLine(startX, currentY + 30, GetScreenWidth() - 20, currentY + 30, Fade(LIGHTGRAY, 0.5f));
             currentY += rowHeight;
+            totalRows++;
         }
         p = p->Next;
     }
@@ -4810,7 +5102,6 @@ void Draw_Screen_BL_PartTime(Vector2 mousePos, bool Clicked, QLNV *QL)
     DrawRectangleRounded({panelBang.x + 3, panelBang.y + 4, panelBang.width, panelBang.height}, 0.03f, 10, Fade(BLACK, 0.08f));
     DrawRectangleRounded(panelBang, 0.03f, 10, WHITE);
     DrawRectangleRoundedLinesEx(panelBang, 0.03f, 10, 1.5f, Color{225, 230, 240, 255});
-
     string default_choice = "Tất cả";
 
     // =========== COMBO CHỨC VỤ ===========
@@ -4925,7 +5216,7 @@ void Draw_Screen_BL_PartTime(Vector2 mousePos, bool Clicked, QLNV *QL)
     bool canHover = !isOpenChiTiet2 && !isChucVuOpen2 && !isPhongOpen2 && !isSortOpen2 && CheckCollisionPointRec(mousePos, listArea);
 
     float currentY = listStartY + scrollY;
-    int totalRows = QL->get_soPT();
+    int totalRows = 0;
     Employee *selEmp = nullptr;
     if (!selectedMNV_PT.empty())
         selEmp = QL->TimTheoMa(selectedMNV_PT);
@@ -4981,6 +5272,7 @@ void Draw_Screen_BL_PartTime(Vector2 mousePos, bool Clicked, QLNV *QL)
             DrawTextEx(myFont, strLuong.c_str(), {colX[6], currentY}, fontSize, 1, BLACK);
             DrawLine(startX, currentY + 30, GetScreenWidth() - 20, currentY + 30, Fade(LIGHTGRAY, 0.5f));
             currentY += rowHeight;
+            totalRows++;
         }
         p = p->Next;
     }

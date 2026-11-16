@@ -323,14 +323,15 @@ void DataBase::Repair(ChucVu *cv)
     ChucVu *cv_old = this->FindCV(cv->get_MaChucVu());
     if (cv_old == nullptr)
         return;
-    *cv_old = *cv;
+    cv_old->set_TenChucVu(cv->get_TenChucVu());
+    cv_old->set_PhuCap(cv->get_PhuCap());
 }
 void DataBase::Repair(ViTriViecLam *vt)
 {
     ViTriViecLam *vt_old = this->FindVTVL(vt->get_MaVTVL());
     if (vt_old == nullptr)
         return;
-    *vt_old = *vt;
+    vt_old->set_TenVTVL(vt->get_TenVTVL());
 }
 void DataBase::Repair(MucLuong *ml)
 {
@@ -344,9 +345,32 @@ void DataBase::Repair(Employee *e)
     Employee *e_old = FindEmployee(e->get_mnv());
     if (e_old == nullptr)
         return;
-    *e_old = *e;
-    // if (e->get_PhongBan() != nullptr)
-    //     e->get_PhongBan()->SuaNV(e);
+
+    // gỡ khỏi danh sách cũ
+    if (e_old->get_PhongBan())
+        e_old->get_PhongBan()->XoaNV(e_old);
+    if (e_old->get_ChucVu())
+        e_old->get_ChucVu()->XoaNV(e_old);
+    if (e_old->get_ViTri())
+        e_old->get_ViTri()->XoaNV(e_old);
+
+    e_old->set_name(e->get_name());
+    e_old->set_sex(e->get_sex());
+    e_old->set_NgaySinh(e->get_NgaySinh());
+    e_old->set_NgayLamViec(e->get_NgayLamViec());
+    e_old->set_PhongBan(e->get_PhongBan());
+    e_old->set_ChucVu(e->get_ChucVu());
+    e_old->set_ViTri(e->get_ViTri());
+    e_old->set_BacViTri(e->get_BacViTri());
+    e_old->set_Thuong(e->get_Thuong());
+
+    // thêm vào danh sách mới
+    if (e_old->get_PhongBan())
+        e_old->get_PhongBan()->ThemNV(e_old);
+    if (e_old->get_ChucVu())
+        e_old->get_ChucVu()->ThemNV(e_old);
+    if (e_old->get_ViTri())
+        e_old->get_ViTri()->ThemNV(e_old);
 }
 
 List<PhongBan> *DataBase::get_ListPB()

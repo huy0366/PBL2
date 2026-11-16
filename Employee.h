@@ -58,6 +58,8 @@ public:
     void set_Thuong(const int &);
     int get_Thuong() const;
 
+    int tinhBac(const Date &);
+
     virtual string get_LoaiNV() = 0;
     virtual long long get_ThucLinh(const long long &) = 0;
     // static bool checkEmpID(Entity *entity, const string &id);
@@ -66,7 +68,7 @@ public:
 Employee::Employee(const string &mnv, const string &ten, const Date &ngay_sinh, const string &gioitinh,
                    ChucVu *cv, ViTriViecLam *vt, PhongBan *pb, const Date &ngay_lam, const int &bac, const double &thuong)
     : mnv(mnv), name(ten), NgaySinh(ngay_sinh), sex(gioitinh), CV(cv), VTVL(vt),
-      PB(pb), NgayLamViec(ngay_lam), Bac_VTVL(bac), Thuong(thuong)
+      PB(pb), NgayLamViec(ngay_lam), Bac_VTVL(tinhBac(ngay_lam)), Thuong(thuong)
 {
 }
 Employee::~Employee() {}
@@ -169,6 +171,19 @@ void Employee::set_Thuong(const int &thuong)
 int Employee::get_Thuong() const
 {
     return this->Thuong;
+}
+int Employee::tinhBac(const Date &d)
+{
+    int thamNien = Date::DateHienTai().get_year() - d.get_year();
+    if (thamNien >= 10)
+        return 5;
+    if (thamNien >= 7)
+        return 4;
+    if (thamNien >= 5)
+        return 3;
+    if (thamNien >= 3)
+        return 2;
+    return 1;
 }
 // bool Employee::checkEmpID(Entity *entity, const string &id)
 

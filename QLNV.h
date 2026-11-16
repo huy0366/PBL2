@@ -221,6 +221,8 @@ bool QLNV::CheckChucVu(ChucVu *cv)
         throw string("Chưa nhập mã chức vụ!");
     if (cv->get_TenChucVu().empty())
         throw string("Chưa nhập tên chức vụ!");
+    if (cv->get_PhuCap() < 0)
+        throw string("Phụ cấp không thể âm!");
     return true;
 }
 bool QLNV::CheckVTVL(ViTriViecLam *vt)

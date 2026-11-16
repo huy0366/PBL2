@@ -56,9 +56,10 @@ string FullTime::get_LoaiNV()
 
 double FullTime::tinhHS(const Date &d)
 {
-    int year = Date::DateHienTai().get_year() - d.get_year();
-    return (1.0 + ((year / 3) * 0.3));
+    int thamNien = Date::DateHienTai().get_year() - d.get_year();
+    return (1.0 + ((thamNien / 3) * 0.3));
 }
+
 FullTime::~FullTime()
 {
 }
