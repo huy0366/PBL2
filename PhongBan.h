@@ -9,6 +9,7 @@ private:
     string MaPhongBan, TenPhongBan;
     Date NgayThanhLap;
     List<Employee> *L;
+    int nam, nu;
 
 public:
     PhongBan();
@@ -20,6 +21,8 @@ public:
     string get_TenPhongBan() const;
     void set_NgayThanhLap(const Date &);
     Date get_NgayThanhLap() const;
+    int get_nam() const;
+    int get_nu() const;
 
     List<Employee> *get_ListNV();
     bool ThemNV(Employee *);
@@ -29,7 +32,6 @@ public:
     // Hàm so sánh kiểm tra Tên Chi Nhánh
     // static bool checkPhongBanName(Entity *entity, const string &name);
 };
-
 PhongBan::PhongBan() : L(new List<Employee>()) {}
 PhongBan::PhongBan(const string &ma, const string &name, const Date &d)
 {
@@ -37,6 +39,7 @@ PhongBan::PhongBan(const string &ma, const string &name, const Date &d)
     this->TenPhongBan = name;
     this->NgayThanhLap = d;
     this->L = new List<Employee>();
+    nam = nu = 0;
 }
 PhongBan::~PhongBan()
 {
@@ -72,41 +75,14 @@ List<Employee> *PhongBan::get_ListNV()
 {
     return this->L;
 }
-bool PhongBan::ThemNV(Employee *e)
+int PhongBan::get_nam() const
 {
-    if (e == nullptr)
-        return 0;
-    this->L->insert(e);
-    return 1;
+    return this->nam;
 }
-bool PhongBan::XoaNV(Employee *e)
+int PhongBan::get_nu() const
 {
-    Node<Employee> *p = this->L->get_header()->Next;
-    while (p != nullptr)
-    {
-        if (p->Data == e)
-        {
-            this->L->remove_item(p);
-            return 1;
-        }
-        p = p->Next;
-    }
-    return 0;
+    return this->nu;
 }
-// bool PhongBan::SuaNV(Employee *e)
-// {
-//     Node<Employee> *p = this->L->get_header()->Next;
-//     while (p != nullptr)
-//     {
-//         if (p->Data->get_mnv() == e->get_mnv())
-//         {
-//             p->Data = e;
-//             return 1;
-//         }
-//         p = p->Next;
-//     }
-//     return 0;
-// }
 int PhongBan::get_sizeNV()
 {
     return this->L->get_size();

@@ -29,13 +29,13 @@ public:
     Employee();
     virtual ~Employee();
     void set_mnv(const string &);
-    string get_mnv();
+    string get_mnv() const;
     void set_name(const string &);
-    string get_name();
+    string get_name() const;
     void set_NgaySinh(const Date &);
-    Date get_NgaySinh();
+    Date get_NgaySinh() const;
     void set_sex(const string &);
-    string get_sex();
+    string get_sex() const;
 
     void set_ChucVu(ChucVu *);
     ChucVu *get_ChucVu() const;
@@ -76,7 +76,7 @@ void Employee::set_name(const string &name)
 {
     this->name = name;
 }
-string Employee::get_name()
+string Employee::get_name() const
 {
     return name;
 }
@@ -85,7 +85,7 @@ void Employee::set_NgaySinh(const Date &date)
 {
     this->NgaySinh = date;
 }
-Date Employee::get_NgaySinh()
+Date Employee::get_NgaySinh() const
 {
     return NgaySinh;
 }
@@ -94,7 +94,7 @@ void Employee::set_sex(const string &sex)
 {
     this->sex = sex;
 }
-string Employee::get_sex()
+string Employee::get_sex() const
 {
     return sex;
 }
@@ -103,7 +103,7 @@ void Employee::set_mnv(const string &mnv)
     this->mnv = mnv;
 }
 
-string Employee::get_mnv()
+string Employee::get_mnv() const
 {
     return mnv;
 }

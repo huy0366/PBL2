@@ -5,7 +5,7 @@
 #include <cstring>
 
 using namespace std;
-Font myFont, tieude, indam;
+Font myFont;
 string FormatSoTien(long long so);
 void HienThongBao(const string &noiDung, bool laLoi = true);
 void VeThongBao();
@@ -65,8 +65,8 @@ int main()
     for (int i = 0; i < 8000; i++)
         codepoints[i] = 32 + i;
     myFont = LoadFontEx("font/times.ttf", 32, codepoints, 8000);
-    tieude = LoadFontEx("font/timesbd.ttf", 32, codepoints, 8000);
-    indam = LoadFontEx("font/segoeuib.ttf", 32, codepoints, 8000);
+    // myFont = LoadFontEx("font/timesbd.ttf", 32, codepoints, 8000);
+    // indam = LoadFontEx("font/segoeuib.ttf", 32, codepoints, 8000);
     SetTextureFilter(myFont.texture, TEXTURE_FILTER_BILINEAR);
     QLNV *QL = new QLNV;
 
@@ -161,7 +161,7 @@ void VeThongBao()
 
     // Vẽ tiêu đề và nội dung thông báo
     const char *tieuDeTB = tbLaLoi ? "Thông báo lỗi" : "Thành công";
-    DrawTextEx(tieude, tieuDeTB, {box.x + 26, box.y + 10}, 22, 1, mauChuDao);
+    DrawTextEx(myFont, tieuDeTB, {box.x + 26, box.y + 10}, 22, 1, mauChuDao);
     DrawTextEx(myFont, tbNoiDung.c_str(), {box.x + 26, box.y + 38}, 22, 1, Color{40, 45, 55, 255});
 }
 void DrawSidebar(int &currentScreen)
@@ -200,7 +200,7 @@ void DrawSidebar(int &currentScreen)
     float sa7 = 0.54f;
     DrawTextureEx(anhmenu, panhmenu, ranhmenu, sanhmenu, WHITE);
     DrawTextureEx(a21, pa21, ra21, sa21, WHITE);
-    DrawTextEx(tieude, "PBL2", {130.f, 65.f}, 35, 1, BLACK);
+    DrawTextEx(myFont, "PBL2", {130.f, 65.f}, 35, 1, BLACK);
     DrawTextEx(myFont, "Quản lí nhân sự", {130.f, 100.f}, 25, 1, BLACK);
     DrawTextureEx(a2, pa2, ra2, sa2, WHITE);
     const char *menu[] = {"HOME", "EMPLOYEE", "DEPARTMENT", "SALARY", "Exit"};
@@ -543,7 +543,7 @@ void Draw_Screen_Home(Texture2D &BackGround, QLNV *QL)
     float ra1 = 0.0f;              // Góc xoay (0 độ) rotation
     float sa1 = 0.33f;
     DrawTextureEx(a1, pa1, ra1, sa1, WHITE);
-    DrawTextEx(tieude, "Trang chủ", {pa1.x + 100, pa1.y}, 45, 1, WHITE);
+    DrawTextEx(myFont, "Trang chủ", {pa1.x + 100, pa1.y}, 45, 1, WHITE);
     DrawTextEx(myFont, "Tổng quan hệ thống", {pa1.x + 100, pa1.y + 50}, 30, 1, WHITE);
     Rectangle sourceRec = {0.0f, 0.0f, (float)BackGround.width, (float)BackGround.height};
 
@@ -573,7 +573,7 @@ void Draw_Screen_Home(Texture2D &BackGround, QLNV *QL)
     // TIÊU ĐỀ
     // =====================================================
 
-    DrawTextEx(myFont, "Quản lý thông tin nhân sự", {startX + 20, startY}, 35, 1, BLACK);
+    DrawTextEx(myFont, "Quản lý thông tin nhân sự", {(float)startX + 20, (float)startY}, 35, 1, BLACK);
 
     // =====================================================
     // 4 CARD THỐNG KÊ
@@ -589,11 +589,11 @@ void Draw_Screen_Home(Texture2D &BackGround, QLNV *QL)
 
     DrawCircle(startX + 48, cardY + cardH / 2, 28, Color{235, 240, 255, 255});
 
-    DrawTextEx(myFont, "N", {startX + 38, cardY + cardH / 2 - 15}, 30, 1, Color{70, 105, 220, 255});
+    DrawTextEx(myFont, "N", {(float)startX + 38, (float)cardY + cardH / 2 - 15}, 30, 1, Color{70, 105, 220, 255});
 
-    DrawTextEx(myFont, "Nhân viên", {startX + 92, cardY + 18}, 26, 1, Color{110, 110, 120, 255});
+    DrawTextEx(myFont, "Nhân viên", {(float)startX + 92, (float)cardY + 18}, 26, 1, Color{110, 110, 120, 255});
 
-    DrawTextEx(myFont, TextFormat("%d", QL->get_DB()->get_ListEmployee()->get_size()), {startX + 92, cardY + 50}, 35, 1, Color{40, 50, 75, 255});
+    DrawTextEx(myFont, TextFormat("%d", QL->get_DB()->get_ListEmployee()->get_size()), {(float)startX + 92, (float)cardY + 50}, 35, 1, Color{40, 50, 75, 255});
 
     // ---------- CARD PHÒNG BAN ----------
 
@@ -603,11 +603,11 @@ void Draw_Screen_Home(Texture2D &BackGround, QLNV *QL)
 
     DrawCircle(x2 + 48, cardY + cardH / 2, 28, Color{235, 240, 255, 255});
 
-    DrawTextEx(myFont, "P", {x2 + 38, cardY + cardH / 2 - 15}, 30, 1, Color{70, 105, 220, 255});
+    DrawTextEx(myFont, "P", {(float)x2 + 38, (float)cardY + cardH / 2 - 15}, 30, 1, Color{70, 105, 220, 255});
 
-    DrawTextEx(myFont, "Phòng ban", {x2 + 92, cardY + 26}, 26, 1, Color{110, 110, 120, 255});
+    DrawTextEx(myFont, "Phòng ban", {(float)x2 + 92, (float)cardY + 26}, 26, 1, Color{110, 110, 120, 255});
 
-    DrawTextEx(myFont, TextFormat("%d", QL->get_DB()->get_ListPB()->get_size()), {x2 + 92, cardY + 50}, 35, 1, Color{40, 50, 75, 255});
+    DrawTextEx(myFont, TextFormat("%d", QL->get_DB()->get_ListPB()->get_size()), {(float)x2 + 92, (float)cardY + 50}, 35, 1, Color{40, 50, 75, 255});
 
     // ---------- CARD CHỨC VỤ ----------
 
@@ -617,11 +617,11 @@ void Draw_Screen_Home(Texture2D &BackGround, QLNV *QL)
 
     DrawCircle(x3 + 48, cardY + cardH / 2, 28, Color{235, 240, 255, 255});
 
-    DrawTextEx(myFont, "C", {x3 + 38, cardY + cardH / 2 - 15}, 30, 1, Color{70, 105, 220, 255});
+    DrawTextEx(myFont, "C", {(float)x3 + 38, (float)cardY + cardH / 2 - 15}, 30, 1, Color{70, 105, 220, 255});
 
-    DrawTextEx(myFont, "Chức vụ", {x3 + 92, cardY + 18}, 26, 1, Color{110, 110, 120, 255});
+    DrawTextEx(myFont, "Chức vụ", {(float)x3 + 92, (float)cardY + 18}, 26, 1, Color{110, 110, 120, 255});
 
-    DrawTextEx(myFont, TextFormat("%d", QL->get_DB()->get_ListCV()->get_size()), {x3 + 92, cardY + 50}, 35, 1, Color{40, 50, 75, 255});
+    DrawTextEx(myFont, TextFormat("%d", QL->get_DB()->get_ListCV()->get_size()), {(float)x3 + 92, (float)cardY + 50}, 35, 1, Color{40, 50, 75, 255});
 
     // ---------- CARD VỊ TRÍ ----------
 
@@ -631,11 +631,11 @@ void Draw_Screen_Home(Texture2D &BackGround, QLNV *QL)
 
     DrawCircle(x4 + 48, cardY + cardH / 2, 28, Color{235, 240, 255, 255});
 
-    DrawTextEx(myFont, "V", {x4 + 38, cardY + cardH / 2 - 15}, 30, 1, Color{70, 105, 220, 255});
+    DrawTextEx(myFont, "V", {(float)x4 + 38, (float)cardY + cardH / 2 - 15}, 30, 1, Color{70, 105, 220, 255});
 
-    DrawTextEx(myFont, "Vị trí", {x4 + 92, cardY + 18}, 26, 1, Color{110, 110, 120, 255});
+    DrawTextEx(myFont, "Vị trí", {(float)x4 + 92, (float)cardY + 18}, 26, 1, Color{110, 110, 120, 255});
 
-    DrawTextEx(myFont, TextFormat("%d", QL->get_DB()->get_ListVTVL()->get_size()), {x4 + 92, cardY + 50}, 35, 1, Color{40, 50, 75, 255});
+    DrawTextEx(myFont, TextFormat("%d", QL->get_DB()->get_ListVTVL()->get_size()), {(float)x4 + 92, (float)cardY + 50}, 35, 1, Color{40, 50, 75, 255});
 
     // =====================================================
     // KHUNG NHÂN VIÊN THEO PHÒNG BAN
@@ -646,8 +646,8 @@ void Draw_Screen_Home(Texture2D &BackGround, QLNV *QL)
 
     DrawRectangleRounded({(float)startX, (float)boxY, (float)contentW, (float)boxH}, 0.05f, 10, WHITE);
 
-    DrawTextEx(myFont, "PHÂN BỐ NHÂN VIÊN THEO PHÒNG BAN", {startX + 20, boxY + 10}, 30, 1, Color{45, 55, 80, 255});
-    DrawTextEx(myFont, "Số lượng nhân viên của từng phòng ban", {startX + 20, boxY + 48}, 25, 1, Color{145, 145, 155, 255});
+    DrawTextEx(myFont, "PHÂN BỐ NHÂN VIÊN THEO PHÒNG BAN", {(float)startX + 20, (float)boxY + 10}, 30, 1, Color{45, 55, 80, 255});
+    DrawTextEx(myFont, "Số lượng nhân viên của từng phòng ban", {(float)startX + 20, (float)boxY + 48}, 25, 1, Color{145, 145, 155, 255});
 
     // =========================================================
     // SCROLL PHÒNG BAN
@@ -733,7 +733,7 @@ void Draw_Screen_Home(Texture2D &BackGround, QLNV *QL)
 
                 int soNV = QL->DemNVThamChieuPB(p->Data);
 
-                DrawTextEx(myFont, tenPB.c_str(), {startX + 20, y}, 30, 1, Color{60, 65, 80, 255});
+                DrawTextEx(myFont, tenPB.c_str(), {(float)startX + 20, (float)y}, 30, 1, Color{60, 65, 80, 255});
 
                 int barX = startX + 20 + (int)maxTenW + 20;
                 int barW = startX + contentW - 80 - barX;
@@ -745,7 +745,7 @@ void Draw_Screen_Home(Texture2D &BackGround, QLNV *QL)
 
                 DrawRectangleRounded({(float)barX, (float)y + 3, barW * percent, 15}, 0.5f, 10, Color{90, 125, 235, 255});
 
-                DrawTextEx(myFont, TextFormat("%d", soNV), {startX + contentW - 60, y}, 25, 1, Color{70, 80, 100, 255});
+                DrawTextEx(myFont, TextFormat("%d", soNV), {(float)startX + contentW - 60, (float)y}, 25, 1, Color{70, 80, 100, 255});
 
                 y += 50;
             }
@@ -764,8 +764,8 @@ void Draw_Screen_Home(Texture2D &BackGround, QLNV *QL)
 
     DrawRectangleRounded({(float)startX, (float)vtBoxY, (float)contentW, (float)vtBoxH}, 0.05f, 10, WHITE);
 
-    DrawTextEx(myFont, "PHÂN BỐ VỊ TRÍ VIỆC LÀM", {startX + 20, vtBoxY + 10}, 30, 1, Color{45, 55, 80, 255});
-    DrawTextEx(myFont, "Số lượng nhân viên đang đảm nhận từng vị trí", {startX + 20, vtBoxY + 48}, 25, 1, Color{145, 145, 155, 255});
+    DrawTextEx(myFont, "PHÂN BỐ VỊ TRÍ VIỆC LÀM", {(float)startX + 20, (float)vtBoxY + 10}, 30, 1, Color{45, 55, 80, 255});
+    DrawTextEx(myFont, "Số lượng nhân viên đang đảm nhận từng vị trí", {(float)startX + 20, (float)vtBoxY + 48}, 25, 1, Color{145, 145, 155, 255});
 
     // =========================================================
     // SCROLL VỊ TRÍ VIỆC LÀM
@@ -861,7 +861,7 @@ void Draw_Screen_Home(Texture2D &BackGround, QLNV *QL)
                 int soNV = QL->DemNVThamChieuVT(pVT->Data);
 
                 // Tên vị trí
-                DrawTextEx(myFont, tenVT.c_str(), {startX + 20, y}, 30, 1, Color{60, 65, 80, 255});
+                DrawTextEx(myFont, tenVT.c_str(), {(float)startX + 20, (float)y}, 30, 1, Color{60, 65, 80, 255});
 
                 // Thanh nền
                 int barX = startX + 20 + (int)maxTenW + 20;
@@ -876,7 +876,7 @@ void Draw_Screen_Home(Texture2D &BackGround, QLNV *QL)
                 DrawRectangleRounded({(float)barX, (float)y + 3, barW * percent, 15}, 0.5f, 10, Color{90, 125, 235, 255});
 
                 // Số nhân viên
-                DrawTextEx(myFont, TextFormat("%d", soNV), {startX + contentW - 60, y}, 25, 1, Color{70, 80, 100, 255});
+                DrawTextEx(myFont, TextFormat("%d", soNV), {(float)startX + contentW - 60, (float)y}, 25, 1, Color{70, 80, 100, 255});
 
                 y += 50;
             }
@@ -1558,7 +1558,7 @@ void Draw_Screen_NhanVien(Vector2 mousePos, bool Clicked, QLNV *QL)
         DrawRectangleRounded(Table, 0.04f, 10, WHITE);
 
         // Tiêu đề & dòng mô tả phụ
-        DrawTextEx(tieude, "Thông tin nhân viên", {Table.x + 36, Table.y + 26}, 32, 1, Color{20, 25, 35, 255});
+        DrawTextEx(myFont, "Thông tin nhân viên", {Table.x + 36, Table.y + 26}, 32, 1, Color{20, 25, 35, 255});
         if (clickSua)
             DrawTextEx(myFont, "Chỉnh sửa thông tin nhân viên", {Table.x + 36, Table.y + 64}, 22, 1, Color{110, 118, 130, 255});
         else
@@ -1603,48 +1603,48 @@ void Draw_Screen_NhanVien(Vector2 mousePos, bool Clicked, QLNV *QL)
         Color textColor = Color{31, 41, 55, 255};
 
         // --- HÀNG 1: Mã nhân viên & Họ và tên ---
-        DrawTextEx(tieude, "Mã nhân viên", {fMa.x, fMa.y - 26}, 20, 1, labelColor);
+        DrawTextEx(myFont, "Mã nhân viên", {fMa.x, fMa.y - 26}, 20, 1, labelColor);
         VeOInput(fMa, MaNhanVienInput, false, true, "");
 
-        DrawTextEx(tieude, "Họ và tên", {fTen.x, fTen.y - 26}, 20, 1, labelColor);
+        DrawTextEx(myFont, "Họ và tên", {fTen.x, fTen.y - 26}, 20, 1, labelColor);
         Typing(isHovaTenActive, HovaTenInput, letterCountHovaTen, mousePos, fTen);
         VeOInput(fTen, HovaTenInput, isHovaTenActive, false, "Nhập họ và tên");
 
         // --- HÀNG 2: Ngày sinh & Giới tính ---
-        DrawTextEx(tieude, "Ngày sinh", {fNS.x, fNS.y - 26}, 20, 1, labelColor);
+        DrawTextEx(myFont, "Ngày sinh", {fNS.x, fNS.y - 26}, 20, 1, labelColor);
         string txtNS = changeNS ? TextFormat("%02d/%02d/%04d", dayNS, monthNS, yearNS) : "";
         VeODate(fNS, txtNS.c_str(), isOpenCalendarNS, mousePos, "mm/dd/yyyy");
 
-        DrawTextEx(tieude, "Giới tính", {fGT.x, fGT.y - 26}, 20, 1, labelColor);
+        DrawTextEx(myFont, "Giới tính", {fGT.x, fGT.y - 26}, 20, 1, labelColor);
         VeDanhSachCombo(fGT, false, dsGT, 2, mousePos, 24);
         DrawTextEx(myFont, (selGT == -1) ? "Chọn giới tính" : dsGT[selGT].c_str(),
                    {fGT.x + 16, fGT.y + 11}, 24, 1, (selGT == -1) ? placeColor : textColor);
 
         // --- HÀNG 3: Phòng ban & Chức vụ ---
-        DrawTextEx(tieude, "Phòng ban", {fPB.x, fPB.y - 26}, 20, 1, labelColor);
+        DrawTextEx(myFont, "Phòng ban", {fPB.x, fPB.y - 26}, 20, 1, labelColor);
         VeDanhSachCombo(fPB, false, dsPB, nPB, mousePos, 24);
         DrawTextEx(myFont, (selPB == -1) ? "Chọn phòng ban" : dsPB[selPB].c_str(),
                    {fPB.x + 16, fPB.y + 11}, 24, 1, (selPB == -1) ? placeColor : textColor);
 
-        DrawTextEx(tieude, "Chức vụ", {fCV.x, fCV.y - 26}, 20, 1, labelColor);
+        DrawTextEx(myFont, "Chức vụ", {fCV.x, fCV.y - 26}, 20, 1, labelColor);
         VeDanhSachCombo(fCV, false, dsCV, nCV, mousePos, 24);
         DrawTextEx(myFont, (selCV == -1) ? "Chọn chức vụ" : dsCV[selCV].c_str(),
                    {fCV.x + 16, fCV.y + 11}, 24, 1, (selCV == -1) ? placeColor : textColor);
 
         // --- HÀNG 4:  Ngày làm việc & Vị trí việc làm ---
 
-        DrawTextEx(tieude, "Vị trí việc làm", {fVT.x, fVT.y - 26}, 20, 1, labelColor);
+        DrawTextEx(myFont, "Vị trí việc làm", {fVT.x, fVT.y - 26}, 20, 1, labelColor);
         VeDanhSachCombo(fVT, false, dsVT, nVT, mousePos, 24);
         DrawTextEx(myFont, (selVT == -1) ? "Chọn vị trí" : dsVT[selVT].c_str(),
                    {fVT.x + 16, fVT.y + 11}, 24, 1, (selVT == -1) ? placeColor : textColor);
-        DrawTextEx(tieude, "Ngày vào làm", {fNVL.x, fNVL.y - 26}, 20, 1, labelColor);
+        DrawTextEx(myFont, "Ngày vào làm", {fNVL.x, fNVL.y - 26}, 20, 1, labelColor);
         string txtNVL = changeNVL ? TextFormat("%02d/%02d/%04d", dayNVL, monthNVL, yearNVL) : "";
         VeODate(fNVL, txtNVL.c_str(), isOpenCalendarNVL, mousePos, "mm/dd/yyyy");
         // --- HÀNG 5: Loại nhân viên ---
 
         if (hienLoai)
         {
-            DrawTextEx(tieude, "Loại nhân viên", {fLoai.x, fLoai.y - 26}, 20, 1, labelColor);
+            DrawTextEx(myFont, "Loại nhân viên", {fLoai.x, fLoai.y - 26}, 20, 1, labelColor);
             VeDanhSachCombo(fLoai, false, dsLoai, 2, mousePos, 24);
             DrawTextEx(myFont, (selLoai == -1) ? "Chọn loại nhân viên" : dsLoai[selLoai].c_str(),
                        {fLoai.x + 16, fLoai.y + 11}, 24, 1, (selLoai == -1) ? placeColor : textColor);
@@ -1657,15 +1657,15 @@ void Draw_Screen_NhanVien(Vector2 mousePos, bool Clicked, QLNV *QL)
         bool hoverHuy = CheckCollisionPointRec(mousePos, btnHuy);
         DrawRectangleRounded(btnHuy, 0.25f, 8, WHITE);
         DrawRectangleRoundedLinesEx(btnHuy, 0.25f, 8, 1.5f, hoverHuy ? Color{180, 190, 205, 255} : Color{225, 230, 240, 255});
-        DrawTextEx(tieude, "Hủy", {btnHuy.x + 28, btnHuy.y + 11}, 22, 1, Color{50, 60, 75, 255});
+        DrawTextEx(myFont, "Hủy", {btnHuy.x + 28, btnHuy.y + 11}, 22, 1, Color{50, 60, 75, 255});
 
         Rectangle btnLuu = {Table.x + Table.width - 125, Table.y + 595, 95, 45};
         bool hoverLuu = CheckCollisionPointRec(mousePos, btnLuu);
         DrawRectangleRounded(btnLuu, 0.25f, 8, hoverLuu ? Color{35, 80, 220, 255} : Color{45, 96, 235, 255});
         if (clickSua)
-            DrawTextEx(tieude, "Sửa", {btnLuu.x + 28, btnLuu.y + 11}, 22, 1, WHITE);
+            DrawTextEx(myFont, "Sửa", {btnLuu.x + 28, btnLuu.y + 11}, 22, 1, WHITE);
         else
-            DrawTextEx(tieude, "Thêm", {btnLuu.x + 22, btnLuu.y + 11}, 22, 1, WHITE);
+            DrawTextEx(myFont, "Thêm", {btnLuu.x + 22, btnLuu.y + 11}, 22, 1, WHITE);
 
         if (!thongBaoLoi.empty())
         {
@@ -2154,7 +2154,7 @@ void Draw_Screen_VTVL(Vector2 mousePos, bool Clicked, QLNV *QL)
     float lech = OpenXoa ? 30.f : 0.f;
     DrawTextEx(myFont, "Mã Vị Trí", {colX[0] + lech, (float)startY}, fontSize, 1, DARKGRAY);
     DrawTextEx(myFont, "Tên Vị Trí", {colX[1] + lech, (float)startY}, fontSize, 1, DARKGRAY);
-    DrawTextEx(myFont, "Số Lượng Nhân Viên", {colX[2] + lech, (float)startY}, fontSize, 1, DARKGRAY);
+    DrawTextEx(myFont, "Số Lượng", {colX[2] + lech, (float)startY}, fontSize, 1, DARKGRAY);
 
     // Kẻ đường gạch ngang dưới tiêu đề
     DrawLine(startX, startY + 30, 1900, startY + 30, LIGHTGRAY);
@@ -2368,7 +2368,7 @@ void Draw_Screen_Employee(QLNV *QL)
     float ra1 = 0.0f;              // Góc xoay (0 độ) rotation
     float sa1 = 0.33f;
     DrawTextureEx(a1, pa1, ra1, sa1, WHITE);
-    DrawTextEx(tieude, "Quản Lý Nhân Sự & Vị Trí Việc Làm", {pa1.x + 100, pa1.y}, 45, 1, WHITE);
+    DrawTextEx(myFont, "Quản Lý Nhân Sự & Vị Trí Việc Làm", {pa1.x + 100, pa1.y}, 45, 1, WHITE);
     DrawTextEx(myFont, "Danh sách và thông tin nhân sự và vị trí của công ty", {pa1.x + 100, pa1.y + 50}, 30, 1, WHITE);
     static bool isOpenNV = true;
     static bool isOpenVT = false;
@@ -2657,14 +2657,16 @@ void Draw_Screen_PhongBan(Vector2 mousePos, bool Clicked, QLNV *QL)
     int fontSize = 30;              // Kích thước chữ
 
     // Tọa độ X của từng cột (Bạn cần tinh chỉnh các số này cho vừa với màn hình)
-    int colX[] = {350, 600, 900, 1250};
+    int colX[] = {350, 600, 900, 1250, 1400, 1500};
 
     // 1. VẼ TIÊU ĐỀ CỘT (Header)
     float lech = OpenXoa ? 30.f : 0.f;
     DrawTextEx(myFont, "Mã Phòng Ban", {colX[0] + lech, (float)startY}, fontSize, 1, DARKGRAY);
     DrawTextEx(myFont, "Tên Phòng Ban", {colX[1] + lech, (float)startY}, fontSize, 1, DARKGRAY);
     DrawTextEx(myFont, "Ngày Thành Lập", {colX[2] + lech, (float)startY}, fontSize, 1, DARKGRAY);
-    DrawTextEx(myFont, "Số Lượng Nhân Viên", {colX[3] + lech, (float)startY}, fontSize, 1, DARKGRAY);
+    DrawTextEx(myFont, "Số Lượng", {colX[3] + lech, (float)startY}, fontSize, 1, DARKGRAY);
+    DrawTextEx(myFont, "Nam", {colX[4] + lech, (float)startY}, fontSize, 1, DARKGRAY);
+    DrawTextEx(myFont, "Nữ", {colX[5] + lech, (float)startY}, fontSize, 1, DARKGRAY);
 
     // Kẻ đường gạch ngang dưới tiêu đề
     DrawLine(startX, startY + 30, 1900, startY + 30, LIGHTGRAY);
@@ -2689,7 +2691,6 @@ void Draw_Screen_PhongBan(Vector2 mousePos, bool Clicked, QLNV *QL)
 
     PhongBan *selPB = nullptr;
     static string selectedPhongBan = "";
-    int idxPB = 0;
     while (current != nullptr)
     {
         string mpb = current->Data->get_MaPhongBan();
@@ -2697,7 +2698,8 @@ void Draw_Screen_PhongBan(Vector2 mousePos, bool Clicked, QLNV *QL)
         string NTL = current->Data->get_NgayThanhLap().ToString();
         int size = current->Data->get_ListNV()->get_size();
         string pb_size = to_string(size);
-
+        string nam = to_string(current->Data->get_nam());
+        string nu = to_string(current->Data->get_nu());
         // ----- HOVER + CHỌN DÒNG -----
         Rectangle rowRect = {(float)startX, currentY - 5, (float)(GetScreenWidth() - startX - 20), 35};
         bool isHover = canHover && CheckCollisionPointRec(mousePos, rowRect);
@@ -2755,11 +2757,12 @@ void Draw_Screen_PhongBan(Vector2 mousePos, bool Clicked, QLNV *QL)
         DrawTextEx(myFont, name.c_str(), {colX[1] + lech, currentY}, fontSize, 1, BLACK);
         DrawTextEx(myFont, NTL.c_str(), {colX[2] + lech, currentY}, fontSize, 1, BLACK);
         DrawTextEx(myFont, pb_size.c_str(), {colX[3] + lech, currentY}, fontSize, 1, BLACK);
+        DrawTextEx(myFont, nam.c_str(), {colX[4] + lech, currentY}, fontSize, 1, BLACK);
+        DrawTextEx(myFont, nu.c_str(), {colX[5] + lech, currentY}, fontSize, 1, BLACK);
         DrawLine(startX, currentY + 30, GetScreenWidth() - 20, currentY + 30, Fade(LIGHTGRAY, 0.5f));
 
         currentY += rowHeight;
         totalRows++;
-        idxPB++;
 
         current = current->Next;
     }
@@ -3360,7 +3363,7 @@ void Draw_Screen_Deparment(QLNV *QL)
     float ra1 = 0.0f;              // Góc xoay (0 độ) rotation
     float sa1 = 0.33f;
     DrawTextureEx(a1, pa1, ra1, sa1, WHITE);
-    DrawTextEx(tieude, "Quản Lý Phòng Ban & Chức Vụ", {pa1.x + 100, pa1.y}, 45, 1, WHITE);
+    DrawTextEx(myFont, "Quản Lý Phòng Ban & Chức Vụ", {pa1.x + 100, pa1.y}, 45, 1, WHITE);
     DrawTextEx(myFont, "Danh sách và thông tin phòng ban & chức vụ của công ty", {pa1.x + 100, pa1.y + 50}, 30, 1, WHITE);
     static bool isOpenPB = true;
     static bool isOpenCV = false;
@@ -3458,16 +3461,16 @@ void Draw_Screen_BangLuong(Vector2 mousePos, bool Clicked, QLNV *QL)
         DrawRectangleRounded({TabFT.x + 2, TabFT.y + 3, TabFT.width, TabFT.height}, 0.25f, 8, Fade(BLACK, 0.12f));
     DrawRectangleRounded(TabFT, 0.25f, 8, CTabFT);
     DrawRectangleRoundedLinesEx(TabFT, 0.25f, 8, 1.5f, borderFT);
-    float twFT = MeasureTextEx(tieude, "Full Time", 36, 1).x;
-    DrawTextEx(tieude, "Full Time", {TabFT.x + (TabFT.width - twFT) / 2.0f, TabFT.y + (TabFT.height - 36) / 2.0f}, 36, 1, textFT);
+    float twFT = MeasureTextEx(myFont, "Full Time", 36, 1).x;
+    DrawTextEx(myFont, "Full Time", {TabFT.x + (TabFT.width - twFT) / 2.0f, TabFT.y + (TabFT.height - 36) / 2.0f}, 36, 1, textFT);
 
     // Vẽ Tab PartTime
     if (isOpenPT)
         DrawRectangleRounded({TabPT.x + 2, TabPT.y + 3, TabPT.width, TabPT.height}, 0.25f, 8, Fade(BLACK, 0.12f));
     DrawRectangleRounded(TabPT, 0.25f, 8, CTabPT);
     DrawRectangleRoundedLinesEx(TabPT, 0.25f, 8, 1.5f, borderPT);
-    float twPT = MeasureTextEx(tieude, "Part Time", 36, 1).x;
-    DrawTextEx(tieude, "Part Time", {TabPT.x + (TabPT.width - twPT) / 2.0f, TabPT.y + (TabPT.height - 36) / 2.0f}, 36, 1, textPT);
+    float twPT = MeasureTextEx(myFont, "Part Time", 36, 1).x;
+    DrawTextEx(myFont, "Part Time", {TabPT.x + (TabPT.width - twPT) / 2.0f, TabPT.y + (TabPT.height - 36) / 2.0f}, 36, 1, textPT);
 
     if (Clicked && CheckCollisionPointRec(mousePos, TabFT))
     {
@@ -3534,16 +3537,16 @@ void Draw_Screen_MucLuong(Vector2 mousePos, bool Clicked, QLNV *QL)
         DrawRectangleRounded({TabFT.x + 2, TabFT.y + 3, TabFT.width, TabFT.height}, 0.25f, 8, Fade(BLACK, 0.12f));
     DrawRectangleRounded(TabFT, 0.25f, 8, CTabFT);
     DrawRectangleRoundedLinesEx(TabFT, 0.25f, 8, 1.5f, borderFT);
-    float twFT = MeasureTextEx(tieude, "Full Time", 36, 1).x;
-    DrawTextEx(tieude, "Full Time", {TabFT.x + (TabFT.width - twFT) / 2.0f, TabFT.y + (TabFT.height - 36) / 2.0f}, 36, 1, textFT);
+    float twFT = MeasureTextEx(myFont, "Full Time", 36, 1).x;
+    DrawTextEx(myFont, "Full Time", {TabFT.x + (TabFT.width - twFT) / 2.0f, TabFT.y + (TabFT.height - 36) / 2.0f}, 36, 1, textFT);
 
     // Vẽ Tab PartTime
     if (isOpenPT)
         DrawRectangleRounded({TabPT.x + 2, TabPT.y + 3, TabPT.width, TabPT.height}, 0.25f, 8, Fade(BLACK, 0.12f));
     DrawRectangleRounded(TabPT, 0.25f, 8, CTabPT);
     DrawRectangleRoundedLinesEx(TabPT, 0.25f, 8, 1.5f, borderPT);
-    float twPT = MeasureTextEx(tieude, "Part Time", 36, 1).x;
-    DrawTextEx(tieude, "Part Time", {TabPT.x + (TabPT.width - twPT) / 2.0f, TabPT.y + (TabPT.height - 36) / 2.0f}, 36, 1, textPT);
+    float twPT = MeasureTextEx(myFont, "Part Time", 36, 1).x;
+    DrawTextEx(myFont, "Part Time", {TabPT.x + (TabPT.width - twPT) / 2.0f, TabPT.y + (TabPT.height - 36) / 2.0f}, 36, 1, textPT);
 
     if (Clicked && CheckCollisionPointRec(mousePos, TabFT))
     {
@@ -4791,8 +4794,8 @@ void Draw_Screen_BL_FullTime(Vector2 mousePos, bool Clicked, QLNV *QL)
         DrawRectangleRounded(btnChiTiet, 0.25f, 8, hoverChiTiet ? Color{80, 50, 215, 255} : Color{98, 70, 234, 255});
         DrawRectangleRoundedLinesEx(btnChiTiet, 0.25f, 8, 1.5f, Color{80, 60, 220, 255});
 
-        float tw = MeasureTextEx(tieude, "Chi tiết", 26, 1).x;
-        DrawTextEx(tieude, "Chi tiết", {btnChiTiet.x + (btnChiTiet.width - tw) / 2.0f, btnChiTiet.y + 11}, 26, 1, WHITE);
+        float tw = MeasureTextEx(myFont, "Chi tiết", 26, 1).x;
+        DrawTextEx(myFont, "Chi tiết", {btnChiTiet.x + (btnChiTiet.width - tw) / 2.0f, btnChiTiet.y + 11}, 26, 1, WHITE);
 
         if (Clicked && !isOpenChiTiet && hoverChiTiet)
         {
@@ -4828,7 +4831,7 @@ void Draw_Screen_BL_FullTime(Vector2 mousePos, bool Clicked, QLNV *QL)
             DrawRectangleRounded({modal.x + 36, modal.y + 26, 7, 30}, 0.5f, 4, Color{110, 65, 240, 255});
 
             // Tiêu đề
-            DrawTextEx(tieude, "Chi tiết tính lương", {modal.x + 54, modal.y + 24}, 30, 1, Color{50, 30, 140, 255});
+            DrawTextEx(myFont, "Chi tiết tính lương", {modal.x + 54, modal.y + 24}, 30, 1, Color{50, 30, 140, 255});
 
             // Tên và mã nhân viên nhỏ bên dưới tiêu đề
             string infoNV = selEmp->get_name() + " (" + selEmp->get_mnv() + ")";
@@ -4998,7 +5001,7 @@ void Draw_Screen_BL_FullTime(Vector2 mousePos, bool Clicked, QLNV *QL)
 
                 // Nút Lưu
                 DrawRectangleRounded(btnLuuThuong, 0.25f, 6, hoverLuu ? Color{80, 50, 215, 255} : Color{98, 70, 234, 255});
-                DrawTextEx(tieude, "Lưu", {btnLuuThuong.x + 12, btnLuuThuong.y + 8}, 18, 1, WHITE);
+                DrawTextEx(myFont, "Lưu", {btnLuuThuong.x + 12, btnLuuThuong.y + 8}, 18, 1, WHITE);
 
                 // Nút Hủy
                 DrawRectangleRounded(btnHuyThuong, 0.25f, 6, hoverHuy ? Color{225, 230, 238, 255} : Color{240, 242, 246, 255});
@@ -5060,10 +5063,10 @@ void Draw_Screen_BL_FullTime(Vector2 mousePos, bool Clicked, QLNV *QL)
                         DrawCircle(iconCalc.x + 11, iconCalc.y + 20, 1.5f, WHITE);
                         DrawCircle(iconCalc.x + 16, iconCalc.y + 20, 1.5f, WHITE);
 
-                        DrawTextEx(tieude, "Tổng thu nhập", {leftX + 50, rowY + 16}, 24, 1, Color{40, 75, 215, 255});
+                        DrawTextEx(myFont, "Tổng thu nhập", {leftX + 50, rowY + 16}, 24, 1, Color{40, 75, 215, 255});
                         string sTong = FormatSoTien((long long)thuclinh) + " đ";
-                        float wTong = MeasureTextEx(tieude, sTong.c_str(), 26, 1).x;
-                        DrawTextEx(tieude, sTong.c_str(), {rightX - wTong - 16, rowY + 15}, 26, 1, Color{30, 60, 200, 255});
+                        float wTong = MeasureTextEx(myFont, sTong.c_str(), 26, 1).x;
+                        DrawTextEx(myFont, sTong.c_str(), {rightX - wTong - 16, rowY + 15}, 26, 1, Color{30, 60, 200, 255});
                         rowY += 72;
             */
             // 8. Box Thực lĩnh (Hộp tím nhạt bo góc với icon checkmark tím)
@@ -5076,10 +5079,10 @@ void Draw_Screen_BL_FullTime(Vector2 mousePos, bool Clicked, QLNV *QL)
             DrawLineEx({leftX + 14, rowY + 31}, {leftX + 19, rowY + 36}, 2.4f, WHITE);
             DrawLineEx({leftX + 19, rowY + 36}, {leftX + 27, rowY + 24}, 2.4f, WHITE);
 
-            DrawTextEx(tieude, "Thực lĩnh", {leftX + 50, rowY + 18}, 26, 1, Color{98, 70, 234, 255});
+            DrawTextEx(myFont, "Thực lĩnh", {leftX + 50, rowY + 18}, 26, 1, Color{98, 70, 234, 255});
             string sTL = FormatSoTien((long long)thuclinh) + " đ";
-            float wTL = MeasureTextEx(tieude, sTL.c_str(), 28, 1).x;
-            DrawTextEx(tieude, sTL.c_str(), {rightX - wTL - 16, rowY + 17}, 28, 1, Color{98, 70, 234, 255});
+            float wTL = MeasureTextEx(myFont, sTL.c_str(), 28, 1).x;
+            DrawTextEx(myFont, sTL.c_str(), {rightX - wTL - 16, rowY + 17}, 28, 1, Color{98, 70, 234, 255});
 
             // Xử lý đóng modal: click [X] hoặc click ra ngoài modal (chỉ khi không phải vừa mở ở frame này)
             if (Clicked && !openedThisFrame)
@@ -5358,8 +5361,8 @@ void Draw_Screen_BL_PartTime(Vector2 mousePos, bool Clicked, QLNV *QL)
         DrawRectangleRounded(btnChiTiet, 0.25f, 8, hoverChiTiet ? Color{80, 50, 215, 255} : Color{98, 70, 234, 255});
         DrawRectangleRoundedLinesEx(btnChiTiet, 0.25f, 8, 1.5f, Color{80, 60, 220, 255});
 
-        float tw = MeasureTextEx(tieude, "Chi tiết", 26, 1).x;
-        DrawTextEx(tieude, "Chi tiết", {btnChiTiet.x + (btnChiTiet.width - tw) / 2.0f, btnChiTiet.y + 11}, 26, 1, WHITE);
+        float tw = MeasureTextEx(myFont, "Chi tiết", 26, 1).x;
+        DrawTextEx(myFont, "Chi tiết", {btnChiTiet.x + (btnChiTiet.width - tw) / 2.0f, btnChiTiet.y + 11}, 26, 1, WHITE);
 
         if (Clicked && !isOpenChiTiet2 && hoverChiTiet)
         {
@@ -5395,7 +5398,7 @@ void Draw_Screen_BL_PartTime(Vector2 mousePos, bool Clicked, QLNV *QL)
             DrawRectangleRounded({modal.x + 36, modal.y + 26, 7, 30}, 0.5f, 4, Color{110, 65, 240, 255});
 
             // Tiêu đề
-            DrawTextEx(tieude, "Chi tiết tính lương", {modal.x + 54, modal.y + 24}, 30, 1, Color{50, 30, 140, 255});
+            DrawTextEx(myFont, "Chi tiết tính lương", {modal.x + 54, modal.y + 24}, 30, 1, Color{50, 30, 140, 255});
 
             // Tên và mã nhân viên nhỏ bên dưới tiêu đề
             string infoNV = selEmp->get_name() + " (" + selEmp->get_mnv() + ") - PartTime";
@@ -5556,7 +5559,7 @@ void Draw_Screen_BL_PartTime(Vector2 mousePos, bool Clicked, QLNV *QL)
 
                 // Nút Lưu
                 DrawRectangleRounded(btnLuuThuong, 0.25f, 6, hoverLuu ? Color{80, 50, 215, 255} : Color{98, 70, 234, 255});
-                DrawTextEx(tieude, "Lưu", {btnLuuThuong.x + 12, btnLuuThuong.y + 8}, 18, 1, WHITE);
+                DrawTextEx(myFont, "Lưu", {btnLuuThuong.x + 12, btnLuuThuong.y + 8}, 18, 1, WHITE);
 
                 // Nút Hủy
                 DrawRectangleRounded(btnHuyThuong, 0.25f, 6, hoverHuy ? Color{225, 230, 238, 255} : Color{240, 242, 246, 255});
@@ -5618,10 +5621,10 @@ void Draw_Screen_BL_PartTime(Vector2 mousePos, bool Clicked, QLNV *QL)
                         DrawCircle(iconCalc.x + 11, iconCalc.y + 20, 1.5f, WHITE);
                         DrawCircle(iconCalc.x + 16, iconCalc.y + 20, 1.5f, WHITE);
 
-                        DrawTextEx(tieude, "Tổng thu nhập", {leftX + 50, rowY + 16}, 24, 1, Color{40, 75, 215, 255});
+                        DrawTextEx(myFont, "Tổng thu nhập", {leftX + 50, rowY + 16}, 24, 1, Color{40, 75, 215, 255});
                         string sTong = FormatSoTien((long long)thuclinh) + " đ";
-                        float wTong = MeasureTextEx(tieude, sTong.c_str(), 26, 1).x;
-                        DrawTextEx(tieude, sTong.c_str(), {rightX - wTong - 16, rowY + 15}, 26, 1, Color{30, 60, 200, 255});
+                        float wTong = MeasureTextEx(myFont, sTong.c_str(), 26, 1).x;
+                        DrawTextEx(myFont, sTong.c_str(), {rightX - wTong - 16, rowY + 15}, 26, 1, Color{30, 60, 200, 255});
                         rowY += 72;
 
                         // 7. Khấu trừ (Icon tròn đỏ có dấu trừ)
@@ -5636,10 +5639,10 @@ void Draw_Screen_BL_PartTime(Vector2 mousePos, bool Clicked, QLNV *QL)
             DrawLineEx({leftX + 14, rowY + 31}, {leftX + 19, rowY + 36}, 2.4f, WHITE);
             DrawLineEx({leftX + 19, rowY + 36}, {leftX + 27, rowY + 24}, 2.4f, WHITE);
 
-            DrawTextEx(tieude, "Thực lĩnh", {leftX + 50, rowY + 18}, 26, 1, Color{98, 70, 234, 255});
+            DrawTextEx(myFont, "Thực lĩnh", {leftX + 50, rowY + 18}, 26, 1, Color{98, 70, 234, 255});
             string sTL = FormatSoTien((long long)thuclinh) + " đ";
-            float wTL = MeasureTextEx(tieude, sTL.c_str(), 28, 1).x;
-            DrawTextEx(tieude, sTL.c_str(), {rightX - wTL - 16, rowY + 17}, 28, 1, Color{98, 70, 234, 255});
+            float wTL = MeasureTextEx(myFont, sTL.c_str(), 28, 1).x;
+            DrawTextEx(myFont, sTL.c_str(), {rightX - wTL - 16, rowY + 17}, 28, 1, Color{98, 70, 234, 255});
 
             // Xử lý đóng modal: click [X] hoặc click ra ngoài modal (chỉ khi không phải vừa mở ở frame này)
             if (Clicked && !openedThisFrame2)
@@ -5668,7 +5671,7 @@ void Draw_Screen_Salary(QLNV *QL)
     float ra1 = 0.0f;              // Góc xoay (0 độ) rotation
     float sa1 = 0.33f;
     DrawTextureEx(a1, pa1, ra1, sa1, WHITE);
-    DrawTextEx(tieude, "Quản Lý Lương & Mức Lương", {pa1.x + 100, pa1.y}, 45, 1, WHITE);
+    DrawTextEx(myFont, "Quản Lý Lương & Mức Lương", {pa1.x + 100, pa1.y}, 45, 1, WHITE);
     DrawTextEx(myFont, "Bảng lương nhân sự và định mức lương theo bậc của công ty", {pa1.x + 100, pa1.y + 50}, 30, 1, WHITE);
 
     static bool isOpenBL = true;

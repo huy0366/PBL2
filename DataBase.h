@@ -755,3 +755,41 @@ inline long long PartTime::get_ThucLinh(const long long &luonggio)
     double luong = luongOT + luongtheogio;
     return luong;
 }
+
+bool PhongBan::ThemNV(Employee *e)
+{
+    if (e == nullptr)
+        return 0;
+    this->L->insert(e);
+    if (e->get_sex() == "Nam")
+    {
+        this->nam++;
+    }
+    else
+    {
+        this->nu++;
+    }
+    return 1;
+}
+bool PhongBan::XoaNV(Employee *e)
+{
+    Node<Employee> *p = this->L->get_header()->Next;
+    while (p != nullptr)
+    {
+        if (p->Data == e)
+        {
+            if (e->get_sex() == "Nam")
+            {
+                this->nam--;
+            }
+            else
+            {
+                this->nu--;
+            }
+            this->L->remove_item(p);
+            return 1;
+        }
+        p = p->Next;
+    }
+    return 0;
+}
