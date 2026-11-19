@@ -526,44 +526,90 @@ bool DrawCalendar(Vector2 mousepos, int &selDay, int &month, int &year, Rectangl
     return change;
 }
 
+// Chuyển Unicode codepoint sang UTF-8, trả về số byte đã ghi
+int CodepointToUTF8(int codepoint, char *out)
+{
+    if (codepoint <= 0x7F)
+    {
+        out[0] = (char)codepoint;
+        return 1;
+    }
+    else if (codepoint <= 0x7FF)
+    {
+        out[0] = (char)(0xC0 | (codepoint >> 6));
+        out[1] = (char)(0x80 | (codepoint & 0x3F));
+        return 2;
+    }
+    else if (codepoint <= 0xFFFF)
+    {
+        out[0] = (char)(0xE0 | (codepoint >> 12));
+        out[1] = (char)(0x80 | ((codepoint >> 6) & 0x3F));
+        out[2] = (char)(0x80 | (codepoint & 0x3F));
+        return 3;
+    }
+    return 0;
+}
+
+// Xóa 1 ký tự UTF-8 cuối (backspace đúng với tiếng Việt)
+int RemoveLastUTF8Char(char *str, int len)
+{
+    if (len <= 0)
+        return 0;
+    int i = len - 1;
+    // Lùi lại qua các byte tiếp theo (10xxxxxx)
+    while (i > 0 && (str[i] & 0xC0) == 0x80)
+        i--;
+    str[i] = '\0';
+    return i;
+}
+
 void Typing(bool &isActive, char *Input, int &letterCount, Vector2 &mousePos, Rectangle vung_go)
 {
     // Kiểm tra click chuột
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
     {
-        // Nếu click vào vùng textHoTen thì kích hoạt, ngược lại thì tắt
         if (CheckCollisionPointRec(mousePos, vung_go))
-        {
             isActive = true;
-        }
         else
-        {
             isActive = false;
-        }
     }
 
-    // Xử lý gõ phím khi ô Họ Tên đang được kích hoạt
     if (isActive)
     {
+        // 1. Đếm TẤT CẢ backspace trong hàng đợi (kể cả backspace Unikey gửi tự động)
+        //    IsKeyPressed chỉ đếm được 1 lần/frame nên dùng GetKeyPressed để đếm đủ
+        int bsCount = 0;
+        int k = GetKeyPressed();
+        while (k > 0)
+        {
+            if (k == KEY_BACKSPACE)
+                bsCount++;
+            k = GetKeyPressed();
+        }
+        // Cộng thêm repeat khi người dùng giữ phím Backspace
+        if (IsKeyPressedRepeat(KEY_BACKSPACE))
+            bsCount++;
+
+        for (int i = 0; i < bsCount; i++)
+            letterCount = RemoveLastUTF8Char(Input, letterCount);
+
+        // 2. Sau khi xóa xong mới thêm ký tự mới (tránh thêm trước xóa sau)
         int key = GetCharPressed();
-        // Bắt các ký tự (hỗ trợ bảng mã ASCII cơ bản)
         while (key > 0)
         {
-            if ((key >= 32) && (letterCount < 49))
+            if (key >= 32)
             {
-                Input[letterCount] = (char)key;
-                Input[letterCount + 1] = '\0';
-                letterCount++;
+                char utf8[4] = {};
+                int bytes = CodepointToUTF8(key, utf8);
+                if (letterCount + bytes < 49)
+                {
+                    for (int b = 0; b < bytes; b++)
+                        Input[letterCount + b] = utf8[b];
+                    letterCount += bytes;
+                    Input[letterCount] = '\0';
+                }
             }
-            key = GetCharPressed(); // Lấy ký tự tiếp theo trong hàng đợi
-        }
-        // Xử lý nút Xóa (Backspace)
-        if (IsKeyPressed(KEY_BACKSPACE) || IsKeyPressedRepeat(KEY_BACKSPACE))
-        {
-            letterCount--;
-            if (letterCount < 0)
-                letterCount = 0;
-            Input[letterCount] = '\0';
+            key = GetCharPressed();
         }
     }
 }
@@ -579,7 +625,14 @@ bool CheckName(const string &input, const string &name)
 {
     if (input.empty())
         return true;
-    return ToLower(name).find(ToLower(input)) != string::npos;
+    // Trim khoảng trắng đầu/cuối trước khi tìm (tránh mất kết quả khi gõ dấu cách)
+    string trimmed = input;
+    size_t start = trimmed.find_first_not_of(" \t");
+    size_t end = trimmed.find_last_not_of(" \t");
+    if (start == string::npos)
+        return true; // toàn khoảng trắng → không lọc
+    trimmed = trimmed.substr(start, end - start + 1);
+    return ToLower(name).find(ToLower(trimmed)) != string::npos;
 }
 // maCV / maPB rỗng = không lọc theo tiêu chí đó
 bool CheckEmployee(Employee *emp, const string &maCV, const string &maPB, const string &keyword)
@@ -3003,6 +3056,16 @@ void Draw_Screen_ChucVu(Vector2 mousepos, bool Clicked, QLNV *QL)
     DrawRectangleRounded(PhucCap, 0.5f, 10, isPhucCapActive ? LIGHTGRAY : WHITE);
     DrawRectangleRoundedLinesEx(PhucCap, 0.3f, 12, 3.0f, LIGHTGRAY);
 
+    if (letterCount_PhuCap > 0)
+    {
+        long long valPC = atoll(PhuCapInput);
+        if (valPC > 0)
+        {
+            string fmt = FormatSoTien(valPC) + " đ/tháng";
+            DrawTextEx(myFont, fmt.c_str(), {PhucCap.x + 320, PhucCap.y}, 28, 1, Color{40, 80, 200, 255});
+        }
+    }
+
     if (Clicked)
     {
         if (CheckCollisionPointRec(mousepos, MaChucVu))
@@ -3646,6 +3709,16 @@ void Draw_Screen_ML_FullTime(Vector2 mousePos, bool Clicked, QLNV *QL)
     static string selectedMLKey = "";
     static bool hoiXoa = false;
 
+    // --- Combobox Mã VTVL ---
+    static bool isDropVT = false;    // dropdown đang mở?
+    static char searchVT[50] = "\0"; // ô search
+    static int letterSearchVT = 0;
+    static string selectedMaVT = ""; // giá trị đã chọn
+
+    // --- Combobox Bậc ---
+    static bool isDropBac = false;
+    static int selectedBac = 0; // 0 = chưa chọn
+
     static char MaVTInput[50] = "\0";
     static int letterCount_Ma = 0;
 
@@ -3697,7 +3770,7 @@ void Draw_Screen_ML_FullTime(Vector2 mousePos, bool Clicked, QLNV *QL)
     DrawTextEx(myFont, "Bậc vị trí:", {textBac.x - 190, textBac.y}, 32, 1, BLACK);
     DrawRectangleRounded(textBac, 0.5f, 10, isBacActive ? LIGHTGRAY : WHITE);
     DrawRectangleRoundedLinesEx(textBac, 0.3f, 12, 3.0f, LIGHTGRAY);
-    DrawTextEx(myFont, "(1, 2, 3...)", {textBac.x + 320, textBac.y}, 24, 1, DARKGRAY);
+    DrawTextEx(myFont, "(1, 2, 3, 4, 5)", {textBac.x + 320, textBac.y}, 24, 1, DARKGRAY);
 
     // Ô nhập Lương
     Rectangle textLuong = {textBac.x, textBac.y + 55, 300, 40};
@@ -4171,7 +4244,7 @@ void Draw_Screen_ML_PartTime(Vector2 mousePos, bool Clicked, QLNV *QL)
     DrawTextEx(myFont, "Bậc vị trí:", {textBac.x - 190, textBac.y}, 32, 1, BLACK);
     DrawRectangleRounded(textBac, 0.5f, 10, isBacActive ? LIGHTGRAY : WHITE);
     DrawRectangleRoundedLinesEx(textBac, 0.3f, 12, 3.0f, LIGHTGRAY);
-    DrawTextEx(myFont, "(1, 2, 3...)", {textBac.x + 320, textBac.y}, 24, 1, DARKGRAY);
+    DrawTextEx(myFont, "(1, 2, 3, 4, 5)", {textBac.x + 320, textBac.y}, 24, 1, DARKGRAY);
 
     // Ô nhập Lương
     Rectangle textLuong = {textBac.x, textBac.y + 55, 300, 40};

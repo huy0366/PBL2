@@ -141,7 +141,7 @@ QLNV::QLNV(/* args */)
     this->DB->ReadAll();
     tuoiToiThieu = 18;
     tuoiToiDa = 60;
-    bacToiDa = 3;
+    bacToiDa = 5;
     soNgayCongChuan = 26;
     soGioToiDaPartTime = 80;
     tienToMa = "NV";
@@ -247,6 +247,57 @@ bool QLNV::CheckMucLuong(MucLuong *ml)
         throw string("Không tìm thấy mức lương!");
     if (ml->get_Luong() <= 0)
         throw string("Mức lương phải lớn hơn 0!");
+    if (ml->get_Bac_VTVL() > 5 && ml->get_Bac_VTVL() < 1)
+        throw string("Lỗi bậc");
+    if (ml == nullptr)
+        throw string("Chưa có thông tin mức lương!");
+
+    const int BAC_MAX = 5;
+    string maVT = ml->get_Ma_VTVL();
+    int bac = ml->get_Bac_VTVL();
+    string loai = ml->get_Loai_NV();
+    long long luong = ml->get_Luong();
+
+    if (bac < 1 || bac > BAC_MAX)
+        throw string("Bậc lương phải từ 1 đến " + to_string(BAC_MAX) + "!");
+    if (luong <= 0)
+        throw string("Mức lương phải lớn hơn 0!");
+
+    // Bậc liền trước (gần nhất đang có). Không có thì coi lương trước = 0
+    long long luongTruoc = 0;
+    int bacTruoc = 0;
+    for (int b = bac - 1; b >= 1; b--)
+    {
+        MucLuong *p = DB->FindML(maVT, b, loai);
+        if (p != nullptr)
+        {
+            luongTruoc = p->get_Luong();
+            bacTruoc = b;
+            break;
+        }
+    }
+
+    // Bậc liền sau (gần nhất đang có). Không có thì coi lương sau = vô cùng
+    long long luongSau = 1e18;
+    int bacSau = 0;
+    for (int b = bac + 1; b <= BAC_MAX; b++)
+    {
+        MucLuong *p = DB->FindML(maVT, b, loai);
+        if (p != nullptr)
+        {
+            luongSau = p->get_Luong();
+            bacSau = b;
+            break;
+        }
+    }
+
+    if (bacTruoc > 0 && luong <= luongTruoc)
+        throw string("Lương bậc " + to_string(bac) + " phải lớn hơn lương bậc " + to_string(bacTruoc) +
+                     " (" + to_string(luongTruoc) + ")!");
+    if (bacSau > 0 && luong >= luongSau)
+        throw string("Lương bậc " + to_string(bac) + " phải nhỏ hơn lương bậc " + to_string(bacSau) +
+                     " (" + to_string(luongSau) + ")!");
+    return true;
     return true;
 }
 

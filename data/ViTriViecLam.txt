@@ -2,4 +2,3 @@ VTVL01	Văn Phòng
 VTVL02	Xưởng Sản Xuất
 VTVL03	Kho
 VTVL04	Cửa Hàng
-VTVL05	khang ngu x2s
